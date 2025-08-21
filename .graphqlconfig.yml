@@ -1,0 +1,15 @@
+projects:
+  liftlyzerv3copy:
+    schemaPath: database/graphql/schema.json
+    includes:
+      - database/graphql/**/*.js
+    excludes:
+      - ./amplify/**
+    extensions:
+      amplify:
+        codeGenTarget: javascript
+        generatedFileName: ''
+        docsFilePath: database/graphql
+extensions:
+  amplify:
+    version: 3

@@ -1,0 +1,45 @@
+# Modern Fitness App Color Palette
+
+## Primary Colors
+- Primary Orange: #FF6B35 (Main brand color for workouts)
+- Primary Green: #4CD964 (Main brand color for nutrition)
+- Primary Blue: #007AFF (System blue for links/actions)
+
+## Background Colors
+- Background: #FFFFFF (Pure white)
+- Secondary Background: #F8F9FA (Light gray background)
+- Card Background: #FFFFFF (White cards)
+
+## Text Colors
+- Primary Text: #1A1A1A (Dark text for headings)
+- Secondary Text: #8E8E93 (Gray text for subtitles)
+- Placeholder Text: #8E8E93 (Gray text for placeholders)
+
+## Border & Shadow Colors
+- Border: #E5E5EA (Light gray borders)
+- Shadow: #000000 (Black shadows with low opacity)
+
+## Accent Colors
+- Success: #4CD964 (Green for success states)
+- Warning: #FF9500 (Orange for warnings)
+- Error: #FF3B30 (Red for errors)
+- Info: #007AFF (Blue for information)
+
+## Gradient Colors
+### Workout Mode
+- Start: #FF6B35
+- Middle: #FF8A65  
+- End: #FFAB91
+
+### Nutrition Mode
+- Start: #4CD964
+- Middle: #66D977
+- End: #81C784
+
+## Usage Guidelines
+- Use Primary Orange (#FF6B35) for workout-related actions and highlights
+- Use Primary Green (#4CD964) for nutrition-related actions and highlights
+- Use Secondary Background (#F8F9FA) for screen backgrounds
+- Use Card Background (#FFFFFF) for elevated content cards
+- Use Primary Text (#1A1A1A) for headings and important text
+- Use Secondary Text (#8E8E93) for subtitles and less important text

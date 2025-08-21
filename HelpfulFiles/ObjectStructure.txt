@@ -1,0 +1,88 @@
+[
+  {
+    id: "workoutId1",
+    name: "Push Day",
+    archived: false,
+    note: "Focus on chest strength",
+    exercises: [
+      {
+        id: "exerciseId1",
+        name: "Bench Press",
+        note: "Work on form",
+        logs: {
+          "2024-07-01": [
+            {
+              id: "2024-07-01T14:23:45.123Z",
+              weight: 200,
+              reps: 8,
+              rpe: 9,
+              rpeEntered: false,
+              fatigueFactor: 1.2
+            },
+            {
+              id: "2024-07-01T14:50:12.456Z",
+              weight: 190,
+              reps: 10,
+              rpe: 8,
+              rpeEntered: false,
+              fatigueFactor: 1.2
+            }
+          ],
+          "2024-07-02": [
+            {
+              id: "2024-07-02T10:15:30.789Z",
+              weight: 205,
+              reps: 6,
+              rpe: 9,
+              rpeEntered: false,
+              fatigueFactor: 1.2
+            }
+          ]
+        }
+      },
+      {
+        id: "exerciseId2",
+        name: "Overhead Press",
+        note: "",
+        logs: {
+          "2024-07-01": [
+            {
+              id: "2024-07-01T15:10:45.321Z",
+              weight: 95,
+              reps: 10,
+              rpe: 8,
+              rpeEntered: false,
+              fatigueFactor: 1.1
+            }
+          ]
+        }
+      }
+    ]
+  },
+
+  {
+    id: "workoutId2",
+    name: "Leg Day",
+    archived: false,
+    note: "",
+    exercises: [
+      {
+        id: "exerciseId3",
+        name: "Squat",
+        note: "",
+        logs: {
+          "2024-07-01": [
+            {
+              id: "2024-07-01T16:20:12.456Z",
+              weight: 300,
+              reps: 5,
+              rpe: 9,
+              rpeEntered: false,
+              fatigueFactor: 1.4
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

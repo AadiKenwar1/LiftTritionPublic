@@ -1,0 +1,371 @@
+import { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  FlatList,
+  SafeAreaView,
+  StyleSheet,
+  TouchableOpacity,
+  Pressable,
+  ScrollView,
+} from "react-native";
+import ExerciseSelector from "../../../components/ExerciseSelector";
+import { useWorkoutContext } from "../../../context/WorkoutContextFunctions/WorkoutContext";
+import LogLineChart from "../../../components/LogLineChart";
+import ChatBubble from "../../../components/ChatBubble";
+import { askOpenAI } from "../../../utils/openAI";
+import { useMemo } from "react";
+import CustomHeader from "../../../components/CustomHeader";
+import FullLiftLog from "../../../components/FullLiftLogPopup";
+
+
+export default function AnalyzeScreen() {
+
+
+  const { workouts, exercises, setExercises, updateUserMax } =
+    useWorkoutContext();
+  const [selectedExercise, setSelectedExercise] = useState("");
+  const [selectedData, setSelectedData] = useState(10);
+  const [logData, setLogData] = useState([]);
+
+  //Gets all the logs of an exercise across all workouts
+  function handleAnalyze() {
+    const groupedLogs = {};
+    for (let i = 0; i < workouts.length; i++) {
+      for (let j = 0; j < workouts[i].exercises.length; j++) {
+        const exercise = workouts[i].exercises[j];
+        if (exercise.name === selectedExercise) {
+          const logDates = Object.keys(exercise.logs);
+          for (const date of logDates) {
+            if (!groupedLogs[date]) {
+              groupedLogs[date] = [];
+            }
+            const logsOnDate = exercise.logs[date];
+            for (const log of logsOnDate) {
+              groupedLogs[date].push({
+                weight: log.weight,
+                reps: log.reps,
+                workout: workouts[i].name,
+              });
+            }
+          }
+        }
+      }
+    }
+    // Convert to array of sections
+    const groupedArray = Object.keys(groupedLogs)
+      .sort((a, b) => new Date(b) - new Date(a)) // sort date keys after grouping
+      .map((date) => ({
+        date,
+        logs: groupedLogs[date],
+      }));
+    //console.log('📊 groupedArray with full logs:', JSON.stringify(groupedArray, null, 2));
+
+    return groupedArray.reverse();
+  }
+
+  useEffect(() => {
+    setLogData(handleAnalyze());
+  }, [selectedExercise]);
+
+  //Array of one rep maxes for the days
+  const chartData = useMemo(() => {
+    return logData.map((group) => {
+      const max1RM = group.logs.reduce((max, log) => {
+        const oneRepMax = log.weight * (1 + log.reps / 30);
+        return Math.max(max, oneRepMax);
+      }, 0);
+
+      return {
+        label: "", // or group.date if you want to label it
+        value: Math.floor(parseFloat(max1RM.toFixed(1))),
+      };
+    });
+  }, [logData]);
+  //1 rep max for exercise based o exercise
+  useEffect(() => {
+    if (selectedExercise && chartData.length > 0) {
+      const newMax = chartData.reduce(
+        (max, dataPoint) => Math.max(max, dataPoint.value),
+        0,
+      );
+      const currentMax = exercises[selectedExercise]?.userMax || 0;
+      if (newMax !== currentMax) {
+        updateUserMax(selectedExercise, newMax); // ✅ Only updates if value actually changed
+      }
+    }
+  }, [chartData, selectedExercise, exercises]);
+
+  //AI FeedBack
+  const [feedback, setFeedback] = useState("");
+  const [loading, setLoading] = useState(false);
+  const latest = chartData.at(-1)?.value || 0;
+  const oldest = chartData[0]?.value || 0;
+  const change = latest - oldest;
+  const percentChange = ((latest - oldest) / oldest) * 100;
+
+  function generateSetSuggestions(latest1RM){
+    const suggestions = [
+      { percent: 0.75, reps: "8-9"},
+      { percent: 0.80, reps: "6-7"},
+      { percent: 0.85, reps: "4-5"},
+      { percent: 0.90, reps: "2-3"},
+    ];
+
+    const lines = suggestions.map(s => {
+      const weight = Math.round(latest1RM * s.percent);
+      return `- ${weight} x ${s.reps}`;
+    });
+
+    return `Some set suggestions I have:\n${lines.join("\n")}`;
+  }
+
+  function formatChartDataForAI(chartData) {
+    if (!chartData || chartData.length === 0) {
+      return "No chart data available.";
+    }
+    return chartData
+      .map((point, index) => {
+        return `Day ${index + 1}: Estimated 1RM = ${point.value} lbs`;
+      })
+      .join("\n");
+  }
+
+  function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchFeedback = async () => {
+      if (!selectedExercise || chartData.length === 0) return;
+
+      setLoading(true);
+      setFeedback(""); // clear stale feedback
+
+      await sleep(500); // wait for chartData to settle
+
+      if (cancelled) return;
+
+      const prompt = `
+      Exercise: ${selectedExercise}
+      Data: ${formatChartDataForAI(chartData.slice(0, 10))}
+      Latest 1RM: ${latest}
+
+      If there's only one data point:
+      - Keep it short and encouraging, like "Great start!"
+      - If strength is above average for this exercise, mention that the user is strong.
+      - Do *not* mention progress, steadiness, or trends.
+      - Do *not* analyze.
+
+      Do *not* reference specific weights or estimated 1RMs at any point.
+
+      If there are multiple data points:
+      - Change: ${change.toFixed(1)} lbs (${percentChange.toFixed(1)}%)
+      - Check the latest three sessions. If there's a dip, mention it briefly.
+      - Summarize the strength trend naturally—improving, holding, or dipping. No dates or numbers.
+      - Be supportive, natural, and conversational.
+      -Analyze trends overall
+    
+
+      No AI tone. No bullet points unless told so. No commands.
+      Keep the entire response under 40 words.
+      Motivational lines must be one sentence.
+      No semicolons.
+      Use proper grammar throughout.
+      `;
+
+      try {
+        const response = await askOpenAI(prompt);
+        if (!cancelled) {
+          setFeedback(response);
+        }
+      } catch (error) {
+        console.error("AI request failed:", error);
+        if (!cancelled) {
+          setFeedback("Couldn't load feedback right now. Try again later!");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchFeedback();
+
+    return () => {
+      cancelled = true; // cleanup in case component updates quickly again
+    };
+  }, [selectedExercise, chartData]);
+
+  const [liftLogVisible, setLiftLogVisible] = useState(false);
+  
+
+  return (
+    <>
+      <CustomHeader />
+      <View style={styles.container}>
+        <View marginTop={-10}>
+          <View alignItems="center" justifyContent="center">
+            <ExerciseSelector
+              selectedExercise={selectedExercise}
+              setSelectedExercise={setSelectedExercise}
+              function={null}
+            />
+          </View>
+
+          {selectedExercise && chartData.length > 0 && (
+            <>
+              <View style={styles.dataSelector} marginBottom={5}>
+                <Pressable
+                  style={
+                    selectedData === 10
+                      ? styles.dataSelectorButtonClicked
+                      : styles.dataSelectorButton
+                  }
+                  marginRight={10}
+                  onPress={() => setSelectedData(10)}
+                >
+                  <Text style={{ color: "white" }}>Last 10 Lifts</Text>
+                </Pressable>
+
+                <Pressable
+                  style={
+                    selectedData === 20
+                      ? styles.dataSelectorButtonClicked
+                      : styles.dataSelectorButton
+                  }
+                  onPress={() => setSelectedData(20)}
+                >
+                  <Text style={{ color: "white" }}>Last 20 Lifts</Text>
+                </Pressable>
+
+                <Pressable
+                  style={
+                    selectedData === 30
+                      ? styles.dataSelectorButtonClicked
+                      : styles.dataSelectorButton
+                  }
+                  marginLeft={10}
+                  onPress={() => setSelectedData(30)}
+                >
+                  <Text style={{ color: "white" }}>Last 30 Lifts</Text>
+                </Pressable>
+              </View>
+
+              <SafeAreaView>
+                <LogLineChart
+                  selectedData={selectedData}
+                  data={chartData.slice(0, selectedData)}
+                />
+              </SafeAreaView>
+            </>
+          )}
+          {chartData.length === 0 && selectedExercise !== "" && (
+            <Text style={styles.noLog}>Start logging to see analytics</Text>
+          )}
+
+          <View>
+            {selectedExercise && chartData.length > 0 && (
+              <>
+                <ChatBubble text={loading ? "..." : feedback + " " + generateSetSuggestions(latest)} />
+              </>
+            )}
+          </View>
+          {selectedExercise !== null && logData.length > 0 && (
+            <TouchableOpacity
+              style={styles.viewLogButton}
+              onPress={() => {
+                setLiftLogVisible(true);
+              }}
+            >
+              <FullLiftLog
+                visible={liftLogVisible}
+                data={logData}
+                selectedExercise={selectedExercise}
+                onClose={() => setLiftLogVisible(false)}
+                marginBottom={30}
+              />
+              <Text
+                style={styles.viewLogButtonText}
+                adjustsFontSizeToFit
+                numberOfLines={1}
+              >
+                View All Time {selectedExercise} Logs
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+    </>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    marginTop: 0,
+    flex: 1,
+    backgroundColor: "white",
+  },
+  dataSelector: {
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+    marginTop: 0,
+  },
+  dataSelectorButton: {
+    backgroundColor: "blue",
+    height: 40,
+    width: "25%",
+    borderRadius: 10,
+    borderWidth: 1.2,
+    borderColor: "red",
+    alignSelf: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 20,
+  },
+  dataSelectorButtonClicked: {
+    backgroundColor: "green",
+    height: 40,
+    width: "30%",
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: "yellow",
+    alignSelf: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 20,
+  },
+  viewLogButton: {
+    backgroundColor: "orange",
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    margin: 20,
+    marginTop: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 6,
+  },
+  viewLogButtonText: {
+    color: "black",
+    fontWeight: "bold",
+    fontSize: 16,
+    textTransform: "uppercase",
+  },
+  noLog: {
+    color: "black",
+    textAlign: "center",
+    marginTop: 210,
+    fontSize: 20,
+  },
+})

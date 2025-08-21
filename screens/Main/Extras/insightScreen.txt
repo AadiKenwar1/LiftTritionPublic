@@ -1,0 +1,213 @@
+import React, { useState, useEffect } from "react";
+import { View, Text, Pressable, StyleSheet, Image } from "react-native";
+import { useWorkoutContext } from "../../../context/WorkoutContextFunctions/WorkoutContext";
+import InsightCards from "../../../components/InsightCards";
+import FatigueMeter from "../../../components/FatigueMeter";
+import SpiderChart from "../../../components/SpiderChart";
+import CustomHeader from "../../../components/CustomHeader";
+import { Picker } from "@react-native-picker/picker";
+import DropDownPicker from "react-native-dropdown-picker";
+import TodaysWorkoutCard from "./InsightPopUpScreens/TodaysWorkoutCard";
+import FatigueCard from "./InsightPopUpScreens/FatigueCard";
+
+import Icon from "react-native-vector-icons/MaterialIcons";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
+
+export default function InsightScreen() {
+  const {
+    extractLogsFromWorkouts,
+    calculateTrainingScores,
+    groupVolumesByRadarCategory,
+    workouts,
+    exercises,
+    userLevel,
+  } = useWorkoutContext();
+
+
+  const [radarData, setRadarData] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState("overall");
+  const [items, setItems] = useState([
+    { label: "Overall", value: "overall" },
+    { label: "Chest & Shoulders", value: "chestShoulders" },
+    { label: "Back", value: "back" },
+    { label: "Arms", value: "arms" },
+    { label: "Legs", value: "legs" },
+  ]);
+
+  const [card1Visible, setCard1Visible] = useState(false);
+  const [card2Visible, setCard2Visible] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      const logs = extractLogsFromWorkouts(workouts);
+      const volumes = calculateTrainingScores(logs, exercises);
+      const data = groupVolumesByRadarCategory(volumes, userLevel, value);
+      setRadarData(data);
+    }, [workouts, userLevel, value]),
+  );
+
+  let color = "";
+  if (userLevel === "novice") {
+    color = "#A0A0A0";
+  } else if (userLevel === "beginner") {
+    color = "#4CAF50";
+  } else if (userLevel === "trainee") {
+    color = "#2196F3";
+  } else if (userLevel === "intermediate") {
+    color = "#FF9800";
+  } else if (userLevel === "advanced") {
+    color = "#E91E63";
+  } else {
+    color = "#9C27B0";
+  }
+
+  return (
+    <>
+      <CustomHeader/>
+      <View style={styles.container}>
+        {/*
+          <View style = {styles.userLevel}>
+          <Text style={styles.header}>User Level: </Text> 
+          <Text style={[styles.header, { color }]}>{userLevel.charAt(0).toUpperCase() + userLevel.substring(1, userLevel.length)}</Text>
+        </View>
+        */}
+        <View style={styles.row}>
+          {/* Card 1 */}
+          <Pressable onPress={() => setCard1Visible(true)}>
+            <TodaysWorkoutCard
+              visible={card1Visible}
+              onClose={() => setCard1Visible(false)}
+              title="Choose Your Level"
+            />
+            <InsightCards
+              cardContents={
+                <>
+                  <Text style={styles.card1Text}>Todays Workout</Text>
+                  <Image
+                    source={require("../../assets/gymShark.png")}
+                    style={{
+                      width: "80%",
+                      height: "80%",
+                      borderRadius: 0,
+                      bottom: -10,
+                    }}
+                    resizeMode="cover"
+                  />
+                </>
+              }
+            />
+          </Pressable>
+
+          {/* Card 2 */}
+          <Pressable onPress={() => setCard2Visible(true)} marginBottom={0}>
+            <FatigueCard
+              visible={card2Visible}
+              onClose={() => setCard2Visible(false)}
+            />
+            <InsightCards cardContents={<FatigueMeter days={1} card = {true}/>} />
+          </Pressable>
+        </View>
+
+        <Text style={styles.spiderChartHeader}>Muscles Hit in Last 7 Days</Text>
+
+        <View marginTop={0}>
+          <SpiderChart data={radarData} />
+        </View>
+        <View style={styles.dropdownWrapper}>
+          <DropDownPicker
+            open={open}
+            value={value}
+            items={items}
+            setOpen={setOpen}
+            setValue={setValue}
+            setItems={setItems}
+            dropDownDirection="TOP"
+            placeholder="Select an option"
+            style={styles.dropdown}
+            dropDownContainerStyle={styles.dropdownContainer}
+            textStyle={styles.dropdownText}
+            placeholderStyle={styles.placeholderStyle}
+            listItemLabelStyle={styles.dropdownText}
+            ArrowUpIconComponent={() => (
+              <Icon name="keyboard-arrow-up" size={24} color="white" />
+            )}
+            ArrowDownIconComponent={() => (
+              <Icon name="keyboard-arrow-down" size={24} color="white" />
+            )}
+          />
+        </View>
+      </View>
+    </>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 0,
+    flex: 1,
+    backgroundColor: "pink",
+  },
+  header: {
+    color: "black",
+    textAlign: "center",
+    marginTop: 20,
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  userLevel: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  row: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 10,
+  },
+  card1Text: {
+    fontWeight: "bold",
+    fontSize: 16,
+    color: "blue",
+  },
+  dropdownWrapper: {
+    zIndex: 1000, // Needed if dropdown overlaps content
+    paddingHorizontal: 20,
+    marginTop: 0,
+  },
+
+  dropdown: {
+    backgroundColor: "orange",
+    borderColor: "#475569",
+    borderRadius: 10,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 4,
+    elevation: 6, // Android
+  },
+
+  dropdownContainer: {
+    backgroundColor: "blue",
+  },
+
+  dropdownText: {
+    color: "red",
+    fontWeight: "bold",
+  },
+
+  placeholderStyle: {
+    color: "#94A3B8",
+  },
+  spiderChartHeader: {
+    color: "white",
+    textAlign: "center",
+    fontSize: 20,
+    fontWeight: "bold",
+    textDecorationLine: "underline",
+    marginTop: 15,
+    letterSpacing: 0.5,
+  },
+})

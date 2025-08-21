@@ -1,0 +1,12 @@
+useEffect(() => {
+    if (selectedExercise && chartData.length > 0) {
+      const newMax = chartData.reduce(
+        (max, dataPoint) => Math.max(max, dataPoint.value),
+        0,
+      );
+      const currentMax = exercises[selectedExercise]?.userMax || 0;
+      if (newMax !== currentMax) {
+        updateUserMax(selectedExercise, newMax); // ✅ Only updates if value actually changed
+      }
+    }
+  }, [chartData, selectedExercise, exercises]);
