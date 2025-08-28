@@ -1,5 +1,6 @@
 {
   "AppSyncApiName": "liftlyzerv3copy",
   "DynamoDBBillingMode": "PAY_PER_REQUEST",
-  "DynamoDBEnableServerSideEncryption": false
+  "DynamoDBEnableServerSideEncryption": false,
+  "AuthModeLastUpdated": "2025-08-25T01:50:28.405Z"
 }

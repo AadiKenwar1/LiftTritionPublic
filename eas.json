@@ -34,7 +34,14 @@
         "image": "latest"
       },
       "env": {
-        "EXPO_NO_WEB": "1"
+        "EXPO_NO_WEB": "1",
+        "GRAPHQL_API_KEY": "GRAPHQL_API_KEY",
+        "GRAPHQL_ENDPOINT": "GRAPHQL_ENDPOINT",
+        "COGNITO_USER_POOL_ID": "COGNITO_USER_POOL_ID",
+        "COGNITO_USER_POOL_CLIENT_ID": "COGNITO_USER_POOL_CLIENT_ID",
+        "OPENAI_API_KEY": "OPENAI_API_KEY",
+        "NUTRITIONX_APP_ID": "NUTRITIONX_APP_ID",
+        "NUTRITIONX_API_KEY": "NUTRITIONX_API_KEY"
       },
       "node": "20.11.0"
     }

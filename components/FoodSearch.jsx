@@ -23,8 +23,6 @@ export default function FoodSearch(props) {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [fetchingDetails, setFetchingDetails] = useState(false);
-  const [addedFood, setAddedFood] = useState([])
-  const [showAddedFoods, setShowAddedFoods] = useState(false); // Toggle for showing added foods
 
   // Debounced search effect: triggers search after user stops typing for 400ms
   useEffect(() => {
@@ -91,22 +89,6 @@ export default function FoodSearch(props) {
             ListHeaderComponent={
                 <>
                     {props.header}
-                    {/* Dropdown toggle for showing added foods */}
-                    <TouchableOpacity
-                      style={[
-                        styles.addedFoodsToggle,
-                        { alignSelf: 'center', width: '100%' }
-                      ]}
-                      onPress={() => setShowAddedFoods((prev) => !prev)}
-                    >
-                      <Ionicons name={showAddedFoods ? 'chevron-up' : 'chevron-down'} size={18} color="#4f46e5" />
-                      <Text style={styles.addedFoodsToggleText}>
-                        {showAddedFoods ? 'Hide Added Foods' : 'Show Added Foods'}
-                      </Text>
-                    </TouchableOpacity>
-                    {/* Only show props.footer if toggle is enabled */}
-                    {showAddedFoods && props.footer}
-
                     <View style={styles.inputContainer}>
                         <TextInput
                             style={styles.input}
@@ -124,11 +106,6 @@ export default function FoodSearch(props) {
                         )}
                     </View>
                     {loading && <ActivityIndicator size="small" color="#4f46e5" style={{ marginBottom: 10 }} />}
-                </>
-            }
-            ListFooterComponent={
-                <>
-                    {/*props.footer*/}
                 </>
             }
             ItemSeparatorComponent={() => (
@@ -247,32 +224,5 @@ const styles = StyleSheet.create({
     color: '#6b7280',
     fontWeight: '500',
     fontFamily: 'Inter_500Medium',
-  },
-  addedFoodsToggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-    backgroundColor: '#f3f4f6',
-    marginBottom: 10,
-    marginTop: 2,
-    borderWidth: 1.3,
-    borderColor: 'black',
-    borderBottomWidth: 4,
-    borderBottomColor: 'black',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  addedFoodsToggleText: {
-    color: '#4f46e5',
-    fontWeight: '600',
-    marginLeft: 4,
-    fontSize: 16,
-    textAlign: 'center',
   },
 });

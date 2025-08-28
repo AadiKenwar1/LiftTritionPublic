@@ -2,6 +2,7 @@ import { Modal, View, Text, StyleSheet, TouchableOpacity, TextInput, Keyboard, T
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import FoodSearch from '../../../components/FoodSearch';
+import PopupModal from '../../../components/PopupModal';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useNutritionContext } from '../../../context/NutritionContext/NutritionContext';
 
@@ -13,6 +14,7 @@ export default function SearchFoodDBPopup(props) {
   const {addNutrition, nutritionData} = useNutritionContext()
 
   const[addedFood, setAddedFood] = useState([])
+  const [showAddedFoodsPopup, setShowAddedFoodsPopup] = useState(false);
 
   function handleDelete(index) {
     const foodToRemove = addedFood[index];
@@ -82,74 +84,101 @@ export default function SearchFoodDBPopup(props) {
           </View>
         </View>
       </View>
-    </>
-  )
 
-  const footer = (
-    <>
-    {addedFood.length > 0 && (
-      <View style={styles.addedContainer}>                
-        {addedFood.map((item, index) => (
-          <View key={index} style={styles.addedItem}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.addedName}>{item.name}</Text>
-              <Text style={styles.addedMacros}>
-                {item.calories} cal | {item.protein}g P | {item.carbs}g C | {item.fats}g F
-              </Text>
-            </View>
-            <TouchableOpacity
-              style={styles.deleteButton}
-              onPress={() => handleDelete(index)}
-            >
-              <Text style={styles.deleteButtonText}>Delete</Text>
-            </TouchableOpacity>
-          </View>
-        ))}
-      </View>
-    )}
+      {/* Show Added Foods Button */}
+      <TouchableOpacity
+        style={styles.showAddedFoodsButton}
+        onPress={() => setShowAddedFoodsPopup(true)}
+      >
+        <Ionicons name="list" size={18} color="white" />
+        <Text style={styles.showAddedFoodsText}>
+          Show Added Foods ({addedFood.length})
+        </Text>
+      </TouchableOpacity>
     </>
   )
 
   return (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={props.visible}
-      onRequestClose={props.onClose}
-    >
-      
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={styles.overlay}>
-        <View style={styles.modalContainer}>
-          <View style={styles.content}>
-            <FoodSearch
-              setCals={setCals}
-              setProtein={setProtein}
-              setCarbs={setCarbs}
-              setFats={setFats}
-              setAddedFood={setAddedFood}
-              header={header}
-              footer={footer}
-            />
+    <>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={props.visible}
+        onRequestClose={props.onClose}
+      >
+        
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.overlay}>
+          <View style={styles.modalContainer}>
+            <View style={styles.content}>
+              <FoodSearch
+                setCals={setCals}
+                setProtein={setProtein}
+                setCarbs={setCarbs}
+                setFats={setFats}
+                setAddedFood={setAddedFood}
+                header={header}
+              />
+            </View>
+            
+            {/* Close Button */}
+            <View flexDirection="row" gap={5} alignItems="center" justifyContent='center' marginTop={10}>
+        <TouchableOpacity style={styles.resetButton} onPress={handleReset} >
+          <Text style={styles.buttonText}>Reset</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
+          <Ionicons name="add" size={18} color="#ffffff" />
+          <Text style={styles.buttonText}>Add Foods</Text>
+        </TouchableOpacity>
+      </View>
+            <TouchableOpacity style={styles.closeButton} onPress={props.onClose}>
+              <Text style={styles.buttonText}>Close</Text>
+            </TouchableOpacity>
           </View>
+        </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
+      {/* Added Foods Popup */}
+      <PopupModal
+        modalVisible={showAddedFoodsPopup}
+        setModalVisible={setShowAddedFoodsPopup}
+      >
+        <View style={styles.addedFoodsPopupContainer}>
+          <Text style={styles.addedFoodsPopupTitle}>Added Foods</Text>
           
-          {/* Close Button */}
-          <View flexDirection="row" gap={5} alignItems="center" justifyContent='center' marginTop={10}>
-      <TouchableOpacity style={styles.resetButton} onPress={handleReset} >
-        <Text style={styles.buttonText}>Reset</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
-        <Ionicons name="add" size={18} color="#ffffff" />
-        <Text style={styles.buttonText}>Add Foods</Text>
-      </TouchableOpacity>
-    </View>
-          <TouchableOpacity style={styles.closeButton} onPress={props.onClose}>
-            <Text style={styles.buttonText}>Close</Text>
+          {addedFood.length === 0 ? (
+            <Text style={styles.noFoodsText}>No foods added yet</Text>
+          ) : (
+            <ScrollView style={styles.addedFoodsList} showsVerticalScrollIndicator={false}>
+              {addedFood.map((item, index) => (
+                <View key={index} style={styles.addedFoodsItem}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.addedFoodsName}>{item.name}</Text>
+                    <Text style={styles.addedFoodsMacros}>
+                      {item.calories} cal | {item.protein}g P | {item.carbs}g C | {item.fats}g F
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    style={styles.addedFoodsDeleteButton}
+                    onPress={() => handleDelete(index)}
+                  >
+                    <Ionicons name="trash" size={16} color="#ffffff" />
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </ScrollView>
+          )}
+          
+          <TouchableOpacity
+            style={styles.closeAddedFoodsButton}
+            onPress={() => setShowAddedFoodsPopup(false)}
+          >
+            <Text style={styles.closeAddedFoodsButtonText}>Close</Text>
           </TouchableOpacity>
         </View>
-      </View>
-      </TouchableWithoutFeedback>
-    </Modal>
+      </PopupModal>
+    </>
   );
 }
 
@@ -190,53 +219,111 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: 'Inter_400Regular',
   },
-  addedContainer: {
-    marginTop: 0,
-    backgroundColor: '#f9fafb',
-    borderRadius: 12,
-    padding: 12,
-    borderWidth: 1,
-    marginTop: 0,
+  showAddedFoodsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    backgroundColor: '#4FC3F7',
     marginBottom: 10,
+    marginTop: 2,
+    borderWidth: 1.3,
+    borderColor: 'black',
+    borderBottomWidth: 4,
+    borderBottomColor: 'black',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
-    elevation: 4,
-    borderWidth:1.3,
-    borderColor: 'black',
-    borderLeftWidth: 4,
-    borderLeftColor: 'black',
-    borderTopLeftRadius: 16,
-    borderBottomLeftRadius: 16,
+    elevation: 2,
   },
-  addedItem: {
+  showAddedFoodsText: {
+    color: 'white',
+    fontWeight: '600',
+    marginLeft: 4,
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  addedFoodsPopupContainer: {
+    width: '100%',
+    maxHeight: 400,
+  },
+  addedFoodsPopupTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1a202c',
+    marginBottom: 15,
+    textAlign: 'center',
+    fontFamily: 'Inter_700Bold',
+  },
+  noFoodsText: {
+    fontSize: 14,
+    color: '#6b7280',
+    textAlign: 'center',
+    marginVertical: 20,
+    fontFamily: 'Inter_400Regular',
+  },
+  addedFoodsList: {
+    maxHeight: 250,
+  },
+  addedFoodsItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
-    paddingVertical: 8,
+    backgroundColor: '#f9fafb',
+    padding: 12,
+    marginBottom: 8,
+    borderRadius: 12,
+    borderWidth: 1.3,
+    borderColor: 'black',
+    borderLeftWidth: 3,
+    borderLeftColor: 'black',
+    borderTopLeftRadius: 12,
+    borderBottomLeftRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  addedName: {
-    fontSize: 12,
+  addedFoodsName: {
+    fontSize: 14,
     fontWeight: '500',
     color: '#1f2937',
+    marginBottom: 4,
     fontFamily: 'Inter_500Medium',
   },
-  addedMacros: {
-    fontSize: 10,
+  addedFoodsMacros: {
+    fontSize: 12,
     color: '#6b7280',
     fontFamily: 'Inter_400Regular',
   },
-  deleteButton: {
+  addedFoodsDeleteButton: {
     backgroundColor: '#ef4444',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    padding: 8,
     borderRadius: 6,
   },
-  deleteButtonText: {
-    color: '#fff',
-    fontSize: 12,
+  closeAddedFoodsButton: {
+    backgroundColor: 'grey',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginTop: 15,
+    alignItems: 'center',
+    borderWidth: 1.3,
+    borderColor: 'black',
+    borderBottomWidth: 4,
+    borderBottomColor: 'black',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  closeAddedFoodsButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
     fontWeight: '600',
     fontFamily: 'Inter_600SemiBold',
   },
