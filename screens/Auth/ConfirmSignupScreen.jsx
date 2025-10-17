@@ -11,7 +11,7 @@ import {
   Keyboard,
   Platform,
 } from "react-native";
-import { useAuth } from "../../context/AuthContext";
+import { useAuthContext } from "../../context/AuthContextFunctions/AuthContext";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect } from "react";
@@ -34,7 +34,7 @@ export default function ConfirmSignupScreen() {
   const [resendLoading, setResendLoading] = useState(false);
   const navigation = useNavigation();
   const route = useRoute();
-  const { confirmSignup, resendConfirmationCode, signin, checkAuthState, user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuthContext();
   
   const email = route.params?.email || "";
   const password = route.params?.password || "";

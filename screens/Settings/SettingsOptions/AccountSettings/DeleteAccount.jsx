@@ -8,12 +8,12 @@ import {
   TextInput,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useAuth } from "../../../../context/AuthContext";
+import { useAuthContext } from "../../../../context/AuthContextFunctions/AuthContext";
 
 export default function DeleteAccountScreen({ navigation }) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { logout } = useAuth();
+  const { clearSessionAndState } = useAuthContext();
 
   const handleDeleteAccount = async () => {
     if (!password.trim()) {

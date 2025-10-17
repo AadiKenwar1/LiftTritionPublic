@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { useAuth } from "../../../context/AuthContext";
+import { useAuthContext } from "../../../context/AuthContextFunctions/AuthContext";
 import { useSettings } from "../../../context/SettingsContext";
 import CustomHeader from "../../../components/CustomHeader";
 import { useNutritionContext } from "../../../context/NutritionContext/NutritionContext";
@@ -9,7 +9,7 @@ import { useWorkoutContext } from "../../../context/WorkoutContextFunctions/Work
 
 export default function ProfileScreen() {
   const navigation = useNavigation();
-  const { user, logout, deleteAccount } = useAuth(); // assumes user object has email
+  const { user, clearSessionAndState, deleteAccount } = useAuthContext(); // assumes user object has email
   const { birthDate, height, bodyWeight, unit, resetSettings } = useSettings();
   const { resetNutritionContext } = useNutritionContext();
   const { resetWorkoutContext } = useWorkoutContext();

@@ -3,7 +3,7 @@ import { generateClient } from 'aws-amplify/api';
 import { listWorkouts, listUserExercises } from '../../database/graphql/queries';
 import exerciseList from '../Exercises/exerciseList';
 import { useSettings } from '../SettingsContext';
-import { useAuth } from '../AuthContext/AuthContext';
+import { useAuthContext } from '../AuthContextFunctions/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
@@ -53,7 +53,7 @@ const PENDING_WORKOUT_KEY = 'pendingWorkoutSyncs';
 
 export function WorkoutProvider({ children }) {
     const { activityFactor } = useSettings();
-    const { user } = useAuth();
+    const { user } = useAuthContext();
     const [workouts, setWorkouts] = useState([]);
     const [pendingSyncs, setPendingSyncs] = useState([]); // HYBRID SYNC: queue for failed mutations
     const [exerciseLibrary, setExerciseLibrary] = useState(exerciseList);

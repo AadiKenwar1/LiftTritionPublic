@@ -13,7 +13,7 @@ import {
   Keyboard,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useAuth } from "../../../../context/AuthContext";
+import { useAuthContext } from "../../../../context/AuthContextFunctions/AuthContext";
 import CustomHeader from "../../../../components/CustomHeader";
 
 export default function ChangePasswordScreen() {
@@ -25,7 +25,7 @@ export default function ChangePasswordScreen() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
-  const { updatePassword } = useAuth();
+  const { } = useAuthContext();
 
   const handleChangePassword = async () => {
     if (!currentPassword || !newPassword || !confirmPassword) {

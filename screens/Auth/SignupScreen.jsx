@@ -9,7 +9,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
-import { useAuth } from "../../context/AuthContext";
+import { useAuthContext } from "../../context/AuthContextFunctions/AuthContext";
 import { useSettings } from "../../context/SettingsContext";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
@@ -23,7 +23,7 @@ export default function SignUpScreen() {
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
   const route = useRoute();
-  const { signup } = useAuth();
+  const { } = useAuthContext();
   const { setNutritionGoals, updateWeight, setBirthDate, setAge, setGender, setHeight, setBodyWeight, setActivityFactor, setGoalType, setGoalWeight, setGoalPace, setUnits } = useSettings();
 
   // Get onboarding data if coming from onboarding flow

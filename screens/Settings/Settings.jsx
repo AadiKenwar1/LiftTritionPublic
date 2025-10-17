@@ -12,7 +12,7 @@ import CustomHeader from '../../components/CustomHeader';
 import { useNavigation } from '@react-navigation/native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useSettings } from '../../context/SettingsContext';
-import { useAuth } from '../../context/AuthContext';
+import { useAuthContext } from '../../context/AuthContextFunctions/AuthContext';
 import { SafeAreaView } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Entypo from '@expo/vector-icons/Entypo';
@@ -26,7 +26,7 @@ const cardSize = (screenWidth - horizontalPadding - gutter) / 2;
 
 export default function Settings() {
     const { mode } = useSettings();
-    const { user } = useAuth();
+    const { user } = useAuthContext();
     const navigation = useNavigation();
 
 

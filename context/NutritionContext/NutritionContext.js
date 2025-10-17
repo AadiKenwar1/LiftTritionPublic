@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import * as crud from './NutritionFunctions/crudFunctions';
 import { addNutritionFromPhoto, addNutritionFromLabel, addNutritionFromBarcode, uriToBase64 } from './NutritionFunctions/photoAnalysisFunctions';
-import { useAuth } from '../AuthContext/AuthContext';
+import { useAuthContext } from '../AuthContextFunctions/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const NutritionContext = createContext();
@@ -9,7 +9,7 @@ const NutritionContext = createContext();
 const PENDING_NUTRITION_KEY = 'pendingNutritionSyncs';
 
 export function NutritionProvider({ children }) {
-  const { user } = useAuth();
+  const { user } = useAuthContext();
   const [nutritionData, setNutritionData] = useState([]);
   const [pendingSyncs, setPendingSyncs] = useState([]); // HYBRID SYNC: queue for failed mutations
   const [processedPhotoUris, setProcessedPhotoUris] = useState(new Set());

@@ -1,11 +1,28 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import AntDesign from '@expo/vector-icons/AntDesign';
 import CustomIcon from '../components/CustomIcon';
+import { useAuthContext } from '../context/AuthContextFunctions/AuthContext';
 
 export default function WelcomeScreen() {
+  const { signInWithApple, loading } = useAuthContext();
   const navigation = useNavigation();
+
+  const handleSignInWithApple = async () => {
+    try {
+      const result = await signInWithApple();
+      if (result.success) {
+        // Navigate to main app or onboarding based on your flow
+      } else {
+        Alert.alert('Sign In Failed', result.error || 'Please try again');
+      }
+    } catch (error) {
+      console.log('Error signing in with Apple:', error);
+      Alert.alert('Error', 'Something went wrong. Please try again.');
+    }
+  };
 
   const handleGetStarted = () => {
     navigation.navigate('Onboarding1');
@@ -29,6 +46,18 @@ export default function WelcomeScreen() {
           <Text style={styles.getStartedButtonText}>Get Started</Text>
           <Ionicons name="arrow-forward" size={20} color="white" />
         </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={[styles.getStartedButton, { backgroundColor: '#000000' }, loading && styles.buttonDisabled]} 
+          onPress={handleSignInWithApple}
+          disabled={loading}
+        >
+          <Text style={[styles.getStartedButtonText]}>
+            {loading ? 'Signing In...' : 'Sign in with Apple'}
+          </Text>
+          {!loading && <AntDesign name="apple1" size={20} color="white" />}
+        </TouchableOpacity>
+
 
         <TouchableOpacity style={styles.loginButton} onPress={handleAlreadyHaveAccount}>
           <Text style={styles.loginButtonText}>Already have an account? Login</Text>
@@ -91,6 +120,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginRight: 8,
     fontFamily: 'Inter_700Bold',
+  },
+  buttonDisabled: {
+    opacity: 0.6,
   },
   loginButton: {
     paddingVertical: 16,

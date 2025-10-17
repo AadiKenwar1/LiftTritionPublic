@@ -9,7 +9,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
-import { useAuth } from "../../context/AuthContext";
+import { useAuthContext } from "../../context/AuthContextFunctions/AuthContext";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -19,7 +19,7 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
-  const { signin } = useAuth();
+  const { signInWithApple } = useAuthContext();
 
   const handleBack = () => {
     navigation.goBack();

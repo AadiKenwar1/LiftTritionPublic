@@ -9,10 +9,10 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { View } from "react-native";
 
 // Import Amplify configuration first (now in AuthContext)
-import "../context/AuthContext/amplifyConfig";
+import "../context/AuthContextFunctions/amplifyConfig";
 
 // Context Providers
-import { AuthProvider, useAuth } from "../context/AuthContext";
+import { AuthProvider, useAuthContext } from "../context/AuthContextFunctions/AuthContext";
 import { SettingsProvider, useSettings } from "../context/SettingsContext";
 import { WorkoutProvider, useWorkoutContext } from "../context/WorkoutContextFunctions/WorkoutContext";
 import { NutritionProvider, useNutritionContext } from "../context/NutritionContext/NutritionContext";
@@ -119,7 +119,7 @@ function TabNavigator() {
 // ============================================================================
 
 function AuthenticatedApp() {
-  const { isAuthenticated, loading: authLoading, user } = useAuth();
+  const { isAuthenticated, loading: authLoading, user } = useAuthContext();
   const { loading: settingsLoading } = useSettings();
   const { loading: workoutLoading } = useWorkoutContext();
   const { loading: nutritionLoading } = useNutritionContext();
