@@ -35,6 +35,7 @@ import OnboardingScreen11 from "./Onboarding/OnboardingScreen11";
 import OnboardingScreen12 from "./Onboarding/OnboardingScreen12";
 
 import LoadingScreen from "./LoadingScreen";
+import WiFiStatusBanner from "../components/WiFiStatusBanner";
 
 // Other screens
 import WorkoutDetails from "./Main/WorkoutLogScreens/exercisesScreen";
@@ -133,11 +134,12 @@ function AuthenticatedApp() {
   }
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator 
-        screenOptions={{ headerShown: false }}
-        initialRouteName="Welcome"
-      >
+    <>
+      <NavigationContainer>
+        <Stack.Navigator 
+          screenOptions={{ headerShown: false }}
+          initialRouteName="Welcome"
+        >
         {!isAuthenticated ? (
           // Auth screens when not authenticated
           <>
@@ -185,6 +187,10 @@ function AuthenticatedApp() {
         )}
       </Stack.Navigator>
     </NavigationContainer>
+    
+    {/* WiFi Status Banner - shows when offline */}
+    <WiFiStatusBanner />
+    </>
   );
 }
 
