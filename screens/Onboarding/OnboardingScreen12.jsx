@@ -9,99 +9,41 @@ import {
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { useAuthContext } from '../../context/AuthContextFunctions/AuthContext';
+import { useSettings } from '../../context/SettingsContext';
 
 export default function OnboardingScreen12() {
   const navigation = useNavigation();
   const route = useRoute();
+  const { markOnboardingCompleted } = useAuthContext();
+  const { calculateMacros, updateWeight } = useSettings();
   
   // Get all onboarding data from previous screens
   const { birthDate, age, height, weight, unit, activityFactor, goalType, goalWeight, goalPace } = route.params || {};
   
   const [calculatedMacros, setCalculatedMacros] = useState(null);
 
-  // Calculate macros using the same logic as SettingsContext
-  const calculateMacros = () => {
-    // Base calculation using Mifflin-St Jeor Equation
-    let calResult = 0;
-    const gender = 'male'; // Default for now, could be added to onboarding later
-    
-    if (gender === 'male') {
-      calResult = (4.536 * weight + 15.88 * height - 5 * age + 5) * activityFactor;
-    } else if (gender === 'female') {
-      calResult = (4.536 * weight + 15.88 * height - 5 * age - 161) * activityFactor;
-    } else {
-      calResult = (4.536 * weight + 15.88 * height - 5 * age - 78) * activityFactor;
-    }
 
-    // Adjust calories based on goal type and desired pace
-    if (goalType === 'lose') {
-      const weeklyDeficit = goalPace * 3500;
-      calResult -= weeklyDeficit / 7;
-    } else if (goalType === 'gain') {
-      const weeklySurplus = goalPace * 3500;
-      calResult += weeklySurplus / 7;
-    }
-
-    // Protein calculation with progressive adjustments
-    let proteinMultiplier = 0.8;
-    
-    // Add protein based on training frequency
-    if (activityFactor === 1.2) {
-      proteinMultiplier += 0.1;
-    } else if (activityFactor === 1.375) {
-      proteinMultiplier += 0.2;
-    } else if (activityFactor === 1.55) {
-      proteinMultiplier += 0.3;
-    } else if (activityFactor === 1.725) {
-      proteinMultiplier += 0.4;
-    }
-    
-    // Add extra protein for weight loss goals
-    if (goalType === 'lose') {
-      proteinMultiplier += 0.1;
-    }
-    
-    // Convert weight to pounds if in metric mode for protein calculation
-    let weightForProtein = goalWeight ? goalWeight : weight;
-    if (!unit) { // If metric (kg), convert to lbs
-      weightForProtein = weightForProtein * 2.20462;
-    }
-    
-    const proteinGrams = weightForProtein * proteinMultiplier;
-    const proteinKcal = proteinGrams * 4;
-
-    // Fat calculation (27.5% of total calories)
-    const fatKcal = calResult * 0.275;
-    const fatGrams = fatKcal / 9;
-
-    // Carb calculation (remaining calories)
-    const carbKcal = calResult - proteinKcal - fatKcal;
-    const carbGrams = carbKcal / 4;
-
-    return {
-      calories: Math.round(calResult),
-      protein: Math.round(proteinGrams),
-      fats: Math.round(fatGrams),
-      carbs: Math.round(carbGrams)
-    };
-  };
-
-  // Calculate macros when component mounts
+  // Calculate macros when we get to this onboarding screen
   useEffect(() => {
     if (weight && height && age && activityFactor) {
-      const macros = calculateMacros();
+      const macroResult = calculateMacros(weight, goalWeight || weight, activityFactor, age, 'male', height, goalType, goalPace, unit);
+      const macros = {
+        calories: Math.round(macroResult.calResult),
+        protein: Math.round(macroResult.proteinGrams),
+        fats: Math.round(macroResult.fatGrams),
+        carbs: Math.round(macroResult.carbGrams)
+      };
       setCalculatedMacros(macros);
     }
-  }, [weight, height, age, activityFactor, goalType, goalWeight, goalPace]);
+  }, [weight, height, age, activityFactor, goalType, goalWeight, goalPace, unit]);
 
-  const handleBack = () => {
-    navigation.goBack();
-  };
 
-  const handleNext = () => {
-    // Pass all data including calculated macros to the signup screen
-    navigation.navigate('Signup', {
-      onboardingData: {
+
+  //Since this is the onboarding screen, we need to mark the onboarding as completed and save the data to the database
+  async function handleNext(){
+    try {
+      const onboardingData = {
         birthDate,
         age,
         height,
@@ -113,7 +55,17 @@ export default function OnboardingScreen12() {
         goalPace,
         calculatedMacros
       }
-    });
+      const result = await markOnboardingCompleted(onboardingData);
+      if (!result.success) {
+        Alert.alert('Error', result.error || 'Failed to complete onboarding');
+      }
+      else {
+        updateWeight(weight);
+      }
+    } catch (error) {
+      console.error('Error completing onboarding:', error);
+      Alert.alert('Error', 'Something went wrong. Please try again.');
+    }
   };
 
   // Show loading or error if data is missing
@@ -125,7 +77,7 @@ export default function OnboardingScreen12() {
           <Text style={styles.errorText}>
             Unable to calculate macros. Please complete all previous steps.
           </Text>
-          <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Text style={styles.backButtonText}>Go Back</Text>
           </TouchableOpacity>
         </View>
@@ -212,7 +164,7 @@ export default function OnboardingScreen12() {
 
         {/* Navigation Buttons */}
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Ionicons name="arrow-back" size={20} color="#666666" />
             <Text style={styles.backButtonText}>Back</Text>
           </TouchableOpacity>

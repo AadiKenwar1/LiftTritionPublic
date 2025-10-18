@@ -54,10 +54,12 @@ export default function OnboardingScreen1() {
         </View>
         
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-            <Ionicons name="arrow-back" size={20} color="#666666" />
+          
+          <TouchableOpacity style={styles.backButton}>
+            <Ionicons name="arrow-back" size={20} color="white" />
             <Text style={styles.backButtonText}>Back</Text>
           </TouchableOpacity>
+        
           
           <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
             <Text style={styles.nextButtonText}>Next</Text>
@@ -140,7 +142,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   backButtonText: {
-    color: '#666666',
+    color: 'white',
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 6,

@@ -133,12 +133,10 @@ export default function ProfileScreen() {
 
         {/* Action Buttons */}
         <View style={styles.actionsContainer}>
-          <TouchableOpacity style={styles.actionButton} onPress={handleLogout}>
+          <TouchableOpacity style={styles.actionButton} onPress={clearSessionAndState}>
             <Text style={styles.actionButtonText}>Sign Out</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton} onPress={handleChangePassword}>
-            <Text style={styles.actionButtonText}>Change Password</Text>
-          </TouchableOpacity>
+
           <TouchableOpacity style={[styles.actionButton, styles.deleteButton]} onPress={handleDeleteAccount}>
             <Text style={[styles.actionButtonText, styles.deleteButtonText]}>Delete Account</Text>
           </TouchableOpacity>

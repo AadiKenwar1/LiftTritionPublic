@@ -54,10 +54,14 @@ const PENDING_WORKOUT_KEY = 'pendingWorkoutSyncs';
 export function WorkoutProvider({ children }) {
     const { activityFactor } = useSettings();
     const { user } = useAuthContext();
-    const [workouts, setWorkouts] = useState([]);
+    // Get workout data from AuthContext user object
+    const workoutsData = user?.workouts || [];
+    const userExercisesData = user?.userExercises || [];
+    
+    const [workouts, setWorkouts] = useState(workoutsData);
     const [pendingSyncs, setPendingSyncs] = useState([]); // HYBRID SYNC: queue for failed mutations
     const [exerciseLibrary, setExerciseLibrary] = useState(exerciseList);
-    const [userExercises, setUserExercises] = useState([]);
+    const [userExercises, setUserExercises] = useState(userExercisesData);
     const [logsByDateObj, setLogsByDateObj] = useState({});
     const [latestLogExercise, setLatestLogExercise] = useState("");
     const [loading, setLoading] = useState(true);
@@ -243,54 +247,16 @@ export function WorkoutProvider({ children }) {
     }
 
     
-    // ORDER PRESERVATION: After fetching workouts, always sort by order descending (newest at top)
+    // Update local state when AuthContext user changes
     useEffect(() => {
-        if (!user || !user.userId) return;
-        setLoading(true);
-        async function fetchFromCloud() {
-            try {
-                // Fetch workouts
-                const workoutResult = await client.graphql({
-                    query: listWorkouts,
-                    variables: { filter: { userId: { eq: user.userId } } }
-                });
-                const cloudWorkouts = (workoutResult.data.listWorkouts.items || []).map(w => ({
-                    ...w,
-                    exercises: w.exercises ? JSON.parse(w.exercises) : [],
-                })).sort((a, b) => b.order - a.order); // ORDER PRESERVATION: newest at top
-                console.log('[ORDER][Workout] Workouts loaded and sorted by order:', cloudWorkouts.map(w => w.order));
-                setWorkouts(cloudWorkouts);
-
-                // Fetch user exercises
-                const userExerciseResult = await client.graphql({
-                    query: listUserExercises,
-                    variables: { filter: { userId: { eq: user.userId } } }
-                });
-                const cloudUserExercises = userExerciseResult.data.listUserExercises.items || [];
-                setUserExercises(cloudUserExercises);
-
-                // Merge user exercises into exerciseLibrary
-                setExerciseLibrary(prev => {
-                    const merged = { ...prev };
-                    cloudUserExercises.forEach(userExercise => {
-                        merged[userExercise.name] = {
-                            isCompound: userExercise.isCompound,
-                            fatigueFactor: userExercise.fatigueFactor,
-                            userMax: userExercise.userMax || 0,
-                            mainMuscle: userExercise.mainMuscle,
-                            accessoryMuscles: userExercise.accessoryMuscles,
-                        };
-                    });
-                    return merged;
-                });
-            } catch (error) {
-                console.error('Error loading workouts/userExercises from cloud:', error);
-            } finally {
-                setLoading(false);
-            }
+        if (user?.workouts) {
+            setWorkouts(user.workouts);
+            setLoading(false);
         }
-        fetchFromCloud();
-    }, [user]);
+        if (user?.userExercises) {
+            setUserExercises(user.userExercises);
+        }
+    }, [user?.workouts, user?.userExercises]);
 
     return (
         <WorkoutContext.Provider

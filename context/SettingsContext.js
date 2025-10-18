@@ -4,18 +4,24 @@ import { getLocalDateKey } from '../utils/date';
 import { generateClient } from 'aws-amplify/api';
 import { getSettings, listSettings } from '../database/graphql/queries';
 import { createSettings, updateSettings } from '../database/graphql/mutations';
+import { useAuthContext } from './AuthContextFunctions/AuthContext';
 
 const client = generateClient();
 
 const SettingsContext = createContext();
 
 export const SettingsProvider = ({ children }) => {
+    const { user } = useAuthContext();
+    
+    // Get settings from AuthContext user object
+    const settings = user?.settings || {};
+    
     /**
      * MODES
      * - Lift Mode
      * - Macro Mode
      */
-    const [mode, setMode] = useState(true);
+    const [mode, setMode] = useState(settings.mode ?? true);
     const toggleMode = () => {
         setMode((prev) => !prev);
     };
@@ -25,7 +31,7 @@ export const SettingsProvider = ({ children }) => {
      * - Imperial (lb and in) - true
      * - Metric (kg and cm) - false
      */
-    const [unit, setUnits] = useState(true);
+    const [unit, setUnits] = useState(settings.unit ?? true);
 
     /**
      * PERSONAL INFORMATION
@@ -34,21 +40,21 @@ export const SettingsProvider = ({ children }) => {
      * - Body Weight - line chart
      * - Height - double scroll
      */
-    const [birthDate, setBirthDate] = useState(null);
-    const [age, setAge] = useState(19);
-    const [gender, setGender] = useState('male');
-    const [bodyWeight, setBodyWeight] = useState(150);
-    const [weightProgress, setWeightProgress] = useState([]);
-    const [height, setHeight] = useState(60);
+    const [birthDate, setBirthDate] = useState(settings.birthDate ?? null);
+    const [age, setAge] = useState(settings.age ?? 19);
+    const [gender, setGender] = useState(settings.gender ?? 'male');
+    const [bodyWeight, setBodyWeight] = useState(settings.bodyWeight ?? 150);
+    const [weightProgress, setWeightProgress] = useState(settings.weightProgress ?? []);
+    const [height, setHeight] = useState(settings.height ?? 60);
 
     /**GOAL WEIGHTS
      * - goalType: lose, maintain, gain
      * - goalWeight
      * - goalPace: how fast we want to achive goalWeight
      */
-    const [goalType, setGoalType] = useState('maintain'); // lose, maintain, gain
-    const [goalWeight, setGoalWeight] = useState(bodyWeight);
-    const [goalPace, setGoalPace] = useState(1.0);
+    const [goalType, setGoalType] = useState(settings.goalType ?? 'maintain'); // lose, maintain, gain
+    const [goalWeight, setGoalWeight] = useState(settings.goalWeight ?? settings.bodyWeight ?? 150);
+    const [goalPace, setGoalPace] = useState(settings.goalPace ?? 1.0);
 
     /**
      * CENTRALIZED WEIGHT UPDATE FUNCTION
@@ -135,7 +141,7 @@ export const SettingsProvider = ({ children }) => {
      * - 3 to 4 times a week = 1.55
      * - 5+ times a week = 1.725
      */
-    const [activityFactor, setActivityFactor] = useState(1.2);
+    const [activityFactor, setActivityFactor] = useState(settings.activityFactor ?? 1.2);
 
     /**
      * MACRONUTRIENT GOALS
@@ -148,10 +154,10 @@ export const SettingsProvider = ({ children }) => {
      * - Fats = 27.5% of calories → 9 kcal/g
      * - Carbs = remaining calories → 4 kcal/g
      */
-    const [calorieGoal, setCalorieGoal] = useState(0);
-    const [proteinGoal, setProteinGoal] = useState(0);
-    const [carbsGoal, setCarbsGoal] = useState(0);
-    const [fatsGoal, setFatsGoal] = useState(0);
+    const [calorieGoal, setCalorieGoal] = useState(settings.calorieGoal ?? 0);
+    const [proteinGoal, setProteinGoal] = useState(settings.proteinGoal ?? 0);
+    const [carbsGoal, setCarbsGoal] = useState(settings.carbsGoal ?? 0);
+    const [fatsGoal, setFatsGoal] = useState(settings.fatsGoal ?? 0);
 
     function calculateMacros(
         currentBodyWeight = bodyWeight,
@@ -241,53 +247,32 @@ export const SettingsProvider = ({ children }) => {
     }
 
     const [loaded, setLoaded] = useState(false);
-    const [settingsId, setSettingsId] = useState(null); // Track settings object id
+    const [settingsId, setSettingsId] = useState(settings.id ?? null); // Track settings object id
 
-    // When loading settings from AppSync
+    // Update local state when AuthContext user changes
     useEffect(() => {
-        async function loadSettings() {
-            try {
-                console.log('[SettingsContext] Loading settings from AppSync...');
-                const result = await client.graphql({ query: listSettings });
-                console.log('[SettingsContext] Raw result from AppSync:', result);
-                const items = result.data.listSettings.items;
-                if (items && items.length > 0) {
-                    const s = items[0];
-                    console.log('[SettingsContext] Loaded settings object:', s);
-                    setSettingsId(s.id);
-                    setMode(s.mode ?? true);
-                    setUnits(s.unit ?? true);
-                    setBirthDate(s.birthDate ?? null);
-                    setAge(s.age ?? 19);
-                    setGender(s.gender ?? 'male');
-                    setBodyWeight(s.bodyWeight ?? 150);
-                    setWeightProgress(
-                        typeof s.weightProgress === 'string'
-                            ? JSON.parse(s.weightProgress || '[]')
-                            : Array.isArray(s.weightProgress)
-                                ? s.weightProgress
-                                : []
-                    );
-                    setHeight(s.height ?? 60);
-                    setGoalType(s.goalType ?? 'maintain');
-                    setGoalWeight(s.goalWeight ?? (s.bodyWeight ?? 150));
-                    setGoalPace(s.goalPace ?? 1.0);
-                    setActivityFactor(s.activityFactor ?? 1.2);
-                    setCalorieGoal(s.calorieGoal ?? 0);
-                    setProteinGoal(s.proteinGoal ?? 0);
-                    setCarbsGoal(s.carbsGoal ?? 0);
-                    setFatsGoal(s.fatsGoal ?? 0);
-                } else {
-                    console.log('[SettingsContext] No settings found in AppSync.');
-                }
-            } catch (error) {
-                console.error('[SettingsContext] Error loading settings from AppSync:', error);
-            } finally {
-                setLoaded(true);
-            }
+        if (user?.settings) {
+            const s = user.settings;
+            setMode(s.mode ?? true);
+            setUnits(s.unit ?? true);
+            setBirthDate(s.birthDate ?? null);
+            setAge(s.age ?? 19);
+            setGender(s.gender ?? 'male');
+            setBodyWeight(s.bodyWeight ?? 150);
+            setWeightProgress(s.weightProgress ?? []);
+            setHeight(s.height ?? 60);
+            setGoalType(s.goalType ?? 'maintain');
+            setGoalWeight(s.goalWeight ?? s.bodyWeight ?? 150);
+            setGoalPace(s.goalPace ?? 1.0);
+            setActivityFactor(s.activityFactor ?? 1.2);
+            setCalorieGoal(s.calorieGoal ?? 0);
+            setProteinGoal(s.proteinGoal ?? 0);
+            setCarbsGoal(s.carbsGoal ?? 0);
+            setFatsGoal(s.fatsGoal ?? 0);
+            setSettingsId(s.id ?? null);
+            setLoaded(true);
         }
-        loadSettings();
-    }, []);
+    }, [user?.settings]);
 
     // Save settings to AppSync whenever they change (after initial load)
     useEffect(() => {

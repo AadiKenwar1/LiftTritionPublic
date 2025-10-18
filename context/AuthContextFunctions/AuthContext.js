@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { generateClient } from 'aws-amplify/api';
+import { updateSettings } from '../../database/graphql/mutations';
 
 // Import Amplify configuration first
 import './amplifyConfig';
@@ -41,20 +43,32 @@ export function AuthProvider({ children }) {
     try {
       const sessionData = await getAppleUserSession();
       if (sessionData) {
-        setAuthenticatedUser({
-          appleUserId: sessionData.appleUserId,
-          email: sessionData.email,
-          name: sessionData.name,
-          provider: 'apple',
-        });
-        console.log('✅ Existing Apple user session restored');
+        // Load fresh user data from database
+        const loadResult = await loadAppleUserData(sessionData.appleUserId);
+        if (loadResult.success) {
+          const userData = {
+            appleUserId: sessionData.appleUserId,
+            email: sessionData.email,
+            name: sessionData.name,
+            provider: 'apple',
+            userId: sessionData.appleUserId,
+            ...loadResult.data,
+          };
+          setAuthenticatedUser(userData);
+          console.log('✅ Existing Apple user session restored with fresh data');
+        } else {
+          console.log('Failed to load user data, clearing session');
+          await clearAppleUserSession();
+          resetAuthState();
+        }
       } else {
         console.log('No existing Apple user session found');
+        resetAuthState();
       }
     } catch (error) {
       console.log('Error checking auth state:', error);
-    } finally {
       resetAuthState();
+    } finally {
       setLoading(false);
     }
   };
@@ -112,6 +126,52 @@ export function AuthProvider({ children }) {
     await clearSessionAndState();
     return { success: true, message: 'Account deleted successfully.' };
   };
+
+  //Marks onboarding as completed and saves onboarding data
+  const markOnboardingCompleted = async (onboardingData = null) => {
+    if (!user?.appleUserId) return { success: false, error: 'No user to update' };
+    try {
+      const client = generateClient();
+            const updateInput = {
+        id: user.appleUserId,
+        onboardingCompleted: true,
+      };
+      if (onboardingData) {
+        updateInput.birthDate = onboardingData.birthDate;
+        updateInput.age = onboardingData.age;
+        updateInput.height = onboardingData.height;
+        updateInput.bodyWeight = onboardingData.weight;
+        updateInput.unit = onboardingData.unit;
+        updateInput.activityFactor = onboardingData.activityFactor;
+        updateInput.goalType = onboardingData.goalType;
+        updateInput.goalWeight = onboardingData.goalWeight;
+        updateInput.goalPace = onboardingData.goalPace;
+        
+        if (onboardingData.calculatedMacros) {
+          updateInput.calorieGoal = onboardingData.calculatedMacros.calories;
+          updateInput.proteinGoal = onboardingData.calculatedMacros.protein;
+          updateInput.carbsGoal = onboardingData.calculatedMacros.carbs;
+          updateInput.fatsGoal = onboardingData.calculatedMacros.fats;
+        }
+      }
+      
+      await client.graphql({
+        query: updateSettings,
+        variables: { input: updateInput }
+      });
+      
+      // Update user state with new settings
+      const updatedSettings = { ...user.settings, ...updateInput };
+      const updatedUser = { ...user, settings: updatedSettings };
+      
+      await storeAppleUserSession(updatedUser);
+      setUser(updatedUser);
+      
+      return { success: true, message: 'Onboarding completed!' };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  };
   
   // Check authentication state on app startup
   useEffect(() => {
@@ -126,6 +186,7 @@ export function AuthProvider({ children }) {
     signInWithApple,
     clearSessionAndState,
     deleteAccount,
+    markOnboardingCompleted,
   };
 
   return (

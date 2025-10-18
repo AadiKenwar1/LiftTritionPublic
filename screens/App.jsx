@@ -123,15 +123,9 @@ function AuthenticatedApp() {
   const { loading: settingsLoading } = useSettings();
   const { loading: workoutLoading } = useWorkoutContext();
   const { loading: nutritionLoading } = useNutritionContext();
-
-  console.log('🚀 AuthenticatedApp render:', { 
-    isAuthenticated, 
-    authLoading, 
-    settingsLoading,
-    workoutLoading,
-    nutritionLoading,
-    user: user ? 'exists' : 'null'
-  });
+  
+  // Check if onboarding is completed (access settings from user object)
+  const onboardingCompleted = user?.settings?.onboardingCompleted;
 
   // Only render the navigator after authLoading is false
   if (authLoading) {
@@ -142,14 +136,43 @@ function AuthenticatedApp() {
     <NavigationContainer>
       <Stack.Navigator 
         screenOptions={{ headerShown: false }}
-        initialRouteName={isAuthenticated ? "Tabs" : "Welcome"}
+        initialRouteName="Welcome"
       >
         {!isAuthenticated ? (
-          // Auth and onboarding screens when not authenticated
+          // Auth screens when not authenticated
           <>
             <Stack.Screen name="Welcome" component={WelcomeScreen} />
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Signup" component={SignupScreen} />
+            <Stack.Screen name="ConfirmSignup" component={ConfirmSignupScreen} />
+          </>
+        ) : 
+        (settingsLoading || workoutLoading || nutritionLoading) ? (
+          // Loading screen while contexts are loading
+          <Stack.Screen name="Loading" component={LoadingScreen} initialParams={{ message: "Loading..." }} />
+        ): 
+        onboardingCompleted ? (
+          // Main app screens when authenticated and onboarding completed
+          <>
+            <Stack.Screen name="Tabs" component={TabNavigator} />
+            <Stack.Screen name="WorkoutDetails" component={WorkoutDetails} options={{ title: "Exercises", ...styles, animation: 'slide_from_bottom', animationDuration: 350,}} />
+            <Stack.Screen name="LogDetails" component={LogDetails} options={{ title: "Logs", ...styles }} />
+            <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: "Profile", ...styles }} />
+            <Stack.Screen name="TrainingFrequency" component={TrainingFrequencyScreen} options={{ title: "Training Frequency", ...styles }} />
+            <Stack.Screen name="Privacy" component={PrivacyScreen} options={{ title: "Privacy", ...styles }} />
+            <Stack.Screen name="About" component={AboutScreen} options={{ title: "About", ...styles }} />
+            <Stack.Screen name="Support" component={SupportScreen} options={{ title: "Support", ...styles }} />
+            <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} options={{ title: "ChangePassword", ...styles }} />
+            <Stack.Screen name="UserExercisesScreen" component={UserExercisesScreen} options={{ title: "UserExercisesScreen", ...styles }} />
+            <Stack.Screen name="AddUserExercise" component={AddUserExerciseScreen} options={{ title: "AddUserExercise", ...styles }} />
+            <Stack.Screen name="DeleteAccount" component={DeleteAccountScreen} options={{ title: "DeleteAccount", ...styles }} />
+            <Stack.Screen name="CameraScreen" component={CameraScreen} options={{ title: "CameraScreen", ...styles }} />
+            <Stack.Screen name="AdjustMacros" component={AdjustMacrosScreen} options={{ title: "AdjustMacrosScreen", ...styles }} />
+            <Stack.Screen name="SetMacros" component={SetMacrosScreen} options={{ title: "SetMacrosScreen", ...styles }} />
+          </>
+        ) : (
+          // Onboarding screens when authenticated but onboarding not completed
+          <>
             <Stack.Screen name="Onboarding1" component={OnboardingScreen1} />
             <Stack.Screen name="Onboarding2" component={OnboardingScreen2} />
             <Stack.Screen name="Onboarding4" component={OnboardingScreen4} />
@@ -158,40 +181,14 @@ function AuthenticatedApp() {
             <Stack.Screen name="Onboarding10" component={OnboardingScreen10} />
             <Stack.Screen name="Onboarding11" component={OnboardingScreen11} />
             <Stack.Screen name="Onboarding12" component={OnboardingScreen12} />
-            <Stack.Screen name="ConfirmSignup" component={ConfirmSignupScreen} />
           </>
-        ) : (
-          (settingsLoading || workoutLoading || nutritionLoading)
-            ? <Stack.Screen name="Loading" component={LoadingScreen} initialParams={{ message: "Loading..." }} />
-            : (
-              // Main app screens when authenticated and all contexts loaded
-              <>
-                <Stack.Screen name="Tabs" component={TabNavigator} />
-                <Stack.Screen name="WorkoutDetails" component={WorkoutDetails} options={{ title: "Exercises", ...styles, animation: 'slide_from_bottom', animationDuration: 350,}} />
-                <Stack.Screen name="LogDetails" component={LogDetails} options={{ title: "Logs", ...styles }} />
-                <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: "Profile", ...styles }} />
-                <Stack.Screen name="TrainingFrequency" component={TrainingFrequencyScreen} options={{ title: "Training Frequency", ...styles }} />
-                <Stack.Screen name="Privacy" component={PrivacyScreen} options={{ title: "Privacy", ...styles }} />
-                <Stack.Screen name="About" component={AboutScreen} options={{ title: "About", ...styles }} />
-                <Stack.Screen name="Support" component={SupportScreen} options={{ title: "Support", ...styles }} />
-                <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} options={{ title: "ChangePassword", ...styles }} />
-                <Stack.Screen name="UserExercisesScreen" component={UserExercisesScreen} options={{ title: "UserExercisesScreen", ...styles }} />
-                <Stack.Screen name="AddUserExercise" component={AddUserExerciseScreen} options={{ title: "AddUserExercise", ...styles }} />
-                <Stack.Screen name="DeleteAccount" component={DeleteAccountScreen} options={{ title: "DeleteAccount", ...styles }} />
-                <Stack.Screen name="CameraScreen" component={CameraScreen} options={{ title: "CameraScreen", ...styles }} />
-                <Stack.Screen name="AdjustMacros" component={AdjustMacrosScreen} options={{ title: "AdjustMacrosScreen", ...styles }} />
-                <Stack.Screen name="SetMacros" component={SetMacrosScreen} options={{ title: "SetMacrosScreen", ...styles }} />
-              </>
-            )
         )}
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
 
-// ============================================================================
-// APP CONTENT
-// ============================================================================
+
 
 function AppContent() {
   return (
@@ -209,9 +206,7 @@ function AppContent() {
   );
 }
 
-// ============================================================================
-// MAIN APP EXPORT
-// ============================================================================
+
 
 const styles = {
   headerStyle: {

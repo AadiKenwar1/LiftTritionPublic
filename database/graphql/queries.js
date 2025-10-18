@@ -153,6 +153,7 @@ export const getSettings = /* GraphQL */ `
       proteinGoal
       carbsGoal
       fatsGoal
+      onboardingCompleted
       createdAt
       updatedAt
       __typename
@@ -184,6 +185,7 @@ export const listSettings = /* GraphQL */ `
         proteinGoal
         carbsGoal
         fatsGoal
+        onboardingCompleted
         createdAt
         updatedAt
         __typename

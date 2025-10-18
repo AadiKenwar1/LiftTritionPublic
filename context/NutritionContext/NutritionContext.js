@@ -10,7 +10,9 @@ const PENDING_NUTRITION_KEY = 'pendingNutritionSyncs';
 
 export function NutritionProvider({ children }) {
   const { user } = useAuthContext();
-  const [nutritionData, setNutritionData] = useState([]);
+  // Get nutrition data from AuthContext user object
+  const nutritionDataFromAuth = user?.nutrition || [];
+  const [nutritionData, setNutritionData] = useState(nutritionDataFromAuth);
   const [pendingSyncs, setPendingSyncs] = useState([]); // HYBRID SYNC: queue for failed mutations
   const [processedPhotoUris, setProcessedPhotoUris] = useState(new Set());
   const [currentlyAnalyzing, setCurrentlyAnalyzing] = useState(null);
@@ -71,17 +73,13 @@ export function NutritionProvider({ children }) {
     return () => clearInterval(interval);
   }, [pendingSyncs, user]);
 
-  // Fetch nutrition logs from cloud for this user on mount or when user changes
+  // Update local state when AuthContext user changes
   useEffect(() => {
-    if (!user || !user.userId) return;
-    async function loadFromCloud() {
-      const cloudLogs = await crud.fetchAllNutritionFromCloud(user.userId);
-      setNutritionData(Array.isArray(cloudLogs) ? cloudLogs : []);
+    if (user?.nutrition) {
+      setNutritionData(user.nutrition);
       setLoaded(true);
-      console.log('[DEBUG] NutritionContext - nutritionData for user', user.userId, ':', cloudLogs);
     }
-    loadFromCloud();
-  }, [user]);
+  }, [user?.nutrition]);
 
   // Wrappers for photo/label/barcode analysis (unchanged, but use addNutrition)
   const addNutritionFromPhotoWrapper = async (uri) => {

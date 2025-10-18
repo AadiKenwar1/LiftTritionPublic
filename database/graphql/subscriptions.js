@@ -195,6 +195,7 @@ export const onCreateSettings = /* GraphQL */ `
       proteinGoal
       carbsGoal
       fatsGoal
+      onboardingCompleted
       createdAt
       updatedAt
       __typename
@@ -221,6 +222,7 @@ export const onUpdateSettings = /* GraphQL */ `
       proteinGoal
       carbsGoal
       fatsGoal
+      onboardingCompleted
       createdAt
       updatedAt
       __typename
@@ -247,6 +249,7 @@ export const onDeleteSettings = /* GraphQL */ `
       proteinGoal
       carbsGoal
       fatsGoal
+      onboardingCompleted
       createdAt
       updatedAt
       __typename

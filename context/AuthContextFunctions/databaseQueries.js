@@ -36,7 +36,6 @@ export const checkAppleUserExists = async (appleUserId) => {
  * @param {string} email - User's proxy email
  * @param {string} name - User's name (optional)
  * @returns {Object} Created settings record
- * DELETE ONCE ONBOARDING IS SET UP!!!!!!!!!!
  */
 export const createDefaultSettings = async (appleUserId, email, name = null) => {
   try {
@@ -61,7 +60,8 @@ export const createDefaultSettings = async (appleUserId, email, name = null) => 
           calorieGoal: 2000,
           proteinGoal: 150,
           carbsGoal: 250,
-          fatsGoal: 65
+          fatsGoal: 65,
+          onboardingCompleted: false,
         }
       }
     });
@@ -109,11 +109,25 @@ export const loadAppleUserData = async (appleUserId) => {
       })
     ]);
     
+    // Parse JSON fields in workout data
+    const parsedWorkouts = workoutsResult.data.listWorkouts.items.map(workout => ({
+      ...workout,
+      exercises: workout.exercises ? JSON.parse(workout.exercises) : [],
+      note: workout.note || "",
+    }));
+
+    // Parse JSON fields in settings data
+    const parsedSettings = settingsResult.data.getSettings ? {
+      ...settingsResult.data.getSettings,
+      weightProgress: settingsResult.data.getSettings.weightProgress ? 
+        JSON.parse(settingsResult.data.getSettings.weightProgress) : [],
+    } : null;
+
     return {
       success: true,
       data: {
-        settings: settingsResult.data.getSettings,
-        workouts: workoutsResult.data.listWorkouts.items,
+        settings: parsedSettings,
+        workouts: parsedWorkouts,
         nutrition: nutritionResult.data.listNutritions.items,
       },
     };
@@ -187,3 +201,4 @@ export const deleteAppleUserData = async (appleUserId) => {
     };
   }
 };
+

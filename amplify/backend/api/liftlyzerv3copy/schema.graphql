@@ -70,6 +70,7 @@ type Settings @model {
   proteinGoal: Int
   carbsGoal: Int
   fatsGoal: Int
+  onboardingCompleted: Boolean
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }

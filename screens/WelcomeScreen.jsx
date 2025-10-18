@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -10,19 +10,6 @@ export default function WelcomeScreen() {
   const { signInWithApple, loading } = useAuthContext();
   const navigation = useNavigation();
 
-  const handleSignInWithApple = async () => {
-    try {
-      const result = await signInWithApple();
-      if (result.success) {
-        // Navigate to main app or onboarding based on your flow
-      } else {
-        Alert.alert('Sign In Failed', result.error || 'Please try again');
-      }
-    } catch (error) {
-      console.log('Error signing in with Apple:', error);
-      Alert.alert('Error', 'Something went wrong. Please try again.');
-    }
-  };
 
   const handleGetStarted = () => {
     navigation.navigate('Onboarding1');
@@ -42,14 +29,11 @@ export default function WelcomeScreen() {
 
       {/* Buttons */}
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.getStartedButton} onPress={handleGetStarted}>
-          <Text style={styles.getStartedButtonText}>Get Started</Text>
-          <Ionicons name="arrow-forward" size={20} color="white" />
-        </TouchableOpacity>
+
 
         <TouchableOpacity 
           style={[styles.getStartedButton, { backgroundColor: '#000000' }, loading && styles.buttonDisabled]} 
-          onPress={handleSignInWithApple}
+          onPress={signInWithApple}
           disabled={loading}
         >
           <Text style={[styles.getStartedButtonText]}>
@@ -59,9 +43,6 @@ export default function WelcomeScreen() {
         </TouchableOpacity>
 
 
-        <TouchableOpacity style={styles.loginButton} onPress={handleAlreadyHaveAccount}>
-          <Text style={styles.loginButtonText}>Already have an account? Login</Text>
-        </TouchableOpacity>
       </View>
     </View>
   );
