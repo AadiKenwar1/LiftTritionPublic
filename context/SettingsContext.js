@@ -4,7 +4,7 @@ import { getLocalDateKey } from '../utils/date';
 import { generateClient } from 'aws-amplify/api';
 import { getSettings, listSettings } from '../database/graphql/queries';
 import { createSettings, updateSettings } from '../database/graphql/mutations';
-import { useAuthContext } from './AuthContextFunctions/AuthContext';
+import { useAuthContext } from './Auth/AuthContext';
 
 const client = generateClient();
 

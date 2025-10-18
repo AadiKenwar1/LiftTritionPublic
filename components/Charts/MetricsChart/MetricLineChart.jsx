@@ -6,8 +6,8 @@ import { TouchableOpacity, Dimensions} from "react-native";
 import InfoModal from "../../InfoModal";
 import PopupModal from "../../PopupModal";
 import ExerciseSelector from "../../ExerciseSelector";
-import { useWorkoutContext } from "../../../context/WorkoutContextFunctions/WorkoutContext";
-import { useNutritionContext } from "../../../context/NutritionContext/NutritionContext";
+import { useWorkoutContext } from "../../../context/Workouts/WorkoutContext";
+import { useNutritionContext } from "../../../context/Nutrition/NutritionContext";
 import ItemSelector from '../../ItemSelector'
 import { useSettings } from "../../../context/SettingsContext";
 import { formatDateForDisplay } from "../../../utils/date";

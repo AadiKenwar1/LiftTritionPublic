@@ -1,11 +1,11 @@
 import React from "react";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { useAuthContext } from "../../../context/AuthContextFunctions/AuthContext";
+import { useAuthContext } from "../../../context/Auth/AuthContext";
 import { useSettings } from "../../../context/SettingsContext";
 import CustomHeader from "../../../components/CustomHeader";
-import { useNutritionContext } from "../../../context/NutritionContext/NutritionContext";
-import { useWorkoutContext } from "../../../context/WorkoutContextFunctions/WorkoutContext";
+import { useNutritionContext } from "../../../context/Nutrition/NutritionContext";
+import { useWorkoutContext } from "../../../context/Workouts/WorkoutContext";
 
 export default function ProfileScreen() {
   const navigation = useNavigation();

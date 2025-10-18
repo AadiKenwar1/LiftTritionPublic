@@ -1,0 +1,60 @@
+import { Modal, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+
+export default function InsightPopup(props) {
+  return (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={props.visible}
+      onRequestClose={props.onClose}
+    >
+      <View style={styles.overlay}>
+        <View style={styles.modalContainer}>
+          <View style={styles.header}>
+            <Text style={styles.title}>{props.title}</Text>
+            <TouchableOpacity onPress={props.onClose}>
+              <Text style={styles.close}>✕</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.content}>
+            {props.children}
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    width: '90%',
+    height: '80%',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    elevation: 10,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  close: {
+    fontSize: 22,
+    fontWeight: 'bold',
+  },
+  content: {
+    flex: 1,
+  },
+});

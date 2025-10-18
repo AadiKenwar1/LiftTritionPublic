@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import CustomIcon from '../components/CustomIcon';
-import { useAuthContext } from '../context/AuthContextFunctions/AuthContext';
+import { useAuthContext } from '../context/Auth/AuthContext';
 
 export default function WelcomeScreen() {
   const { signInWithApple, loading } = useAuthContext();

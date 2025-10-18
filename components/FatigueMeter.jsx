@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Dimensions } from "react-native";
 
 // Custom hook for getting workout data from context
-import { useWorkoutContext } from "../context/WorkoutContextFunctions/WorkoutContext";
+import { useWorkoutContext } from "../context/Workouts/WorkoutContext";
 
 // Import the generic progress wheel component
 import ProgressWheel from "./ProgressWheel";

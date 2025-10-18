@@ -16,8 +16,8 @@ import FatigueMeter from '../../components/FatigueMeter';
 import CustomHeader from '../../components/CustomHeader';
 import ProgressWheel from '../../components/ProgressWheel';
 import { useSettings } from '../../context/SettingsContext';
-import { useNutritionContext } from '../../context/NutritionContext/NutritionContext';
-import { useWorkoutContext } from '../../context/WorkoutContextFunctions/WorkoutContext';
+import { useNutritionContext } from '../../context/Nutrition/NutritionContext';
+import { useWorkoutContext } from '../../context/Workouts/WorkoutContext';
 
 const { width: screenWidth } = Dimensions.get('window');
 export default function ProgressScreen() {

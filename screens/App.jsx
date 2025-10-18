@@ -9,49 +9,44 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { View } from "react-native";
 
 // Import Amplify configuration first (now in AuthContext)
-import "../context/AuthContextFunctions/amplifyConfig";
+import "../context/Auth/amplifyConfig";
 
 // Context Providers
-import { AuthProvider, useAuthContext } from "../context/AuthContextFunctions/AuthContext";
+import { AuthProvider, useAuthContext } from "../context/Auth/AuthContext";
 import { SettingsProvider, useSettings } from "../context/SettingsContext";
-import { WorkoutProvider, useWorkoutContext } from "../context/WorkoutContextFunctions/WorkoutContext";
-import { NutritionProvider, useNutritionContext } from "../context/NutritionContext/NutritionContext";
+import { WorkoutProvider, useWorkoutContext } from "../context/Workouts/WorkoutContext";
+import { NutritionProvider, useNutritionContext } from "../context/Nutrition/NutritionContext";
 
 // Screens
-import WelcomeScreen from "./WelcomeScreen";
-import LoginScreen from "./Auth/LoginScreen";
-import SignupScreen from "./Auth/SignupScreen";
-import ConfirmSignupScreen from "./Auth/ConfirmSignupScreen";
-import LogScreen from "./Main/logScreen";
-import ProgressScreen from "./Main/progressScreen";
-import SettingsScreen from "./Settings/Settings";
-import OnboardingScreen1 from "./Onboarding/OnboardingScreen1";
-import OnboardingScreen2 from "./Onboarding/OnboardingScreen2";
-import OnboardingScreen4 from "./Onboarding/OnboardingScreen4";
-import OnboardingScreen6 from "./Onboarding/OnboardingScreen6";
-import OnboardingScreen8 from "./Onboarding/OnboardingScreen8";
-import OnboardingScreen10 from "./Onboarding/OnboardingScreen10";
-import OnboardingScreen11 from "./Onboarding/OnboardingScreen11";
-import OnboardingScreen12 from "./Onboarding/OnboardingScreen12";
+import WelcomeScreen from "./welcomeScreen";
+import LogScreen from "./main/logScreen";
+import ProgressScreen from "./main/progressScreen";
+import SettingsScreen from "./settings/settings";
+import OnboardingScreen1 from "./onboarding/onboardingScreen1";
+import OnboardingScreen2 from "./onboarding/onboardingScreen2";
+import OnboardingScreen4 from "./onboarding/onboardingScreen4";
+import OnboardingScreen6 from "./onboarding/onboardingScreen6";
+import OnboardingScreen8 from "./onboarding/onboardingScreen8";
+import OnboardingScreen10 from "./onboarding/onboardingScreen10";
+import OnboardingScreen11 from "./onboarding/onboardingScreen11";
+import OnboardingScreen12 from "./onboarding/onboardingScreen12";
 
-import LoadingScreen from "./LoadingScreen";
+import LoadingScreen from "./loadingScreen";
 import WiFiStatusBanner from "../components/WiFiStatusBanner";
 
 // Other screens
-import WorkoutDetails from "./Main/WorkoutLogScreens/exercisesScreen";
-import LogDetails from "./Main/WorkoutLogScreens/logsScreen";
-import ProfileScreen from "./Settings/SettingsOptions/Profile";
-import TrainingFrequencyScreen from "./Settings/SettingsOptions/TrainingFrequency";
-import PrivacyScreen from "./Settings/SettingsOptions/Privacy";
-import AboutScreen from "./Settings/SettingsOptions/About";
-import SupportScreen from "./Settings/SettingsOptions/Support";
-import ChangePasswordScreen from "./Settings/SettingsOptions/AccountSettings/ChangePassword";
-import UserExercisesScreen from "./Settings/SettingsOptions/UserExercises/UserExercises";
-import AddUserExerciseScreen from "./Settings/SettingsOptions/UserExercises/AddUserExercise";
-import DeleteAccountScreen from "./Settings/SettingsOptions/AccountSettings/DeleteAccount";
-import CameraScreen from "./Camera";
-import AdjustMacrosScreen from "./Settings/SettingsOptions/AdjustMacros/AdjustMacros";
-import SetMacrosScreen from "./Settings/SettingsOptions/AdjustMacros/SetMacros";
+import WorkoutDetails from "./main/workoutScreens/exercisesScreen";
+import LogDetails from "./main/workoutScreens/logsScreen";
+import ProfileScreen from "./settings/SettingsOptions/profile";
+import TrainingFrequencyScreen from "./settings/SettingsOptions/trainingFrequency";
+import PrivacyScreen from "./settings/SettingsOptions/privacy";
+import AboutScreen from "./settings/SettingsOptions/about";
+import SupportScreen from "./settings/SettingsOptions/support";
+import UserExercisesScreen from "./settings/SettingsOptions/userExercises/userExercises";
+import AddUserExerciseScreen from "./settings/SettingsOptions/userExercises/addUserExercise";
+import CameraScreen from "./camera";
+import AdjustMacrosScreen from "./settings/SettingsOptions/adjustMacros/adjustMacros";
+import SetMacrosScreen from "./settings/SettingsOptions/adjustMacros/setMacros";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -144,9 +139,7 @@ function AuthenticatedApp() {
           // Auth screens when not authenticated
           <>
             <Stack.Screen name="Welcome" component={WelcomeScreen} />
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="Signup" component={SignupScreen} />
-            <Stack.Screen name="ConfirmSignup" component={ConfirmSignupScreen} />
+
           </>
         ) : 
         (settingsLoading || workoutLoading || nutritionLoading) ? (
@@ -164,10 +157,8 @@ function AuthenticatedApp() {
             <Stack.Screen name="Privacy" component={PrivacyScreen} options={{ title: "Privacy", ...styles }} />
             <Stack.Screen name="About" component={AboutScreen} options={{ title: "About", ...styles }} />
             <Stack.Screen name="Support" component={SupportScreen} options={{ title: "Support", ...styles }} />
-            <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} options={{ title: "ChangePassword", ...styles }} />
             <Stack.Screen name="UserExercisesScreen" component={UserExercisesScreen} options={{ title: "UserExercisesScreen", ...styles }} />
             <Stack.Screen name="AddUserExercise" component={AddUserExerciseScreen} options={{ title: "AddUserExercise", ...styles }} />
-            <Stack.Screen name="DeleteAccount" component={DeleteAccountScreen} options={{ title: "DeleteAccount", ...styles }} />
             <Stack.Screen name="CameraScreen" component={CameraScreen} options={{ title: "CameraScreen", ...styles }} />
             <Stack.Screen name="AdjustMacros" component={AdjustMacrosScreen} options={{ title: "AdjustMacrosScreen", ...styles }} />
             <Stack.Screen name="SetMacros" component={SetMacrosScreen} options={{ title: "SetMacrosScreen", ...styles }} />

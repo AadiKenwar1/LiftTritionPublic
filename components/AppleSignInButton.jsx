@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Alert, Platform } from 'react-native';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import * as SecureStore from 'expo-secure-store';
-import { useAuth } from '../context/AuthContextFunctions';
+import { useAuth } from '../context/Auth';
 
 export default function AppleSignInButton({ onSuccess, onError, style, textStyle }) {
   const [isLoading, setIsLoading] = useState(false);

@@ -1,21 +1,21 @@
-import PopupModal from "../../components/PopupModal";
-import { useSettings } from "../../context/SettingsContext";
+import PopupModal from "../../components/PopupModal.jsx";
+import { useSettings } from "../../context/SettingsContext.js";
 import Ionicons from '@expo/vector-icons/Ionicons'; // ✅ Correct import
 import { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View, Pressable} from "react-native";
-import Fab from '../../components/Fab';
-import { useWorkoutContext } from '../../context/WorkoutContextFunctions/WorkoutContext';
-import CustomHeader from '../../components/CustomHeader';
-import LogScreen2 from "./WorkoutLogScreens/workoutsScreen"
-import NutritionScreen from './NutritionLogScreens/nutritionScreen'
+import Fab from '../../components/Fab.jsx';
+import { useWorkoutContext } from '../../context/Workouts/WorkoutContext.js';
+import CustomHeader from '../../components/CustomHeader.jsx';
+import LogScreen2 from "./workoutScreens/workoutsScreen.jsx"
+import NutritionScreen from './nutritionScreens/nutritionScreen.jsx'
 import { useNavigation } from "@react-navigation/native";
-import AddNutritionPopup from './NutritionLogScreens/AddNutritionPopup'
+import AddNutritionPopup from './nutritionScreens/addNutritionPopup.jsx'
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRoute } from "@react-navigation/native";
-import ArchivedPopup from '../../components/ArchivedPopup';
+import ArchivedPopup from '../../components/ArchivedPopup.jsx';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import SearchFoodDBPopup from './NutritionLogScreens/SearchFoodDBPopup.jsx'
-import SavedFoodsPopup from './NutritionLogScreens/SavedFoodsPopup.jsx'
+import SearchFoodDBPopup from './nutritionScreens/searchFoodDBPopup.jsx'
+import SavedFoodsPopup from './nutritionScreens/savedFoodsPopup.jsx'
 import { Fragment } from 'react';
 
 

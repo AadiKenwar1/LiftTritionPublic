@@ -8,7 +8,7 @@ import {
   FlatList,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { useWorkoutContext } from "../../../../context/WorkoutContextFunctions/WorkoutContext";
+import { useWorkoutContext } from "../../../../context/Workouts/WorkoutContext";
 import CustomHeader from "../../../../components/CustomHeader";
 import { Entypo, Ionicons } from "@expo/vector-icons";
 

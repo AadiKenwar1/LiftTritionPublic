@@ -1,6 +1,3 @@
-import { useSetting } from "../../../context/NutritionContext/NutritionContext";
-
-
 export function insightText(mode, data, selectedLift, selectedMacro){
     let insight = "";
     let deltaPercent = 0;
