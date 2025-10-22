@@ -272,7 +272,6 @@ export default function NutritionScreen({photoUri, cameraMode, barcodeData}) {
                 </View>
               </TouchableOpacity>
             </View>
-
             {/* Today's Macros Header */}
             <TouchableOpacity 
               style={styles.headerButton}
@@ -281,7 +280,9 @@ export default function NutritionScreen({photoUri, cameraMode, barcodeData}) {
             >
               <View flexDirection="row" alignItems="center" gap={2}>
                 <Text style={styles.header}>{formatDateForDisplay(selectedDate)}</Text>
+                <TouchableOpacity>
                 <Ionicons name="calendar-outline" size={23} color="#1A1A1A" />
+                </TouchableOpacity>
               </View>
               <Text>Click to change date</Text>
               
@@ -371,7 +372,7 @@ const styles = StyleSheet.create({
     paddingBottom: 0,
   },
   weightSection: {
-    marginBottom: 20,//
+    marginBottom: 30,//
   },
   sectionTitle: {
     fontSize: 20,
@@ -459,9 +460,11 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 15,
     borderBottomRightRadius: 15,
   },
+
   header: {
     textAlign: 'center',
-    fontSize: 24,
+    fontSize: 28,
+    marginTop: -2,
     fontWeight: '700',
     color: '#1A1A1A',
     letterSpacing: 0.3,

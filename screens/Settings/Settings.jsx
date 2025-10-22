@@ -45,7 +45,7 @@ export default function Settings() {
                   <Text style={styles.settingText}>Personal Details</Text>
                   <Text style={styles.settingSubtext}>Update your profile information</Text>
                 </View>
-                <MaterialCommunityIcons name="account-circle" size={28} color="#00B8A9" />
+                <MaterialCommunityIcons name="account-circle" size={28} color="black" />
               </View>
             </TouchableOpacity>
 
@@ -55,7 +55,7 @@ export default function Settings() {
                   <Text style={styles.settingText}>My Exercises</Text>
                   <Text style={styles.settingSubtext}>Manage your custom exercises</Text>
                 </View>
-                <MaterialCommunityIcons name="dumbbell" size={28} color="#00B8A9" />
+                <MaterialCommunityIcons name="dumbbell" size={28} color="black" />
               </View>
             </TouchableOpacity>
 
@@ -65,7 +65,7 @@ export default function Settings() {
                   <Text style={styles.settingText}>Nutrition Goals</Text>
                   <Text style={styles.settingSubtext}>Adjust your macro targets</Text>
                 </View>
-                <Ionicons name="nutrition" size={28} color="#00B8A9" />
+                <Ionicons name="nutrition" size={28} color="black" />
               </View>
             </TouchableOpacity>
 
@@ -75,7 +75,7 @@ export default function Settings() {
                   <Text style={styles.settingText}>Training Frequency</Text>
                   <Text style={styles.settingSubtext}>Set your workout schedule</Text>
                 </View>
-                <MaterialCommunityIcons name="calendar-clock" size={28} color="#00B8A9" />
+                <MaterialCommunityIcons name="calendar-clock" size={28} color="black" />
               </View>
             </TouchableOpacity>
 
@@ -85,7 +85,7 @@ export default function Settings() {
                   <Text style={styles.settingText}>Privacy & Security</Text>
                   <Text style={styles.settingSubtext}>Manage your data and privacy</Text>
                 </View>
-                <FontAwesome6 name="shield-halved" size={28} color="#00B8A9" />
+                <FontAwesome6 name="shield-halved" size={28} color="black" />
               </View>
             </TouchableOpacity>
 
@@ -95,7 +95,7 @@ export default function Settings() {
                   <Text style={styles.settingText}>About LiftLyzer</Text>
                   <Text style={styles.settingSubtext}>App information and version</Text>
                 </View>
-                <FontAwesome5 name="info-circle" size={28} color="#00B8A9" />
+                <FontAwesome5 name="info-circle" size={28} color="black" />
               </View>
             </TouchableOpacity>
 
@@ -105,7 +105,7 @@ export default function Settings() {
                   <Text style={styles.settingText}>Help & Support</Text>
                   <Text style={styles.settingSubtext}>Get help and contact support</Text>
                 </View>
-                <Entypo name="help-with-circle" size={28} color="#00B8A9" />
+                <Entypo name="help-with-circle" size={28} color="black" />
               </View>
             </TouchableOpacity>
 

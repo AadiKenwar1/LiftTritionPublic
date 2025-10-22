@@ -10,6 +10,7 @@ export const reorderWorkoutsRoot = async (newOrder, setWorkouts, userId) => {
     ...workout,
     order: newOrder.length - 1 - idx, // ORDER PRESERVATION: set order so top is highest
   }));
+  
   setWorkouts(updatedWorkouts);
   // HYBRID SYNC: Persist each workout's new order to the backend
   for (const workout of updatedWorkouts) {

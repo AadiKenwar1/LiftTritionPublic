@@ -9,12 +9,17 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useWorkoutContext } from "../../../../context/Workouts/WorkoutContext";
+import { useAuthContext } from "../../../../context/Auth/AuthContext";
+import { generateClient } from 'aws-amplify/api';
+import { deleteUserExercise } from "../../../../database/graphql/mutations";
 import CustomHeader from "../../../../components/CustomHeader";
 import { Entypo, Ionicons } from "@expo/vector-icons";
 
 export default function UserExercises() {
   const navigation = useNavigation();
+  const { user } = useAuthContext();
   const { setExerciseLibrary, userExercises, setUserExercises } = useWorkoutContext();
+  const client = generateClient();
 
   const handleDelete = (exerciseName) => {
     Alert.alert(
@@ -25,16 +30,34 @@ export default function UserExercises() {
         {
           text: "Delete",
           style: "destructive",
-          onPress: () => {
-            setUserExercises((prev) =>
-              prev.filter((exercise) => exercise.name !== exerciseName),
-            );
-            setExerciseLibrary((prev) => {
-              const newExercises = { ...prev };
-              delete newExercises[exerciseName];
-              return newExercises;
-            });
-            Alert.alert("Deleted", `"${exerciseName}" has been removed.`);
+          onPress: async () => {
+            try {
+              // Find the exercise to get its ID
+              const exerciseToDelete = userExercises.find(ex => ex.name === exerciseName);
+              
+              if (exerciseToDelete && exerciseToDelete.id) {
+                // Delete from database
+                await client.graphql({
+                  query: deleteUserExercise,
+                  variables: { input: { id: exerciseToDelete.id } }
+                });
+              }
+
+              // Update local state
+              setUserExercises((prev) =>
+                prev.filter((exercise) => exercise.name !== exerciseName),
+              );
+              setExerciseLibrary((prev) => {
+                const newExercises = { ...prev };
+                delete newExercises[exerciseName];
+                return newExercises;
+              });
+              
+              Alert.alert("Deleted", `"${exerciseName}" has been removed.`);
+            } catch (error) {
+              console.error("Error deleting exercise:", error);
+              Alert.alert("Error", "Failed to delete exercise. Please try again.");
+            }
           },
         },
       ],
@@ -96,7 +119,7 @@ export default function UserExercises() {
         {/* FAB Button */}
         <TouchableOpacity
           style={styles.fabButton}
-          onPress={() => navigation.navigate('AddUserExercise')}
+          onPress={() => navigation.navigate('AddExerciseScreen1')}
           activeOpacity={0.8}
         >
           <Ionicons name="add" size={40} color="#fff" />

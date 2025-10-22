@@ -1,6 +1,6 @@
 import { generateClient } from 'aws-amplify/api';
-import { getSettings, listWorkouts, listNutritions } from '../../database/graphql/queries';
-import { deleteWorkout, deleteNutrition, deleteSettings, createSettings } from '../../database/graphql/mutations';
+import { getSettings, listWorkouts, listNutritions, listUserExercises } from '../../database/graphql/queries';
+import { deleteWorkout, deleteNutrition, deleteSettings, createSettings, deleteUserExercise } from '../../database/graphql/mutations';
 
 /**
  * Checks if Apple user exists in the database
@@ -88,7 +88,7 @@ export const loadAppleUserData = async (appleUserId) => {
   try {
     const client = generateClient();
     // Load all user data in parallel
-    const [settingsResult, workoutsResult, nutritionResult] = await Promise.all([
+    const [settingsResult, workoutsResult, nutritionResult, userExercisesResult] = await Promise.all([
       client.graphql({
         query: getSettings,
         variables: { id: appleUserId }
@@ -103,6 +103,13 @@ export const loadAppleUserData = async (appleUserId) => {
       
       client.graphql({
         query: listNutritions,
+        variables: { 
+          filter: { userId: { eq: appleUserId } }
+        }
+      }),
+      
+      client.graphql({
+        query: listUserExercises,
         variables: { 
           filter: { userId: { eq: appleUserId } }
         }
@@ -129,6 +136,7 @@ export const loadAppleUserData = async (appleUserId) => {
         settings: parsedSettings,
         workouts: parsedWorkouts,
         nutrition: nutritionResult.data.listNutritions.items,
+        userExercises: userExercisesResult.data.listUserExercises.items,
       },
     };
   } catch (error) {
@@ -149,7 +157,7 @@ export const deleteAppleUserData = async (appleUserId) => {
   try {
     const client = generateClient();
     // Delete all user data in parallel
-    const [workoutsResult, nutritionResult, settingsResult] = await Promise.all([
+    const [workoutsResult, nutritionResult, userExercisesResult, settingsResult] = await Promise.all([
       // Delete workouts
       client.graphql({
         query: listWorkouts,
@@ -177,6 +185,22 @@ export const deleteAppleUserData = async (appleUserId) => {
           client.graphql({
             query: deleteNutrition,
             variables: { input: { id: nutrition.id } }
+          })
+        );
+        return Promise.all(deletePromises);
+      }),
+      
+      // Delete user exercises
+      client.graphql({
+        query: listUserExercises,
+        variables: { 
+          filter: { userId: { eq: appleUserId } }
+        }
+      }).then(async (result) => {
+        const deletePromises = result.data.listUserExercises.items.map(exercise =>
+          client.graphql({
+            query: deleteUserExercise,
+            variables: { input: { id: exercise.id } }
           })
         );
         return Promise.all(deletePromises);

@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 18,
-    color: 'black',
+    color: '#00B8A9',
     fontWeight: '600',
     textAlign: 'center',
     opacity: 0.8,

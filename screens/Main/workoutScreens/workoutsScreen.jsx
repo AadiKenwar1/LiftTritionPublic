@@ -180,7 +180,7 @@ export default function LogScreen() {
         {workouts.filter((item) => !item.archived).length > 0 && (
           <DraggableLogList
             bold={true}
-            data={workouts.filter((item) => !item.archived)}
+            data={workouts.filter((item) => !item.archived).sort((a, b) => b.order - a.order)}
             reorderWorkouts={reorderWorkouts}
             function2={goToWorkoutDetails}
             onMenuPress={openWorkoutMenu} // ✅ pass kebab menu handler

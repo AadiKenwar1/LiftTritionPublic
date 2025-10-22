@@ -18,15 +18,16 @@ import NotesModal from "../../../components/Notes";
 import { Ionicons } from "@expo/vector-icons";
 import Foundation from '@expo/vector-icons/Foundation';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useSettings } from "../../../context/SettingsContext";
 
 
 
 export default function LogDetails() {
   //Object Functions
-  const { workouts, addLogToExercise, deleteLog, addNoteToExercise, exerciseLibrary, setLatestLogExercise} =
+  const { workouts, addLogToExercise, deleteLog, addNoteToExercise, exerciseLibrary} =
     useWorkoutContext();
 
-
+  const { setLastExercise } = useSettings();
   //Gets ids of parent exercise and workout
   const route = useRoute();
   const { workoutId, exerciseId } = route.params;
@@ -59,7 +60,7 @@ export default function LogDetails() {
       fatigueFactor: fatigueFactor
     };
     addLogToExercise(workoutId, exerciseId, newLog);
-    setLatestLogExercise(exercise.name)
+    setLastExercise(exercise.name)
     setReps("");
     setWeight("");
     setRpe("");
@@ -82,8 +83,14 @@ export default function LogDetails() {
             </View>
 
             {logs[date].map((entry, index) => (
-              <View key={entry.id || index} style={styles.logItem}>
-                <Text style={styles.logText}>
+              <View key={entry.id || index} style={[
+                styles.logItem,
+                entry.synced === false && styles.logItemUnsynced
+              ]}>
+                <Text style={[
+                  styles.logText,
+                  entry.synced === false && styles.logTextUnsynced
+                ]}>
                   {entry.weight} lbs x {entry.reps} reps{" "}
                   {!entry.defaultRir && entry.rpe !== undefined
                     ? "x RPE: " + entry.rpe
@@ -233,11 +240,19 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
+  logItemUnsynced: {
+    backgroundColor: "#9CA3AF", // Grey color for unsynced
+    borderColor: "#6B7280", // Darker grey border
+    shadowColor: "#9CA3AF",
+  },
   logText: {
     fontSize: 16,
     color: "white",
     fontWeight: "500",
     flex: 1,
+  },
+  logTextUnsynced: {
+    color: "#F3F4F6", // Light grey text for unsynced
   },
   inputGroup: {
     flexDirection: "row",

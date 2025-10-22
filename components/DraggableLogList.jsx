@@ -30,7 +30,7 @@ export default function DraggableLogList(props) {
           <View style={{ marginBottom: 12, paddingHorizontal: 20 }}>
             <Log
               bold={props.bold}
-              currItem={item.name ? item.name : item}
+              currItem={item}
               isActive={isActive}
               archived={item.archived}
               function={() => props.function2(item)}

@@ -44,6 +44,10 @@ import AboutScreen from "./settings/SettingsOptions/about";
 import SupportScreen from "./settings/SettingsOptions/support";
 import UserExercisesScreen from "./settings/SettingsOptions/userExercises/userExercises";
 import AddUserExerciseScreen from "./settings/SettingsOptions/userExercises/addUserExercise";
+import AddExerciseScreen1 from "./settings/SettingsOptions/userExercises/AddExerciseScreen1";
+import AddExerciseScreen2 from "./settings/SettingsOptions/userExercises/AddExerciseScreen2";
+import AddExerciseScreen3 from "./settings/SettingsOptions/userExercises/AddExerciseScreen3";
+import AddExerciseScreen4 from "./settings/SettingsOptions/userExercises/AddExerciseScreen4";
 import CameraScreen from "./camera";
 import AdjustMacrosScreen from "./settings/SettingsOptions/adjustMacros/adjustMacros";
 import SetMacrosScreen from "./settings/SettingsOptions/adjustMacros/setMacros";
@@ -159,6 +163,10 @@ function AuthenticatedApp() {
             <Stack.Screen name="Support" component={SupportScreen} options={{ title: "Support", ...styles }} />
             <Stack.Screen name="UserExercisesScreen" component={UserExercisesScreen} options={{ title: "UserExercisesScreen", ...styles }} />
             <Stack.Screen name="AddUserExercise" component={AddUserExerciseScreen} options={{ title: "AddUserExercise", ...styles }} />
+            <Stack.Screen name="AddExerciseScreen1" component={AddExerciseScreen1} options={{ title: "Add Exercise", ...styles }} />
+            <Stack.Screen name="AddExerciseScreen2" component={AddExerciseScreen2} options={{ title: "Add Exercise", ...styles }} />
+            <Stack.Screen name="AddExerciseScreen3" component={AddExerciseScreen3} options={{ title: "Add Exercise", ...styles }} />
+            <Stack.Screen name="AddExerciseScreen4" component={AddExerciseScreen4} options={{ title: "Add Exercise", ...styles }} />
             <Stack.Screen name="CameraScreen" component={CameraScreen} options={{ title: "CameraScreen", ...styles }} />
             <Stack.Screen name="AdjustMacros" component={AdjustMacrosScreen} options={{ title: "AdjustMacrosScreen", ...styles }} />
             <Stack.Screen name="SetMacros" component={SetMacrosScreen} options={{ title: "SetMacrosScreen", ...styles }} />

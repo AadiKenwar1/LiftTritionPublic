@@ -24,13 +24,13 @@ const { width: screenWidth } = Dimensions.get('window');
 
 
 export default function LogLineChart(props) {
-  const {mode, bodyWeight, goalWeight, unit} = useSettings()
+  const {mode, bodyWeight, goalWeight, unit, lastExercise} = useSettings()
   const styles = getStyles(mode)
 
   const {getLiftLogs, formatForChart, workouts} = useWorkoutContext()
   const {getMacroForLast30Days, nutritionData} = useNutritionContext()
 
-  const [selectedLift, setSelectedLift] = useState("Barbell Bench Press")
+  const [selectedLift, setSelectedLift] = useState(lastExercise || "Barbell Bench Press")
   const [selectedMacro, setSelectedMacro] = useState("Protein")
 
 
@@ -40,7 +40,7 @@ export default function LogLineChart(props) {
   const [logData, setLogData] = useState([]);
   useEffect(() => {
       setLogData(getLiftLogs(selectedLift));
-    }, [selectedLift, workouts]);
+    }, [selectedLift, workouts, lastExercise]);
 
   const dependency = mode === true? logData : [nutritionData]
   const chartData = useMemo(() => {

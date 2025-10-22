@@ -14,6 +14,7 @@ export const createWorkout = /* GraphQL */ `
       order
       archived
       note
+      synced
       createdAt
       updatedAt
       __typename
@@ -33,6 +34,7 @@ export const updateWorkout = /* GraphQL */ `
       order
       archived
       note
+      synced
       createdAt
       updatedAt
       __typename
@@ -52,6 +54,7 @@ export const deleteWorkout = /* GraphQL */ `
       order
       archived
       note
+      synced
       createdAt
       updatedAt
       __typename
@@ -136,6 +139,7 @@ export const createNutrition = /* GraphQL */ `
       isPhoto
       ingredients
       saved
+      synced
       createdAt
       updatedAt
       __typename
@@ -160,6 +164,7 @@ export const updateNutrition = /* GraphQL */ `
       isPhoto
       ingredients
       saved
+      synced
       createdAt
       updatedAt
       __typename
@@ -184,6 +189,7 @@ export const deleteNutrition = /* GraphQL */ `
       isPhoto
       ingredients
       saved
+      synced
       createdAt
       updatedAt
       __typename
@@ -214,6 +220,7 @@ export const createSettings = /* GraphQL */ `
       carbsGoal
       fatsGoal
       onboardingCompleted
+      lastExercise
       createdAt
       updatedAt
       __typename
@@ -244,6 +251,7 @@ export const updateSettings = /* GraphQL */ `
       carbsGoal
       fatsGoal
       onboardingCompleted
+      lastExercise
       createdAt
       updatedAt
       __typename
@@ -274,6 +282,7 @@ export const deleteSettings = /* GraphQL */ `
       carbsGoal
       fatsGoal
       onboardingCompleted
+      lastExercise
       createdAt
       updatedAt
       __typename

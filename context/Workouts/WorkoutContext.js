@@ -63,7 +63,6 @@ export function WorkoutProvider({ children }) {
     const [exerciseLibrary, setExerciseLibrary] = useState(exerciseList);
     const [userExercises, setUserExercises] = useState(userExercisesData);
     const [logsByDateObj, setLogsByDateObj] = useState({});
-    const [latestLogExercise, setLatestLogExercise] = useState("");
     const [loading, setLoading] = useState(true);
 
 
@@ -135,13 +134,7 @@ export function WorkoutProvider({ children }) {
     const addExerciseToWorkout = (workoutId, newExercise) =>
         addExerciseToWorkoutRoot(workoutId, newExercise, workouts, setWorkouts, user?.userId);
     const addLogToExercise = (workoutId, exerciseId, newLog) =>
-        addLogToExerciseRoot(
-            workoutId,
-            exerciseId,
-            newLog,
-            workouts,
-            setWorkouts
-        );
+        addLogToExerciseRoot(workoutId, exerciseId, newLog, workouts, setWorkouts, user?.userId);
 
     //Archive Functions
     const archiveWorkout = (id) => archiveWorkoutRoot(id, workouts, setWorkouts, user?.userId);
@@ -177,9 +170,9 @@ export function WorkoutProvider({ children }) {
 
     //Reorder Functions
     const reorderWorkouts = (newOrder) =>
-        reorderWorkoutsRoot(newOrder, setWorkouts);
+        reorderWorkoutsRoot(newOrder, setWorkouts, user?.userId);
     const reorderExercises = (workoutId, newExerciseOrder) =>
-        reorderExercisesRoot(workoutId, newExerciseOrder, setWorkouts);
+        reorderExercisesRoot(workoutId, newExerciseOrder, workouts, setWorkouts, user?.userId);
 
     //Notes functions
     const addNoteToWorkout = (wid, note) =>
@@ -243,17 +236,16 @@ export function WorkoutProvider({ children }) {
         setWorkouts([]);
         setUserExercises([]);
         setLogsByDateObj({});
-        setLatestLogExercise("");
     }
 
     
-    // Update local state when AuthContext user changes
+    // Update local state when AuthContext user changes (only on initial load)
     useEffect(() => {
-        if (user?.workouts) {
+        if (user?.workouts && workouts.length === 0) {
             setWorkouts(user.workouts);
             setLoading(false);
         }
-        if (user?.userExercises) {
+        if (user?.userExercises && userExercises.length === 0) {
             setUserExercises(user.userExercises);
         }
     }, [user?.workouts, user?.userExercises]);
@@ -293,8 +285,6 @@ export function WorkoutProvider({ children }) {
                 volumeChart,
                 fatigueChart,
                 setChart,
-                latestLogExercise,
-                setLatestLogExercise,
                 resetWorkoutContext,
                 loading,
             }}

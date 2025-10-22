@@ -12,8 +12,10 @@ export async function renameWorkoutRoot(workoutId, newName, workouts, setWorkout
     userId,
     name: updatedWorkout.name,
     exercises: JSON.stringify(updatedWorkout.exercises),
+    order: updatedWorkout.order,
     archived: updatedWorkout.archived,
     note: updatedWorkout.note,
+    synced: updatedWorkout.synced,
     createdAt: updatedWorkout.createdAt,
     updatedAt: new Date().toISOString(),
   };

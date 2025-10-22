@@ -56,6 +56,9 @@ export const SettingsProvider = ({ children }) => {
     const [goalWeight, setGoalWeight] = useState(settings.goalWeight ?? settings.bodyWeight ?? 150);
     const [goalPace, setGoalPace] = useState(settings.goalPace ?? 1.0);
 
+    const [lastExercise, setLastExercise] = useState("");
+
+
     /**
      * CENTRALIZED WEIGHT UPDATE FUNCTION
      * Updates both bodyWeight and weightProgress with new weight entry
@@ -372,7 +375,9 @@ export const SettingsProvider = ({ children }) => {
                 setGoalPace,
                 updateWeight,
                 formatWeightChart,
-                resetSettings
+                resetSettings,
+                lastExercise,
+                setLastExercise,
             }}
         >
             {children}

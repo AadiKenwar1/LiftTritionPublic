@@ -14,6 +14,7 @@ type Workout @model {
   order: Int!           # Added for explicit workout ordering
   archived: Boolean
   note: String
+  synced: Boolean
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
@@ -71,6 +72,7 @@ type Settings @model {
   carbsGoal: Int
   fatsGoal: Int
   onboardingCompleted: Boolean
+  lastExercise: String
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
