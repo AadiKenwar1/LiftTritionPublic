@@ -51,6 +51,7 @@ import {
   getUserExerciseByName,
 } from './Functions/userExerciseFunctions';
 
+
 const client = generateClient();
 const WorkoutContext = createContext();
 
@@ -103,32 +104,47 @@ export function WorkoutProvider({ children }) {
     setLogsByExercise(newLogsByExercise);
   }, [exercises, logs]);
 
-  // Load V2 data from AuthContext user object (following Settings/Nutrition pattern)
+
+  // Load workout data from AuthContext user object (following Settings/Nutrition pattern)
   useEffect(() => {
-    if (user?.workoutsV2 && user?.exercises && user?.exerciseLogs) {
-      console.log('🔄 Loading V2 data from AuthContext user object');
-      console.log('📊 V2 data counts:', {
-        workouts: user.workoutsV2.length,
+    if (user?.workouts && user?.exercises && user?.exerciseLogs) {
+      console.log('🔄 Loading workout data from AuthContext user object');
+      console.log('📊 Workout data counts:', {
+        workouts: user.workouts.length,
         exercises: user.exercises.length,
         logs: user.exerciseLogs.length,
         userExercises: user.userExercises?.length || 0
       });
       
-      setWorkouts(user.workoutsV2 || []);
+      setWorkouts(user.workouts || []);
       setExercises(user.exercises || []);
       setLogs(user.exerciseLogs || []);
       setUserExercises(user.userExercises || []);
       setLoading(false);
     } else if (user?.userId) {
-      // User exists but no V2 data yet
-      console.log('📝 User exists but no V2 data found yet');
+      // User exists but no workout data yet
+      console.log('📝 User exists but no workout data found yet');
       setWorkouts([]);
       setExercises([]);
       setLogs([]);
       setUserExercises([]);
       setLoading(false);
     }
-  }, [user?.workoutsV2, user?.exercises, user?.exerciseLogs, user?.userId]);
+  }, [user?.workouts, user?.exercises, user?.exerciseLogs, user?.userId]);
+
+  // Merge userExercises into exerciseLibrary when userExercises changes
+  useEffect(() => {
+    if (userExercises.length > 0) {
+      console.log('🔄 Merging user exercises into exercise library');
+      setExerciseLibrary(prev => {
+        const updatedLibrary = { ...prev };
+        userExercises.forEach(userExercise => {
+          updatedLibrary[userExercise.name] = userExercise;
+        });
+        return updatedLibrary;
+      });
+    }
+  }, [userExercises]);
 
   // Workout Functions
   const handleAddWorkout = (name) => {
@@ -220,7 +236,9 @@ export function WorkoutProvider({ children }) {
 
   // Helper functions for getting related data
   const getExercisesForWorkout = (workoutId) => {
-    return exercises.filter(exercise => exercise.workoutId === workoutId);
+    return exercises
+      .filter(exercise => exercise.workoutId === workoutId)
+      .sort((a, b) => (b.order || 0) - (a.order || 0)); // Higher order first
   };
 
   const getLogsForExercise = (exerciseId) => {

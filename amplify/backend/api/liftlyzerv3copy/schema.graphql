@@ -7,40 +7,10 @@ input AMPLIFY { globalAuthRule: AuthRule = { allow: public } } # FOR TESTING ONL
 # ============================================================================
 
 # ============================================================================
-# V1 NESTED STRUCTURE (DEPRECATED - KEEP FOR MIGRATION)
+# WORKOUT MODELS (V2 FLAT STRUCTURE - PERFORMANCE OPTIMIZED)
 # ============================================================================
 
 type Workout @model {
-  id: ID!
-  userId: ID!           # Added for per-user data isolation
-  name: String!
-  exercises: AWSJSON! # Array of exercise objects stored as JSON
-  order: Int!           # Added for explicit workout ordering
-  archived: Boolean
-  note: String
-  synced: Boolean
-  createdAt: AWSDateTime!
-  updatedAt: AWSDateTime!
-}
-
-type UserExercise @model {
-  id: ID!
-  userId: ID!           # Added for per-user data isolation
-  name: String!
-  isCompound: Boolean!
-  fatigueFactor: Float!
-  userMax: Float
-  mainMuscle: String!
-  accessoryMuscles: [String]
-  createdAt: AWSDateTime!
-  updatedAt: AWSDateTime!
-}
-
-# ============================================================================
-# V2 FLAT STRUCTURE (NEW - PERFORMANCE OPTIMIZED)
-# ============================================================================
-
-type WorkoutV2 @model {
   id: ID!
   userId: ID!
   name: String!
@@ -76,6 +46,19 @@ type ExerciseLog @model {
   reps: Int!
   rpe: Float!
   synced: Boolean
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type UserExercise @model {
+  id: ID!
+  userId: ID!
+  name: String!
+  isCompound: Boolean!
+  fatigueFactor: Float!
+  userMax: Float
+  mainMuscle: String!
+  accessoryMuscles: [String]
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }

@@ -1,5 +1,5 @@
 import { generateClient } from 'aws-amplify/api';
-import { getSettings, listWorkouts, listNutritions, listUserExercises, listWorkoutV2s, listExercises, listExerciseLogs } from '../../database/graphql/queries';
+import { getSettings, listNutritions, listUserExercises, listWorkouts, listExercises, listExerciseLogs } from '../../database/graphql/queries';
 import { deleteWorkout, deleteNutrition, deleteSettings, createSettings, deleteUserExercise } from '../../database/graphql/mutations';
 
 /**
@@ -88,17 +88,10 @@ export const loadAppleUserData = async (appleUserId) => {
   try {
     const client = generateClient();
         // Load all user data in parallel
-        const [settingsResult, workoutsResult, nutritionResult, userExercisesResult, workoutsV2Result, exercisesResult, exerciseLogsResult] = await Promise.all([
+        const [settingsResult, nutritionResult, userExercisesResult, workoutsResult, exercisesResult, exerciseLogsResult] = await Promise.all([
           client.graphql({
             query: getSettings,
             variables: { id: appleUserId }
-          }),
-          
-          client.graphql({
-            query: listWorkouts,
-            variables: { 
-              filter: { userId: { eq: appleUserId } }
-            }
           }),
           
           client.graphql({
@@ -115,9 +108,8 @@ export const loadAppleUserData = async (appleUserId) => {
             }
           }),
           
-          // V2 Data
           client.graphql({
-            query: listWorkoutV2s,
+            query: listWorkouts,
             variables: { 
               filter: { userId: { eq: appleUserId } }
             }
@@ -138,13 +130,6 @@ export const loadAppleUserData = async (appleUserId) => {
           })
         ]);
     
-    // Parse JSON fields in workout data
-    const parsedWorkouts = workoutsResult.data.listWorkouts.items.map(workout => ({
-      ...workout,
-      exercises: workout.exercises ? JSON.parse(workout.exercises) : [],
-      note: workout.note || "",
-    }));
-
     // Parse JSON fields in settings data
     const parsedSettings = settingsResult.data.getSettings ? {
       ...settingsResult.data.getSettings,
@@ -152,17 +137,38 @@ export const loadAppleUserData = async (appleUserId) => {
         JSON.parse(settingsResult.data.getSettings.weightProgress) : [],
     } : null;
 
+    // Add synced: true to all nutrition items from database
+    const nutritionWithSyncStatus = nutritionResult.data.listNutritions.items.map(item => ({
+      ...item,
+      synced: true
+    }));
+
+    // Add synced: true to all workout data from database
+    const workoutsWithSyncStatus = (workoutsResult.data.listWorkouts.items || []).map(item => ({
+      ...item,
+      synced: true
+    }));
+
+    const exercisesWithSyncStatus = (exercisesResult.data.listExercises.items || []).map(item => ({
+      ...item,
+      synced: true
+    }));
+
+    const exerciseLogsWithSyncStatus = (exerciseLogsResult.data.listExerciseLogs.items || []).map(item => ({
+      ...item,
+      synced: true
+    }));
+
     return {
       success: true,
       data: {
         settings: parsedSettings,
-        workouts: parsedWorkouts,
-        nutrition: nutritionResult.data.listNutritions.items,
+        nutrition: nutritionWithSyncStatus,
         userExercises: userExercisesResult.data.listUserExercises.items,
-        // V2 Data
-        workoutsV2: workoutsV2Result.data.listWorkoutV2s.items || [],
-        exercises: exercisesResult.data.listExercises.items || [],
-        exerciseLogs: exerciseLogsResult.data.listExerciseLogs.items || [],
+        // Workout data (V2 flat structure) with sync status
+        workouts: workoutsWithSyncStatus,
+        exercises: exercisesWithSyncStatus,
+        exerciseLogs: exerciseLogsWithSyncStatus,
       },
     };
   } catch (error) {

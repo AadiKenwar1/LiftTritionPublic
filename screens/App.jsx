@@ -14,8 +14,7 @@ import "../context/Auth/amplifyConfig";
 // Context Providers
 import { AuthProvider, useAuthContext } from "../context/Auth/AuthContext";
 import { SettingsProvider, useSettings } from "../context/SettingsContext";
-import { WorkoutProvider, useWorkoutContext } from "../context/Workouts/WorkoutContext";
-import { WorkoutProvider as WorkoutProviderV2 } from "../context/WorkoutsV2/WorkoutContext";
+import { WorkoutProvider, useWorkoutContext } from "../context/WorkoutsV2/WorkoutContext";
 import { NutritionProvider, useNutritionContext } from "../context/Nutrition/NutritionContext";
 
 // Screens
@@ -201,13 +200,11 @@ function AppContent() {
     <AuthProvider>
       <SettingsProvider>
         <WorkoutProvider>
-          <WorkoutProviderV2>
-            <NutritionProvider>
-              <GestureHandlerRootView style={{ flex: 1 }}>
-                <AuthenticatedApp />
-              </GestureHandlerRootView>
-            </NutritionProvider>
-          </WorkoutProviderV2>
+          <NutritionProvider>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+              <AuthenticatedApp />
+            </GestureHandlerRootView>
+          </NutritionProvider>
         </WorkoutProvider>
       </SettingsProvider>
     </AuthProvider>

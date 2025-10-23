@@ -11,14 +11,14 @@ import {
   Platform,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { useWorkoutContext as useWorkoutContextV2 } from "../../../../context/WorkoutsV2/WorkoutContext";
+import { useWorkoutContext } from "../../../../context/WorkoutsV2/WorkoutContext";
 import CustomHeader from "../../../../components/CustomHeader";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function AddUserExercise() {
   const navigation = useNavigation();
-  const { setExerciseLibrary, userExercises, setUserExercises, exerciseLibrary, addUserExercise: addUserExerciseV2 } =
-    useWorkoutContextV2();
+  const { setExerciseLibrary, userExercises, setUserExercises, exerciseLibrary, addUserExercise } =
+    useWorkoutContext();
 
   const allMuscles = [
     "Upper Chest", "Lower Chest", "Front Deltoid", "Side Deltoid", "Rear Deltoid",
@@ -81,7 +81,7 @@ export default function AddUserExercise() {
     return Math.min(1.1, Math.max(0.5, parseFloat(fatigue.toFixed(2))));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const trimmedName = name.trim();
     if (!trimmedName) {
       Alert.alert("Missing Info", "Please enter an exercise name.");

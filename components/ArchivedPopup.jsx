@@ -10,7 +10,7 @@ import {
 import DraggableFlatList from "react-native-draggable-flatlist";
 import Log from "./Log";
 import { useState } from "react";
-import { useWorkoutContext } from "../context/Workouts/WorkoutContext";
+import { useWorkoutContext } from "../context/WorkoutsV2/WorkoutContext";
 import { Alert } from "react-native";
 
 

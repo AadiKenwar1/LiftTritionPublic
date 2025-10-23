@@ -8,7 +8,7 @@ import {
   FlatList,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { useWorkoutContext as useWorkoutContextV2 } from "../../../../context/WorkoutsV2/WorkoutContext";
+import { useWorkoutContext } from "../../../../context/WorkoutsV2/WorkoutContext";
 import { useAuthContext } from "../../../../context/Auth/AuthContext";
 import { generateClient } from 'aws-amplify/api';
 import { deleteUserExercise } from "../../../../database/graphql/mutations";
@@ -18,7 +18,7 @@ import { Entypo, Ionicons } from "@expo/vector-icons";
 export default function UserExercises() {
   const navigation = useNavigation();
   const { user } = useAuthContext();
-  const { setExerciseLibrary, userExercises, setUserExercises, deleteUserExercise: deleteUserExerciseV2 } = useWorkoutContextV2();
+  const { setExerciseLibrary, userExercises, setUserExercises, deleteUserExercise } = useWorkoutContext();
   const client = generateClient();
 
   const handleDelete = (exerciseName) => {

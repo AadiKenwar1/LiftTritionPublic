@@ -13,21 +13,34 @@ const client = generateClient();
  * @returns {Promise} - Promise that resolves when exercise is added
  */
 export async function addExercise(workoutId, exerciseName, userId, setExercises) {
+  // Get current exercises to determine the highest order for this workout
+  let currentExercises = [];
+  setExercises(prev => {
+    currentExercises = prev;
+    return prev;
+  });
+
+  // Find the highest order value among exercises for this specific workout
+  const workoutExercises = currentExercises.filter(ex => ex.workoutId === workoutId);
+  const maxOrder = workoutExercises.length > 0 
+    ? Math.max(...workoutExercises.map(ex => ex.order || 0))
+    : -1;
+
   const newExercise = {
     id: uuid.v4(),
     workoutId,
     userId,
     name: exerciseName,
     userMax: 0,
-    order: 0, // Will be updated by reorder function
+    order: maxOrder + 1, // New exercise gets highest order (appears first)
     archived: false,
     note: "",
-    synced: true, // Mark as synced when saving to database
+    synced: false, // Mark as unsynced initially
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
 
-  // Optimistic update - mark as unsynced initially
+  // Optimistic update - add new exercise at the beginning and mark as unsynced
   setExercises(prev => [{ ...newExercise, synced: false }, ...prev]);
 
   try {

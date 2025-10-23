@@ -87,9 +87,9 @@ export function NutritionProvider({ children }) {
           user && user.userId
             ? crud.addNutrition(nutritionData, setNutritionData, user.userId, name, protein, carbs, fats, calories, isPhoto, ingredients)
             : null,
-        deleteNutrition: (id) => (user && user.userId ? crud.deleteNutrition(setNutritionData, id, user.userId) : null),
-        editNutrition: (id, name, protein, carbs, fats, calories, saved) => (user && user.userId ? crud.editNutrition(setNutritionData, id, name, protein, carbs, fats, calories, user.userId, saved) : null),
-        updateIngredientsAndMacros: (id, ingredients, totalMacros) => (user && user.userId ? crud.updateIngredientsAndMacros(setNutritionData, id, ingredients, totalMacros, user.userId) : null),
+        deleteNutrition: (id) => (user && user.userId ? crud.deleteNutrition(nutritionData, setNutritionData, id, user.userId) : null),
+        editNutrition: (id, name, protein, carbs, fats, calories, saved) => (user && user.userId ? crud.editNutrition(nutritionData, setNutritionData, id, name, protein, carbs, fats, calories, user.userId, saved) : null),
+        updateIngredientsAndMacros: (id, ingredients, totalMacros) => (user && user.userId ? crud.updateIngredientsAndMacros(nutritionData, setNutritionData, id, ingredients, totalMacros, user.userId) : null),
         getTodaysMacro,
         getMacroForDate,
         getTodaysLogs,

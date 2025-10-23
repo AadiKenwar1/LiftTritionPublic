@@ -1,5 +1,5 @@
 import { getLocalDateKey } from '../../../utils/date';
-import { estimate1RM } from './OneRepMax';
+import { estimate1RM } from './oneRepMax';
 
 /**
  * Calculate fatigue percentage for the last X days using V2 flat structure

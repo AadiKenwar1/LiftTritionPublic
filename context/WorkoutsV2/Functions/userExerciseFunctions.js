@@ -1,7 +1,7 @@
 import { generateClient } from 'aws-amplify/api';
 import { 
   createUserExercise, 
-  updateUserExercise, 
+  updateUserExercise as updateUserExerciseMutation, 
   deleteUserExercise as deleteUserExerciseMutation 
 } from '../../../database/graphql/mutations';
 import uuid from 'react-native-uuid';
@@ -118,7 +118,7 @@ export async function updateUserExercise(exerciseId, updateData, setUserExercise
 
   try {
     await client.graphql({
-      query: updateUserExercise,
+      query: updateUserExerciseMutation,
       variables: {
         input: {
           id: exerciseId,

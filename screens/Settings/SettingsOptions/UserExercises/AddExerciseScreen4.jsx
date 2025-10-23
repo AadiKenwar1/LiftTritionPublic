@@ -9,7 +9,7 @@ import {
   Alert,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { useWorkoutContext } from "../../../../context/Workouts/WorkoutContext";
+import { useWorkoutContext } from "../../../../context/WorkoutsV2/WorkoutContext";
 import { useAuthContext } from "../../../../context/Auth/AuthContext";
 import { generateClient } from 'aws-amplify/api';
 import { createUserExercise } from "../../../../database/graphql/mutations";

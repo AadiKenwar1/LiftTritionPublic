@@ -11,8 +11,7 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
-import { useWorkoutContext } from "../../../context/Workouts/WorkoutContext";
-import { useWorkoutContext as useWorkoutContextV2 } from "../../../context/WorkoutsV2/WorkoutContext";
+import { useWorkoutContext } from "../../../context/WorkoutsV2/WorkoutContext";
 import { Entypo } from "@expo/vector-icons"; // Add this line
 import CustomHeader from "../../../components/CustomHeader";
 import NotesModal from "../../../components/Notes";
@@ -43,8 +42,8 @@ export default function LogDetails() {
     getLogsForExercise,
     addNoteToExercise,
     exerciseLibrary,
-    loading: loadingV2
-  } = useWorkoutContextV2();
+    loading
+  } = useWorkoutContext();
 
   const { setLastExercise } = useSettings();
   //Gets ids of parent exercise and workout

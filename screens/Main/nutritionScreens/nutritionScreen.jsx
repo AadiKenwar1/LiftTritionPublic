@@ -111,7 +111,13 @@ export default function NutritionScreen({photoUri, cameraMode, barcodeData}) {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: () => deleteNutrition(item.id),
+          onPress: async () => {
+            try {
+              await deleteNutrition(item.id);
+            } catch (error) {
+              Alert.alert("Error", "Failed to delete nutrition entry. Please try again.");
+            }
+          },
         },
       ]
     );
@@ -140,18 +146,22 @@ export default function NutritionScreen({photoUri, cameraMode, barcodeData}) {
     setShowEditModal(true);
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (editingItem) {
-      editNutrition(
-        editingItem.id,
-        editName,
-        parseInt(editProtein) || 0,
-        parseInt(editCarbs) || 0,
-        parseInt(editFats) || 0,
-        parseInt(editCalories) || 0
-      );
-      setShowEditModal(false);
-      setEditingItem(null);
+      try {
+        await editNutrition(
+          editingItem.id,
+          editName,
+          parseInt(editProtein) || 0,
+          parseInt(editCarbs) || 0,
+          parseInt(editFats) || 0,
+          parseInt(editCalories) || 0
+        );
+        setShowEditModal(false);
+        setEditingItem(null);
+      } catch (error) {
+        Alert.alert("Error", "Failed to update nutrition entry. Please try again.");
+      }
     }
   };
 
@@ -174,28 +184,43 @@ export default function NutritionScreen({photoUri, cameraMode, barcodeData}) {
 
 
   function renderItem({item}){
+    const isUnsynced = item?.synced === false;
+    
     return(
-      <View style={styles.itemContainer}>
+      <View style={[
+        styles.itemContainer, 
+        isUnsynced && styles.itemContainerUnsynced
+      ]}>
         <View style={styles.itemHeader}>
           <Text style={styles.name}>{item.name}</Text>
           <View style={styles.headerRight}>
             <View style={styles.caloriesBadge}>
               <Text style={styles.caloriesText}>{item.calories} cal</Text>
             </View>
+            {/* Sync Status Indicator */}
+            {isUnsynced && (
+              <View style={styles.syncStatusIndicator}>
+                <Ionicons name="time-outline" size={16} color="#FFA500" />
+              </View>
+            )}
             <View style={styles.actionButtons}>
               <TouchableOpacity 
                 style={styles.bookmarkButton}
-                onPress={() => {
-                  const newSaved = !item.saved;
-                  editNutrition(
-                    item.id,
-                    item.name,
-                    item.protein,
-                    item.carbs,
-                    item.fats,
-                    item.calories,
-                    newSaved // Pass the new saved value
-                  );
+                onPress={async () => {
+                  try {
+                    const newSaved = !item.saved;
+                    await editNutrition(
+                      item.id,
+                      item.name,
+                      item.protein,
+                      item.carbs,
+                      item.fats,
+                      item.calories,
+                      newSaved // Pass the new saved value
+                    );
+                  } catch (error) {
+                    Alert.alert("Error", "Failed to update bookmark status. Please try again.");
+                  }
                 }}
               >
                 <Ionicons 
@@ -339,7 +364,13 @@ export default function NutritionScreen({photoUri, cameraMode, barcodeData}) {
         visible={showIngredientsModal}
         onClose={() => setShowIngredientsModal(false)}
         ingredients={viewingIngredientsItem?.ingredients || []}
-        onSave={updateIngredientsAndMacros}
+        onSave={async (id, ingredients, totalMacros) => {
+          try {
+            await updateIngredientsAndMacros(id, ingredients, totalMacros);
+          } catch (error) {
+            Alert.alert("Error", "Failed to update ingredients and macros. Please try again.");
+          }
+        }}
         itemId={viewingIngredientsItem?.id}
         currentMacros={{
           protein: viewingIngredientsItem?.protein || 0,
@@ -509,6 +540,12 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderBottomLeftRadius: 24,
   },
+  itemContainerUnsynced: {
+    backgroundColor: '#9CA3AF', // Grey color for unsynced
+    borderColor: '#6B7280', // Darker grey border
+    borderLeftColor: '#6B7280', // Darker grey left border
+    shadowColor: '#9CA3AF',
+  },
   itemHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -639,5 +676,10 @@ const styles = StyleSheet.create({
   bookmarkButton: {
     padding: 4,
     borderRadius: 8,
+  },
+  syncStatusIndicator: {
+    padding: 4,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
   },
 });

@@ -32,7 +32,7 @@ export default function WelcomeScreen() {
 
 
         <TouchableOpacity 
-          style={[styles.getStartedButton, { backgroundColor: '#000000' }, loading && styles.buttonDisabled]} 
+          style={[styles.getStartedButton, { backgroundColor: '#00B8A9' }, loading && styles.buttonDisabled]} 
           onPress={signInWithApple}
           disabled={loading}
         >

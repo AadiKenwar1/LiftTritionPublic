@@ -7,7 +7,6 @@ export const getWorkout = /* GraphQL */ `
       id
       userId
       name
-      exercises
       order
       archived
       note
@@ -25,89 +24,6 @@ export const listWorkouts = /* GraphQL */ `
     $nextToken: String
   ) {
     listWorkouts(filter: $filter, limit: $limit, nextToken: $nextToken) {
-      items {
-        id
-        userId
-        name
-        exercises
-        order
-        archived
-        note
-        synced
-        createdAt
-        updatedAt
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
-export const getUserExercise = /* GraphQL */ `
-  query GetUserExercise($id: ID!) {
-    getUserExercise(id: $id) {
-      id
-      userId
-      name
-      isCompound
-      fatigueFactor
-      userMax
-      mainMuscle
-      accessoryMuscles
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const listUserExercises = /* GraphQL */ `
-  query ListUserExercises(
-    $filter: ModelUserExerciseFilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    listUserExercises(filter: $filter, limit: $limit, nextToken: $nextToken) {
-      items {
-        id
-        userId
-        name
-        isCompound
-        fatigueFactor
-        userMax
-        mainMuscle
-        accessoryMuscles
-        createdAt
-        updatedAt
-        __typename
-      }
-      nextToken
-      __typename
-    }
-  }
-`;
-export const getWorkoutV2 = /* GraphQL */ `
-  query GetWorkoutV2($id: ID!) {
-    getWorkoutV2(id: $id) {
-      id
-      userId
-      name
-      order
-      archived
-      note
-      synced
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const listWorkoutV2s = /* GraphQL */ `
-  query ListWorkoutV2s(
-    $filter: ModelWorkoutV2FilterInput
-    $limit: Int
-    $nextToken: String
-  ) {
-    listWorkoutV2s(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
         userId
@@ -204,6 +120,48 @@ export const listExerciseLogs = /* GraphQL */ `
         reps
         rpe
         synced
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const getUserExercise = /* GraphQL */ `
+  query GetUserExercise($id: ID!) {
+    getUserExercise(id: $id) {
+      id
+      userId
+      name
+      isCompound
+      fatigueFactor
+      userMax
+      mainMuscle
+      accessoryMuscles
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const listUserExercises = /* GraphQL */ `
+  query ListUserExercises(
+    $filter: ModelUserExerciseFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listUserExercises(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        userId
+        name
+        isCompound
+        fatigueFactor
+        userMax
+        mainMuscle
+        accessoryMuscles
         createdAt
         updatedAt
         __typename

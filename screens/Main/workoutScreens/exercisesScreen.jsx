@@ -9,8 +9,7 @@ import {
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import uuid from "react-native-uuid";
-import { useWorkoutContext } from "../../../context/Workouts/WorkoutContext";
-import { useWorkoutContext as useWorkoutContextV2 } from "../../../context/WorkoutsV2/WorkoutContext";
+import { useWorkoutContext } from "../../../context/WorkoutsV2/WorkoutContext";
 import DraggableLogList from "../../../components/DraggableLogList";
 import { useNavigation } from "@react-navigation/native";
 import ExerciseSelector from "../../../components/ExerciseSelector";
@@ -45,8 +44,8 @@ export default function WorkoutDetails() {
     getExercisesForWorkout,
     addNoteToWorkout,
     exerciseLibrary,
-    loading: loadingV2
-  } = useWorkoutContextV2();
+    loading
+  } = useWorkoutContext();
 
 
   //Gets the workout exercise is contained in

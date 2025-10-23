@@ -6,8 +6,7 @@ import { TouchableOpacity, Dimensions} from "react-native";
 import InfoModal from "../../InfoModal";
 import PopupModal from "../../PopupModal";
 import ExerciseSelector from "../../ExerciseSelector";
-import { useWorkoutContext } from "../../../context/Workouts/WorkoutContext";
-import { useWorkoutContext as useWorkoutContextV2 } from "../../../context/WorkoutsV2/WorkoutContext";
+import { useWorkoutContext } from "../../../context/WorkoutsV2/WorkoutContext";
 import { useNutritionContext } from "../../../context/Nutrition/NutritionContext";
 import ItemSelector from '../../ItemSelector'
 import { useSettings } from "../../../context/SettingsContext";
@@ -29,11 +28,8 @@ export default function MetricLineChart(props) {
   const {mode, weightProgress, unit, formatWeightChart} = useSettings()
   const styles = getStyles(mode)
 
-  // V1 Context (keeping for reference)
-  const {setChart: setChartV1, volumeChart: volumeChartV1, logsByDateObj: logsByDateObjV1} = useWorkoutContext()
-  
-  // V2 Context - now using for main functionality
-  const {setChart, volumeChart, logsByDateObj, loading: loadingV2} = useWorkoutContextV2()
+  // Context - using for main functionality
+  const {setChart, volumeChart, logsByDateObj, loading} = useWorkoutContext()
   const {getMacroForLast30Days, nutritionData} = useNutritionContext()
 
   // FIXED: Simplified state to prevent visual glitch - use button positions instead of metric names

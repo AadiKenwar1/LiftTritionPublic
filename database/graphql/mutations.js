@@ -10,7 +10,6 @@ export const createWorkout = /* GraphQL */ `
       id
       userId
       name
-      exercises
       order
       archived
       note
@@ -30,7 +29,6 @@ export const updateWorkout = /* GraphQL */ `
       id
       userId
       name
-      exercises
       order
       archived
       note
@@ -47,124 +45,6 @@ export const deleteWorkout = /* GraphQL */ `
     $condition: ModelWorkoutConditionInput
   ) {
     deleteWorkout(input: $input, condition: $condition) {
-      id
-      userId
-      name
-      exercises
-      order
-      archived
-      note
-      synced
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const createUserExercise = /* GraphQL */ `
-  mutation CreateUserExercise(
-    $input: CreateUserExerciseInput!
-    $condition: ModelUserExerciseConditionInput
-  ) {
-    createUserExercise(input: $input, condition: $condition) {
-      id
-      userId
-      name
-      isCompound
-      fatigueFactor
-      userMax
-      mainMuscle
-      accessoryMuscles
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const updateUserExercise = /* GraphQL */ `
-  mutation UpdateUserExercise(
-    $input: UpdateUserExerciseInput!
-    $condition: ModelUserExerciseConditionInput
-  ) {
-    updateUserExercise(input: $input, condition: $condition) {
-      id
-      userId
-      name
-      isCompound
-      fatigueFactor
-      userMax
-      mainMuscle
-      accessoryMuscles
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const deleteUserExercise = /* GraphQL */ `
-  mutation DeleteUserExercise(
-    $input: DeleteUserExerciseInput!
-    $condition: ModelUserExerciseConditionInput
-  ) {
-    deleteUserExercise(input: $input, condition: $condition) {
-      id
-      userId
-      name
-      isCompound
-      fatigueFactor
-      userMax
-      mainMuscle
-      accessoryMuscles
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const createWorkoutV2 = /* GraphQL */ `
-  mutation CreateWorkoutV2(
-    $input: CreateWorkoutV2Input!
-    $condition: ModelWorkoutV2ConditionInput
-  ) {
-    createWorkoutV2(input: $input, condition: $condition) {
-      id
-      userId
-      name
-      order
-      archived
-      note
-      synced
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const updateWorkoutV2 = /* GraphQL */ `
-  mutation UpdateWorkoutV2(
-    $input: UpdateWorkoutV2Input!
-    $condition: ModelWorkoutV2ConditionInput
-  ) {
-    updateWorkoutV2(input: $input, condition: $condition) {
-      id
-      userId
-      name
-      order
-      archived
-      note
-      synced
-      createdAt
-      updatedAt
-      __typename
-    }
-  }
-`;
-export const deleteWorkoutV2 = /* GraphQL */ `
-  mutation DeleteWorkoutV2(
-    $input: DeleteWorkoutV2Input!
-    $condition: ModelWorkoutV2ConditionInput
-  ) {
-    deleteWorkoutV2(input: $input, condition: $condition) {
       id
       userId
       name
@@ -298,6 +178,66 @@ export const deleteExerciseLog = /* GraphQL */ `
       reps
       rpe
       synced
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const createUserExercise = /* GraphQL */ `
+  mutation CreateUserExercise(
+    $input: CreateUserExerciseInput!
+    $condition: ModelUserExerciseConditionInput
+  ) {
+    createUserExercise(input: $input, condition: $condition) {
+      id
+      userId
+      name
+      isCompound
+      fatigueFactor
+      userMax
+      mainMuscle
+      accessoryMuscles
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const updateUserExercise = /* GraphQL */ `
+  mutation UpdateUserExercise(
+    $input: UpdateUserExerciseInput!
+    $condition: ModelUserExerciseConditionInput
+  ) {
+    updateUserExercise(input: $input, condition: $condition) {
+      id
+      userId
+      name
+      isCompound
+      fatigueFactor
+      userMax
+      mainMuscle
+      accessoryMuscles
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const deleteUserExercise = /* GraphQL */ `
+  mutation DeleteUserExercise(
+    $input: DeleteUserExerciseInput!
+    $condition: ModelUserExerciseConditionInput
+  ) {
+    deleteUserExercise(input: $input, condition: $condition) {
+      id
+      userId
+      name
+      isCompound
+      fatigueFactor
+      userMax
+      mainMuscle
+      accessoryMuscles
       createdAt
       updatedAt
       __typename

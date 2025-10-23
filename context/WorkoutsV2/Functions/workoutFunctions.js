@@ -1,5 +1,5 @@
 import { generateClient } from 'aws-amplify/api';
-import { createWorkoutV2, updateWorkoutV2, deleteWorkoutV2 } from '../../../database/graphql/mutations';
+import { createWorkout, updateWorkout, deleteWorkout as deleteWorkoutMutation } from '../../../database/graphql/mutations';
 import uuid from 'react-native-uuid';
 
 const client = generateClient();
@@ -12,24 +12,36 @@ const client = generateClient();
  * @returns {Promise} - Promise that resolves when workout is added
  */
 export async function addWorkout(name, userId, setWorkouts) {
+  // Get current workouts to determine the highest order
+  let currentWorkouts = [];
+  setWorkouts(prev => {
+    currentWorkouts = prev;
+    return prev;
+  });
+
+  // Find the highest order value (or start at 0 if no workouts exist)
+  const maxOrder = currentWorkouts.length > 0 
+    ? Math.max(...currentWorkouts.map(w => w.order || 0))
+    : -1;
+
   const newWorkout = {
     id: uuid.v4(),
     userId,
     name,
-    order: 0, // Will be updated by reorder function
+    order: maxOrder + 1, // New workout gets highest order (appears first)
     archived: false,
     note: "",
-    synced: true, // Mark as synced when saving to database
+    synced: false, // Mark as unsynced initially
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
 
-  // Optimistic update - mark as unsynced initially
+  // Optimistic update - add new workout at the beginning and mark as unsynced
   setWorkouts(prev => [{ ...newWorkout, synced: false }, ...prev]);
 
   try {
     await client.graphql({
-      query: createWorkoutV2,
+      query: createWorkout,
       variables: { input: newWorkout }
     });
     
@@ -63,7 +75,7 @@ export async function deleteWorkout(workoutId, setWorkouts, setExercises, setLog
 
   try {
     await client.graphql({
-      query: deleteWorkoutV2,
+      query: deleteWorkoutMutation,
       variables: { input: { id: workoutId } }
     });
   } catch (error) {
@@ -102,7 +114,7 @@ export async function renameWorkout(workoutId, newName, setWorkouts) {
     };
 
     await client.graphql({
-      query: updateWorkoutV2,
+      query: updateWorkout,
       variables: { input }
     });
 
@@ -131,16 +143,20 @@ export async function renameWorkout(workoutId, newName, setWorkouts) {
  * @returns {Promise} - Promise that resolves when workouts are reordered
  */
 export async function reorderWorkouts(newOrder, setWorkouts) {
+  // Store the original order for rollback
+  let originalWorkouts = [];
+  setWorkouts(prev => {
+    originalWorkouts = [...prev];
+    return prev;
+  });
   // Update order field for each workout
   const updatedWorkouts = newOrder.map((workout, index) => ({
     ...workout,
     order: newOrder.length - 1 - index, // Higher order = appears first
     synced: false,
   }));
-
   // Optimistic update
   setWorkouts(updatedWorkouts);
-
   try {
     // Update each workout's order in the database
     const updatePromises = updatedWorkouts.map(workout => {
@@ -151,18 +167,19 @@ export async function reorderWorkouts(newOrder, setWorkouts) {
       };
 
       return client.graphql({
-        query: updateWorkoutV2,
+        query: updateWorkout,
         variables: { input }
       });
     });
-
     await Promise.all(updatePromises);
-
     // Mark all as synced
     setWorkouts(prev => prev.map(workout => ({ ...workout, synced: true })));
   } catch (error) {
     console.error('Error reordering workouts:', error);
-    // Note: In a real app, you'd want to revert to the original order
+    // Revert to original order on error
+    console.log('🔄 Reverting to original workout order due to error');
+    setWorkouts(originalWorkouts);
+    
     throw error;
   }
 }
@@ -189,7 +206,7 @@ export async function archiveWorkout(workoutId, setWorkouts) {
     };
 
     await client.graphql({
-      query: updateWorkoutV2,
+      query: updateWorkout,
       variables: { input }
     });
 
@@ -233,7 +250,7 @@ export async function unarchiveWorkout(workoutId, setWorkouts) {
     };
 
     await client.graphql({
-      query: updateWorkoutV2,
+      query: updateWorkout,
       variables: { input }
     });
 
@@ -272,7 +289,7 @@ export async function addNoteToWorkout(workoutId, note, setWorkouts) {
 
   try {
     await client.graphql({
-      query: updateWorkoutV2,
+      query: updateWorkout,
       variables: {
         input: {
           id: workoutId,

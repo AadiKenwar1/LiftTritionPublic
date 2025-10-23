@@ -11,8 +11,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import PopupModal from "../../../components/PopupModal";
 import DraggableLogList from "../../../components/DraggableLogList";
-import { useWorkoutContext } from "../../../context/Workouts/WorkoutContext";
-import { useWorkoutContext as useWorkoutContextV2 } from "../../../context/WorkoutsV2/WorkoutContext";
+import { useWorkoutContext } from "../../../context/WorkoutsV2/WorkoutContext";
 import { Alert } from "react-native";
 
 export default function LogScreen() {
@@ -40,8 +39,8 @@ export default function LogScreen() {
     deleteWorkout,
     renameWorkout,
     archiveWorkout,
-    loading: loadingV2
-  } = useWorkoutContextV2();
+    loading
+  } = useWorkoutContext();
 
   //Adds workouts
   function handleAddWorkout(inputName) {

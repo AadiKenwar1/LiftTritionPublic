@@ -1,5 +1,5 @@
 import { getLocalDateKey } from '../../../utils/date';
-import { format1RMForChart } from './OneRepMax';
+import { format1RMForChart } from './oneRepMax';
 
 /**
  * Get volume chart data for V2 flat structure

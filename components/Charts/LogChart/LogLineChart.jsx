@@ -6,8 +6,7 @@ import { TouchableOpacity, Dimensions} from "react-native";
 import InfoModal from "../../InfoModal";
 import PopupModal from "../../PopupModal";
 import ExerciseSelector from "../../ExerciseSelector";
-import { useWorkoutContext } from "../../../context/Workouts/WorkoutContext";
-import { useWorkoutContext as useWorkoutContextV2 } from "../../../context/WorkoutsV2/WorkoutContext";
+import { useWorkoutContext } from "../../../context/WorkoutsV2/WorkoutContext";
 import { useNutritionContext } from "../../../context/Nutrition/NutritionContext";
 import ItemSelector from '../../ItemSelector'
 import { useSettings } from "../../../context/SettingsContext";
@@ -28,11 +27,8 @@ export default function LogLineChart(props) {
   const {mode, bodyWeight, goalWeight, unit, lastExercise} = useSettings()
   const styles = getStyles(mode)
 
-  // V1 Context (keeping for reference)
-  const {getLiftLogs: getLiftLogsV1, formatForChart: formatForChartV1, workouts: workoutsV1} = useWorkoutContext()
-  
-  // V2 Context - now using for main functionality
-  const {getLiftLogs, formatForChart, workouts, getExerciseNames, loading: loadingV2} = useWorkoutContextV2()
+  // Context - using for main functionality
+  const {getLiftLogs, formatForChart, workouts, getExerciseNames, loading} = useWorkoutContext()
   const {getMacroForLast30Days, nutritionData} = useNutritionContext()
 
   const [selectedLift, setSelectedLift] = useState(lastExercise || "Barbell Bench Press")

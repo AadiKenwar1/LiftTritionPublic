@@ -5,7 +5,7 @@ import { useAuthContext } from "../../../context/Auth/AuthContext";
 import { useSettings } from "../../../context/SettingsContext";
 import CustomHeader from "../../../components/CustomHeader";
 import { useNutritionContext } from "../../../context/Nutrition/NutritionContext";
-import { useWorkoutContext } from "../../../context/Workouts/WorkoutContext";
+import { useWorkoutContext } from "../../../context/WorkoutsV2/WorkoutContext";
 
 export default function ProfileScreen() {
   const navigation = useNavigation();

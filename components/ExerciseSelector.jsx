@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useState } from "react";
-import { useWorkoutContext } from "../context/Workouts/WorkoutContext";
+import { useWorkoutContext } from "../context/WorkoutsV2/WorkoutContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
