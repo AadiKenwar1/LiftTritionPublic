@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View, Pressable} from "react-native";
 import Fab from '../../components/Fab.jsx';
 import { useWorkoutContext } from '../../context/Workouts/WorkoutContext.js';
+import { useWorkoutContext as useWorkoutContextV2 } from '../../context/WorkoutsV2/WorkoutContext.js';
 import CustomHeader from '../../components/CustomHeader.jsx';
 import LogScreen2 from "./workoutScreens/workoutsScreen.jsx"
 import NutritionScreen from './nutritionScreens/nutritionScreen.jsx'
@@ -32,12 +33,35 @@ export default function LogScreen() {
   const [workoutName, setWorkoutName] = useState('');
   const {workouts, addWorkout, resetContextState, reorderWorkouts, unarchiveWorkout, deleteWorkout} = useWorkoutContext();
   
+  // V2 Context - now using for main add button
+  const {workouts: workoutsV2, addWorkout: addWorkoutV2, loading: loadingV2} = useWorkoutContextV2();
+  
   const [addWorkoutVisible, setAddWorkoutVisible] = useState(false)
   function handleAddWorkout(inputName) {
-      addWorkout(inputName);
+      console.log('🚀 Adding workout with V2 context:', inputName);
+      console.log('📊 Current V2 workouts count:', workoutsV2.length);
+      addWorkoutV2(inputName); // Now using V2!
       setWorkoutName(''); // clear input
       setAddWorkoutVisible(false); // close modal
   }
+
+  // V2 Test function
+  const handleAddWorkoutV2 = async () => {
+    try {
+      console.log('🚀 Testing V2 Add Workout...');
+      const startTime = performance.now();
+      
+      await addWorkoutV2('Test Workout V2 - ' + new Date().toLocaleTimeString());
+      
+      const endTime = performance.now();
+      const duration = endTime - startTime;
+      
+      console.log(`✅ V2 Workout added in ${duration.toFixed(2)}ms`);
+      console.log('📊 V2 Workouts count:', workoutsV2.length);
+    } catch (error) {
+      console.error('❌ V2 Error adding workout:', error);
+    }
+  };
 
   const [addNutritionVisible, setAddNutritionVisible] = useState(false)
   const [archivedWorkoutsVisible, setArchivedWorkoutsVisible] = useState(false)
@@ -138,10 +162,27 @@ export default function LogScreen() {
                   shadowOpacity={0.2}
                 />
               </TouchableOpacity>,
+
+              // V2 Test Button
+              <TouchableOpacity
+                key="test-v2"
+                style={[styles.fabButtons, { backgroundColor: '#FF6B35' }]}
+                disabled={loadingV2}
+              >
+                <Ionicons
+                  name='flash'
+                  size={35}
+                  color='white'
+                  shadowColor='black'
+                  shadowRadius={4}
+                  shadowOpacity={0.4}
+                />
+              </TouchableOpacity>,
+
               //Coming Soon - AI Workout Generator (react fragment to even out the buttons)
               <Fragment key="ai-workout-generator-placeholder"></Fragment>,
               //Coming Soon - Workout Scheduler (react fragment to even out the buttons)
-              <Fragment key="workout-scheduler-placeholder"></Fragment>
+              //<Fragment key="workout-scheduler-placeholder"></Fragment>
 
               
             ]

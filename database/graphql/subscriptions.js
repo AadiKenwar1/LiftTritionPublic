@@ -109,6 +109,174 @@ export const onDeleteUserExercise = /* GraphQL */ `
     }
   }
 `;
+export const onCreateWorkoutV2 = /* GraphQL */ `
+  subscription OnCreateWorkoutV2(
+    $filter: ModelSubscriptionWorkoutV2FilterInput
+  ) {
+    onCreateWorkoutV2(filter: $filter) {
+      id
+      userId
+      name
+      order
+      archived
+      note
+      synced
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onUpdateWorkoutV2 = /* GraphQL */ `
+  subscription OnUpdateWorkoutV2(
+    $filter: ModelSubscriptionWorkoutV2FilterInput
+  ) {
+    onUpdateWorkoutV2(filter: $filter) {
+      id
+      userId
+      name
+      order
+      archived
+      note
+      synced
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onDeleteWorkoutV2 = /* GraphQL */ `
+  subscription OnDeleteWorkoutV2(
+    $filter: ModelSubscriptionWorkoutV2FilterInput
+  ) {
+    onDeleteWorkoutV2(filter: $filter) {
+      id
+      userId
+      name
+      order
+      archived
+      note
+      synced
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onCreateExercise = /* GraphQL */ `
+  subscription OnCreateExercise($filter: ModelSubscriptionExerciseFilterInput) {
+    onCreateExercise(filter: $filter) {
+      id
+      workoutId
+      userId
+      name
+      userMax
+      order
+      archived
+      note
+      synced
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onUpdateExercise = /* GraphQL */ `
+  subscription OnUpdateExercise($filter: ModelSubscriptionExerciseFilterInput) {
+    onUpdateExercise(filter: $filter) {
+      id
+      workoutId
+      userId
+      name
+      userMax
+      order
+      archived
+      note
+      synced
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onDeleteExercise = /* GraphQL */ `
+  subscription OnDeleteExercise($filter: ModelSubscriptionExerciseFilterInput) {
+    onDeleteExercise(filter: $filter) {
+      id
+      workoutId
+      userId
+      name
+      userMax
+      order
+      archived
+      note
+      synced
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onCreateExerciseLog = /* GraphQL */ `
+  subscription OnCreateExerciseLog(
+    $filter: ModelSubscriptionExerciseLogFilterInput
+  ) {
+    onCreateExerciseLog(filter: $filter) {
+      id
+      exerciseId
+      workoutId
+      userId
+      date
+      weight
+      reps
+      rpe
+      synced
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onUpdateExerciseLog = /* GraphQL */ `
+  subscription OnUpdateExerciseLog(
+    $filter: ModelSubscriptionExerciseLogFilterInput
+  ) {
+    onUpdateExerciseLog(filter: $filter) {
+      id
+      exerciseId
+      workoutId
+      userId
+      date
+      weight
+      reps
+      rpe
+      synced
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onDeleteExerciseLog = /* GraphQL */ `
+  subscription OnDeleteExerciseLog(
+    $filter: ModelSubscriptionExerciseLogFilterInput
+  ) {
+    onDeleteExerciseLog(filter: $filter) {
+      id
+      exerciseId
+      workoutId
+      userId
+      date
+      weight
+      reps
+      rpe
+      synced
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
 export const onCreateNutrition = /* GraphQL */ `
   subscription OnCreateNutrition(
     $filter: ModelSubscriptionNutritionFilterInput
@@ -126,7 +294,6 @@ export const onCreateNutrition = /* GraphQL */ `
       isPhoto
       ingredients
       saved
-      synced
       createdAt
       updatedAt
       __typename
@@ -150,7 +317,6 @@ export const onUpdateNutrition = /* GraphQL */ `
       isPhoto
       ingredients
       saved
-      synced
       createdAt
       updatedAt
       __typename
@@ -174,7 +340,6 @@ export const onDeleteNutrition = /* GraphQL */ `
       isPhoto
       ingredients
       saved
-      synced
       createdAt
       updatedAt
       __typename

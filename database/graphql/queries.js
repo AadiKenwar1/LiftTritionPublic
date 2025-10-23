@@ -85,6 +85,134 @@ export const listUserExercises = /* GraphQL */ `
     }
   }
 `;
+export const getWorkoutV2 = /* GraphQL */ `
+  query GetWorkoutV2($id: ID!) {
+    getWorkoutV2(id: $id) {
+      id
+      userId
+      name
+      order
+      archived
+      note
+      synced
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const listWorkoutV2s = /* GraphQL */ `
+  query ListWorkoutV2s(
+    $filter: ModelWorkoutV2FilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listWorkoutV2s(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        userId
+        name
+        order
+        archived
+        note
+        synced
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const getExercise = /* GraphQL */ `
+  query GetExercise($id: ID!) {
+    getExercise(id: $id) {
+      id
+      workoutId
+      userId
+      name
+      userMax
+      order
+      archived
+      note
+      synced
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const listExercises = /* GraphQL */ `
+  query ListExercises(
+    $filter: ModelExerciseFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listExercises(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        workoutId
+        userId
+        name
+        userMax
+        order
+        archived
+        note
+        synced
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const getExerciseLog = /* GraphQL */ `
+  query GetExerciseLog($id: ID!) {
+    getExerciseLog(id: $id) {
+      id
+      exerciseId
+      workoutId
+      userId
+      date
+      weight
+      reps
+      rpe
+      synced
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const listExerciseLogs = /* GraphQL */ `
+  query ListExerciseLogs(
+    $filter: ModelExerciseLogFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listExerciseLogs(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        exerciseId
+        workoutId
+        userId
+        date
+        weight
+        reps
+        rpe
+        synced
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
 export const getNutrition = /* GraphQL */ `
   query GetNutrition($id: ID!) {
     getNutrition(id: $id) {
@@ -100,7 +228,6 @@ export const getNutrition = /* GraphQL */ `
       isPhoto
       ingredients
       saved
-      synced
       createdAt
       updatedAt
       __typename
@@ -127,7 +254,6 @@ export const listNutritions = /* GraphQL */ `
         isPhoto
         ingredients
         saved
-        synced
         createdAt
         updatedAt
         __typename

@@ -11,14 +11,14 @@ import {
   Platform,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { useWorkoutContext } from "../../../../context/Workouts/WorkoutContext";
+import { useWorkoutContext as useWorkoutContextV2 } from "../../../../context/WorkoutsV2/WorkoutContext";
 import CustomHeader from "../../../../components/CustomHeader";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function AddUserExercise() {
   const navigation = useNavigation();
-  const { setExerciseLibrary, userExercises, setUserExercises, exerciseLibrary } =
-    useWorkoutContext();
+  const { setExerciseLibrary, userExercises, setUserExercises, exerciseLibrary, addUserExercise: addUserExerciseV2 } =
+    useWorkoutContextV2();
 
   const allMuscles = [
     "Upper Chest", "Lower Chest", "Front Deltoid", "Side Deltoid", "Rear Deltoid",
@@ -102,9 +102,18 @@ export default function AddUserExercise() {
       return;
     }
     const fatigueFactor = estimateFatigueFactor({ mainMuscle, accessoryMuscles, isCompound, equipmentType, });
-    const newExercise = { isCompound, fatigueFactor, userMax: 0, mainMuscle, accessoryMuscles, };
-    setExerciseLibrary((prev) => ({ ...prev, [trimmedName]: newExercise, }));
-    setUserExercises((prev) => [ ...prev, { name: trimmedName, ...newExercise }, ]);
+    const exerciseData = { 
+      name: trimmedName,
+      isCompound, 
+      fatigueFactor, 
+      userMax: 0, 
+      mainMuscle, 
+      accessoryMuscles 
+    };
+    
+    // Use V2 addUserExercise function
+    await addUserExerciseV2(exerciseData);
+    console.log('🚀 Added user exercise with V2 context:', trimmedName);
     Alert.alert("Success", "Exercise added successfully!", [{ text: "OK", onPress: () => navigation.goBack() }]);
   };
 

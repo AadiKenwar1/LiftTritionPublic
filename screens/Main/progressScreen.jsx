@@ -18,12 +18,31 @@ import ProgressWheel from '../../components/ProgressWheel';
 import { useSettings } from '../../context/SettingsContext';
 import { useNutritionContext } from '../../context/Nutrition/NutritionContext';
 import { useWorkoutContext } from '../../context/Workouts/WorkoutContext';
+import { useWorkoutContext as useWorkoutContextV2 } from '../../context/WorkoutsV2/WorkoutContext';
 
 const { width: screenWidth } = Dimensions.get('window');
 export default function ProgressScreen() {
     const {mode, calorieGoal, proteinGoal, carbsGoal, fatsGoal} = useSettings()
     const {getTodaysMacro} = useNutritionContext()
-    const {fatigueTodayPercent, fatigueLast3DaysPercent, fatigueLast6DaysPercent, fatigueLast9DaysPercent} = useWorkoutContext()
+    // V1 Context (keeping for reference)
+    const {fatigueTodayPercent: fatigueTodayPercentV1, fatigueLast3DaysPercent: fatigueLast3DaysPercentV1, fatigueLast6DaysPercent: fatigueLast6DaysPercentV1, fatigueLast9DaysPercent: fatigueLast9DaysPercentV1} = useWorkoutContext()
+    
+    // V2 Context - now using for main functionality
+    const {getFatigueForLastXDays, loading: loadingV2} = useWorkoutContextV2()
+    
+    // Calculate V2 fatigue percentages
+    console.log('🚀 Calculating fatigue with V2 context');
+    const fatigueTodayPercent = getFatigueForLastXDays(1);
+    const fatigueLast3DaysPercent = getFatigueForLastXDays(3);
+    const fatigueLast6DaysPercent = getFatigueForLastXDays(6);
+    const fatigueLast9DaysPercent = getFatigueForLastXDays(9);
+    
+    console.log('📊 V2 Fatigue percentages:', {
+      today: fatigueTodayPercent,
+      last3Days: fatigueLast3DaysPercent,
+      last6Days: fatigueLast6DaysPercent,
+      last9Days: fatigueLast9DaysPercent
+    });
 
     const todaysCalories = getTodaysMacro("calories");
     const calPercent = (todaysCalories / calorieGoal) * 100;

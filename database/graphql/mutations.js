@@ -121,6 +121,189 @@ export const deleteUserExercise = /* GraphQL */ `
     }
   }
 `;
+export const createWorkoutV2 = /* GraphQL */ `
+  mutation CreateWorkoutV2(
+    $input: CreateWorkoutV2Input!
+    $condition: ModelWorkoutV2ConditionInput
+  ) {
+    createWorkoutV2(input: $input, condition: $condition) {
+      id
+      userId
+      name
+      order
+      archived
+      note
+      synced
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const updateWorkoutV2 = /* GraphQL */ `
+  mutation UpdateWorkoutV2(
+    $input: UpdateWorkoutV2Input!
+    $condition: ModelWorkoutV2ConditionInput
+  ) {
+    updateWorkoutV2(input: $input, condition: $condition) {
+      id
+      userId
+      name
+      order
+      archived
+      note
+      synced
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const deleteWorkoutV2 = /* GraphQL */ `
+  mutation DeleteWorkoutV2(
+    $input: DeleteWorkoutV2Input!
+    $condition: ModelWorkoutV2ConditionInput
+  ) {
+    deleteWorkoutV2(input: $input, condition: $condition) {
+      id
+      userId
+      name
+      order
+      archived
+      note
+      synced
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const createExercise = /* GraphQL */ `
+  mutation CreateExercise(
+    $input: CreateExerciseInput!
+    $condition: ModelExerciseConditionInput
+  ) {
+    createExercise(input: $input, condition: $condition) {
+      id
+      workoutId
+      userId
+      name
+      userMax
+      order
+      archived
+      note
+      synced
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const updateExercise = /* GraphQL */ `
+  mutation UpdateExercise(
+    $input: UpdateExerciseInput!
+    $condition: ModelExerciseConditionInput
+  ) {
+    updateExercise(input: $input, condition: $condition) {
+      id
+      workoutId
+      userId
+      name
+      userMax
+      order
+      archived
+      note
+      synced
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const deleteExercise = /* GraphQL */ `
+  mutation DeleteExercise(
+    $input: DeleteExerciseInput!
+    $condition: ModelExerciseConditionInput
+  ) {
+    deleteExercise(input: $input, condition: $condition) {
+      id
+      workoutId
+      userId
+      name
+      userMax
+      order
+      archived
+      note
+      synced
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const createExerciseLog = /* GraphQL */ `
+  mutation CreateExerciseLog(
+    $input: CreateExerciseLogInput!
+    $condition: ModelExerciseLogConditionInput
+  ) {
+    createExerciseLog(input: $input, condition: $condition) {
+      id
+      exerciseId
+      workoutId
+      userId
+      date
+      weight
+      reps
+      rpe
+      synced
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const updateExerciseLog = /* GraphQL */ `
+  mutation UpdateExerciseLog(
+    $input: UpdateExerciseLogInput!
+    $condition: ModelExerciseLogConditionInput
+  ) {
+    updateExerciseLog(input: $input, condition: $condition) {
+      id
+      exerciseId
+      workoutId
+      userId
+      date
+      weight
+      reps
+      rpe
+      synced
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const deleteExerciseLog = /* GraphQL */ `
+  mutation DeleteExerciseLog(
+    $input: DeleteExerciseLogInput!
+    $condition: ModelExerciseLogConditionInput
+  ) {
+    deleteExerciseLog(input: $input, condition: $condition) {
+      id
+      exerciseId
+      workoutId
+      userId
+      date
+      weight
+      reps
+      rpe
+      synced
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
 export const createNutrition = /* GraphQL */ `
   mutation CreateNutrition(
     $input: CreateNutritionInput!
@@ -139,7 +322,6 @@ export const createNutrition = /* GraphQL */ `
       isPhoto
       ingredients
       saved
-      synced
       createdAt
       updatedAt
       __typename
@@ -164,7 +346,6 @@ export const updateNutrition = /* GraphQL */ `
       isPhoto
       ingredients
       saved
-      synced
       createdAt
       updatedAt
       __typename
@@ -189,7 +370,6 @@ export const deleteNutrition = /* GraphQL */ `
       isPhoto
       ingredients
       saved
-      synced
       createdAt
       updatedAt
       __typename

@@ -1,5 +1,5 @@
 import { generateClient } from 'aws-amplify/api';
-import { getSettings, listWorkouts, listNutritions, listUserExercises } from '../../database/graphql/queries';
+import { getSettings, listWorkouts, listNutritions, listUserExercises, listWorkoutV2s, listExercises, listExerciseLogs } from '../../database/graphql/queries';
 import { deleteWorkout, deleteNutrition, deleteSettings, createSettings, deleteUserExercise } from '../../database/graphql/mutations';
 
 /**
@@ -87,34 +87,56 @@ export const createDefaultSettings = async (appleUserId, email, name = null) => 
 export const loadAppleUserData = async (appleUserId) => {
   try {
     const client = generateClient();
-    // Load all user data in parallel
-    const [settingsResult, workoutsResult, nutritionResult, userExercisesResult] = await Promise.all([
-      client.graphql({
-        query: getSettings,
-        variables: { id: appleUserId }
-      }),
-      
-      client.graphql({
-        query: listWorkouts,
-        variables: { 
-          filter: { userId: { eq: appleUserId } }
-        }
-      }),
-      
-      client.graphql({
-        query: listNutritions,
-        variables: { 
-          filter: { userId: { eq: appleUserId } }
-        }
-      }),
-      
-      client.graphql({
-        query: listUserExercises,
-        variables: { 
-          filter: { userId: { eq: appleUserId } }
-        }
-      })
-    ]);
+        // Load all user data in parallel
+        const [settingsResult, workoutsResult, nutritionResult, userExercisesResult, workoutsV2Result, exercisesResult, exerciseLogsResult] = await Promise.all([
+          client.graphql({
+            query: getSettings,
+            variables: { id: appleUserId }
+          }),
+          
+          client.graphql({
+            query: listWorkouts,
+            variables: { 
+              filter: { userId: { eq: appleUserId } }
+            }
+          }),
+          
+          client.graphql({
+            query: listNutritions,
+            variables: { 
+              filter: { userId: { eq: appleUserId } }
+            }
+          }),
+          
+          client.graphql({
+            query: listUserExercises,
+            variables: { 
+              filter: { userId: { eq: appleUserId } }
+            }
+          }),
+          
+          // V2 Data
+          client.graphql({
+            query: listWorkoutV2s,
+            variables: { 
+              filter: { userId: { eq: appleUserId } }
+            }
+          }),
+          
+          client.graphql({
+            query: listExercises,
+            variables: { 
+              filter: { userId: { eq: appleUserId } }
+            }
+          }),
+          
+          client.graphql({
+            query: listExerciseLogs,
+            variables: { 
+              filter: { userId: { eq: appleUserId } }
+            }
+          })
+        ]);
     
     // Parse JSON fields in workout data
     const parsedWorkouts = workoutsResult.data.listWorkouts.items.map(workout => ({
@@ -137,6 +159,10 @@ export const loadAppleUserData = async (appleUserId) => {
         workouts: parsedWorkouts,
         nutrition: nutritionResult.data.listNutritions.items,
         userExercises: userExercisesResult.data.listUserExercises.items,
+        // V2 Data
+        workoutsV2: workoutsV2Result.data.listWorkoutV2s.items || [],
+        exercises: exercisesResult.data.listExercises.items || [],
+        exerciseLogs: exerciseLogsResult.data.listExerciseLogs.items || [],
       },
     };
   } catch (error) {

@@ -1,5 +1,0 @@
-{
-  "AppSyncApiName": "liftlyzerv3copy",
-  "DynamoDBBillingMode": "PAY_PER_REQUEST",
-  "DynamoDBEnableServerSideEncryption": false
-}

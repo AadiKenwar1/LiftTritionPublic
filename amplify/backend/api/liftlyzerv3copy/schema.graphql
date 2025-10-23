@@ -6,6 +6,10 @@ input AMPLIFY { globalAuthRule: AuthRule = { allow: public } } # FOR TESTING ONL
 # WORKOUT CONTEXT MODELS
 # ============================================================================
 
+# ============================================================================
+# V1 NESTED STRUCTURE (DEPRECATED - KEEP FOR MIGRATION)
+# ============================================================================
+
 type Workout @model {
   id: ID!
   userId: ID!           # Added for per-user data isolation
@@ -28,6 +32,50 @@ type UserExercise @model {
   userMax: Float
   mainMuscle: String!
   accessoryMuscles: [String]
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# ============================================================================
+# V2 FLAT STRUCTURE (NEW - PERFORMANCE OPTIMIZED)
+# ============================================================================
+
+type WorkoutV2 @model {
+  id: ID!
+  userId: ID!
+  name: String!
+  order: Int!
+  archived: Boolean
+  note: String
+  synced: Boolean
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type Exercise @model {
+  id: ID!
+  workoutId: ID!
+  userId: ID!
+  name: String!
+  userMax: Float
+  order: Int!
+  archived: Boolean
+  note: String
+  synced: Boolean
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type ExerciseLog @model {
+  id: ID!
+  exerciseId: ID!
+  workoutId: ID!
+  userId: ID!
+  date: String!
+  weight: Float!
+  reps: Int!
+  rpe: Float!
+  synced: Boolean
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }

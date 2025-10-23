@@ -8,7 +8,7 @@ import {
   FlatList,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { useWorkoutContext } from "../../../../context/Workouts/WorkoutContext";
+import { useWorkoutContext as useWorkoutContextV2 } from "../../../../context/WorkoutsV2/WorkoutContext";
 import { useAuthContext } from "../../../../context/Auth/AuthContext";
 import { generateClient } from 'aws-amplify/api';
 import { deleteUserExercise } from "../../../../database/graphql/mutations";
@@ -18,7 +18,7 @@ import { Entypo, Ionicons } from "@expo/vector-icons";
 export default function UserExercises() {
   const navigation = useNavigation();
   const { user } = useAuthContext();
-  const { setExerciseLibrary, userExercises, setUserExercises } = useWorkoutContext();
+  const { setExerciseLibrary, userExercises, setUserExercises, deleteUserExercise: deleteUserExerciseV2 } = useWorkoutContextV2();
   const client = generateClient();
 
   const handleDelete = (exerciseName) => {
@@ -36,22 +36,10 @@ export default function UserExercises() {
               const exerciseToDelete = userExercises.find(ex => ex.name === exerciseName);
               
               if (exerciseToDelete && exerciseToDelete.id) {
-                // Delete from database
-                await client.graphql({
-                  query: deleteUserExercise,
-                  variables: { input: { id: exerciseToDelete.id } }
-                });
+                // Use V2 deleteUserExercise function
+                await deleteUserExerciseV2(exerciseToDelete.id, exerciseName);
+                console.log('🚀 Deleted user exercise with V2 context:', exerciseName);
               }
-
-              // Update local state
-              setUserExercises((prev) =>
-                prev.filter((exercise) => exercise.name !== exerciseName),
-              );
-              setExerciseLibrary((prev) => {
-                const newExercises = { ...prev };
-                delete newExercises[exerciseName];
-                return newExercises;
-              });
               
               Alert.alert("Deleted", `"${exerciseName}" has been removed.`);
             } catch (error) {

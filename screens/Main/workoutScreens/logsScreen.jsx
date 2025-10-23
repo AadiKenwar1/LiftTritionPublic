@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { useWorkoutContext } from "../../../context/Workouts/WorkoutContext";
+import { useWorkoutContext as useWorkoutContextV2 } from "../../../context/WorkoutsV2/WorkoutContext";
 import { Entypo } from "@expo/vector-icons"; // Add this line
 import CustomHeader from "../../../components/CustomHeader";
 import NotesModal from "../../../components/Notes";
@@ -23,22 +24,42 @@ import { useSettings } from "../../../context/SettingsContext";
 
 
 export default function LogDetails() {
-  //Object Functions
-  const { workouts, addLogToExercise, deleteLog, addNoteToExercise, exerciseLibrary} =
-    useWorkoutContext();
+  // V1 Context (keeping for reference)
+  const { 
+    workouts: workoutsV1, 
+    addLogToExercise: addLogToExerciseV1, 
+    deleteLog: deleteLogV1, 
+    addNoteToExercise: addNoteToExerciseV1, 
+    exerciseLibrary: exerciseLibraryV1 
+  } = useWorkoutContext();
+
+  // V2 Context - now using for main functionality
+  const {
+    workouts,
+    exercises,
+    logs,
+    addLog,
+    deleteLog,
+    getLogsForExercise,
+    addNoteToExercise,
+    exerciseLibrary,
+    loading: loadingV2
+  } = useWorkoutContextV2();
 
   const { setLastExercise } = useSettings();
   //Gets ids of parent exercise and workout
   const route = useRoute();
   const { workoutId, exerciseId } = route.params;
   const workout = workouts.find((w) => w.id === workoutId);
-  const exercise = workout.exercises.find((e) => e.id === exerciseId);
+  const exercise = exercises.find((e) => e.id === exerciseId);
+  
+  // Get logs for this exercise using V2 flat structure
+  const exerciseLogs = getLogsForExercise(exerciseId);
 
   //Set information
   const [reps, setReps] = useState('');
   const [weight, setWeight] = useState('');
   const [rpe, setRpe] = useState('');
-  const fatigueFactor = exerciseLibrary[exercise.name].fatigueFactor ?? 1
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
 
@@ -49,27 +70,35 @@ export default function LogDetails() {
       return;
     }
 
-    const timestamp = new Date().toISOString();
     const noRPE = rpe === '';
-    const newLog = {
-      id: timestamp,
+    const logData = {
+      workoutId: workoutId,
       weight: parseFloat(weight),
       reps: parseInt(reps),
-      rpe: noRPE ? 8 : parseFloat(rpe),
-      rpeEntered: noRPE, //boolean
-      fatigueFactor: fatigueFactor
+      rpe: noRPE ? 8 : parseFloat(rpe)
     };
-    addLogToExercise(workoutId, exerciseId, newLog);
-    setLastExercise(exercise.name)
+    
+    console.log('🚀 Adding log with V2 context:', logData);
+    console.log('📊 Current V2 logs count for exercise:', exerciseLogs.length);
+    addLog(exerciseId, logData);
+    setLastExercise(exercise.name);
     setReps("");
     setWeight("");
     setRpe("");
   }
 
-  //Display logs functions
+  //Display logs functions - V2 flat structure
   function displayLogs() {
-    const logs = exercise.logs;
-    return Object.keys(logs)
+    // Group logs by date
+    const logsByDate = {};
+    exerciseLogs.forEach(log => {
+      if (!logsByDate[log.date]) {
+        logsByDate[log.date] = [];
+      }
+      logsByDate[log.date].push(log);
+    });
+
+    return Object.keys(logsByDate)
       .slice()
       .reverse()
       .map((date) => {
@@ -82,7 +111,7 @@ export default function LogDetails() {
               <View style={styles.line} />
             </View>
 
-            {logs[date].map((entry, index) => (
+            {logsByDate[date].map((entry, index) => (
               <View key={entry.id || index} style={[
                 styles.logItem,
                 entry.synced === false && styles.logItemUnsynced
@@ -92,7 +121,7 @@ export default function LogDetails() {
                   entry.synced === false && styles.logTextUnsynced
                 ]}>
                   {entry.weight} lbs x {entry.reps} reps{" "}
-                  {!entry.defaultRir && entry.rpe !== undefined
+                  {entry.rpe !== undefined && entry.rpe !== 8
                     ? "x RPE: " + entry.rpe
                     : ""}
                 </Text>
@@ -114,7 +143,8 @@ export default function LogDetails() {
                           text: "Delete",
                           style: "destructive",
                           onPress: () => {
-                            deleteLog(workoutId, exerciseId, date, index);
+                            console.log('🚀 Deleting log with V2 context:', entry.id);
+                            deleteLog(entry.id);
                           },          
                         },
                         {
@@ -135,11 +165,12 @@ export default function LogDetails() {
       });
   }
 
-  const [note, setNote] = useState(exercise.note);
+  const [note, setNote] = useState(exercise?.note || "");
   const [notesVisible, setNotesVisible] = useState(false);
   function handleClose() {
     setNotesVisible(false);
-    addNoteToExercise(workoutId, exerciseId, note);
+    console.log('🚀 Adding exercise note with V2 context:', note);
+    addNoteToExercise(exerciseId, note);
   }
 
   return (

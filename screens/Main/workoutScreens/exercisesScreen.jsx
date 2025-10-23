@@ -10,6 +10,7 @@ import {
 import { useRoute } from "@react-navigation/native";
 import uuid from "react-native-uuid";
 import { useWorkoutContext } from "../../../context/Workouts/WorkoutContext";
+import { useWorkoutContext as useWorkoutContextV2 } from "../../../context/WorkoutsV2/WorkoutContext";
 import DraggableLogList from "../../../components/DraggableLogList";
 import { useNavigation } from "@react-navigation/native";
 import ExerciseSelector from "../../../components/ExerciseSelector";
@@ -23,43 +24,57 @@ import Fab from "../../../components/Fab"
 import ItemSelector from "../../../components/ItemSelector";
 
 export default function WorkoutDetails() {
-  //Object functions
+  // V1 Context (keeping for reference)
   const {
-    workouts,
-    addExerciseToWorkout,
-    reorderExercises,
-    deleteExercise,
-    addNoteToWorkout,
-    archiveExercise
+    workouts: workoutsV1,
+    addExerciseToWorkout: addExerciseToWorkoutV1,
+    reorderExercises: reorderExercisesV1,
+    deleteExercise: deleteExerciseV1,
+    addNoteToWorkout: addNoteToWorkoutV1,
+    archiveExercise: archiveExerciseV1
   } = useWorkoutContext();
 
+  // V2 Context - now using for main functionality
+  const {
+    workouts,
+    exercises,
+    addExercise,
+    reorderExercises,
+    deleteExercise,
+    archiveExercise,
+    getExercisesForWorkout,
+    addNoteToWorkout,
+    exerciseLibrary,
+    loading: loadingV2
+  } = useWorkoutContextV2();
 
-  //Gets the workout exercise is containedin
+
+  //Gets the workout exercise is contained in
   const route = useRoute();
   const { workoutId } = route.params;
   const workout = workouts.find((w) => w.id === workoutId);
+  
+  // Get exercises for this workout using V2 flat structure
+  const workoutExercises = getExercisesForWorkout(workoutId);
 
   const [modalVisible, setModalVisible] = useState(false);
 
 
   //Adds exercise to workout
   const [selectedExercise, setSelectedExercise] = useState("");
-  function handleAddExercise() {
-    const alreadyExists = workout.exercises.some(
-      (item) => item.name === selectedExercise,
-    );
-    if (selectedExercise && !alreadyExists) {
-      const newExercise = {
-        id: uuid.v4(),
-        name: selectedExercise,
-        logs: [],
-      };
-      addExerciseToWorkout(workoutId, newExercise);
-      setModalVisible(false);
-    } else {
-      Alert.alert("", "This exercise has already been added");
-    }
-  }
+        function handleAddExercise() {
+          const alreadyExists = workoutExercises.some(
+            (item) => item.name === selectedExercise,
+          );
+          if (selectedExercise && !alreadyExists) {
+            console.log('🚀 Adding exercise with V2 context:', selectedExercise);
+            console.log('📊 Current V2 exercises count for workout:', workoutExercises.length);
+            addExercise(workoutId, selectedExercise);
+            setModalVisible(false);
+          } else {
+            Alert.alert("", "This exercise has already been added");
+          }
+        }
 
   //Navigates to logsScreen when exercise is clicked
   const navigation = useNavigation();
@@ -76,7 +91,8 @@ export default function WorkoutDetails() {
       {
         text:"Archive",
         onPress:() => {
-          archiveExercise(workout.id, exercise.id)
+          console.log('🚀 Archiving exercise with V2 context:', exercise.name);
+          archiveExercise(exercise.id);
         }
 
       },
@@ -84,7 +100,8 @@ export default function WorkoutDetails() {
         text: "Delete",
         style: "destructive",
         onPress: () => {
-          deleteExercise(workout.id, exercise.id);
+          console.log('🚀 Deleting exercise with V2 context:', exercise.name);
+          deleteExercise(exercise.id);
         },
       },
       {
@@ -98,6 +115,7 @@ export default function WorkoutDetails() {
   const [notesVisible, setNotesVisible] = useState(false);
   function handleClose() {
     setNotesVisible(false);
+    console.log('🚀 Adding workout note with V2 context:', note);
     addNoteToWorkout(workout.id, note);
   }
 
@@ -113,9 +131,9 @@ export default function WorkoutDetails() {
 
       <View style={styles.container}>
 
-        {/**Display Exercies in Workout */}
+        {/**Display Exercises in Workout */}
         <DraggableLogList
-          data={workout.exercises.filter((item) => !item.archived)}
+          data={workoutExercises.filter((item) => !item.archived)}
           workout={workout}
           reorderExercises={reorderExercises}
           function2={goToLogDetails}
@@ -186,7 +204,7 @@ export default function WorkoutDetails() {
 
         <ArchivedPopup
           visible={archivedVisible}
-          data={workout.exercises.filter((item) => item.archived)}
+          data={workoutExercises.filter((item) => item.archived)}
           onClose={() => setArchivedVisible(false)}
           marginBottom={30}
           workout={workout}
