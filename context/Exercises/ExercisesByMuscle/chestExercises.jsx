@@ -103,7 +103,7 @@ const chestExercises = {
       "Tricep Lateral Head",
       "Tricep Medial Head",
     ],
-    fatigueFactor: 1.1,
+    fatigueFactor: 1,
     userMax: 0,
   },
   "Dumbbell Bench Press": {

@@ -127,6 +127,7 @@ export function AuthProvider({ children }) {
     return { success: true, message: 'Account deleted successfully.' };
   };
 
+
   //Marks onboarding as completed and saves onboarding data
   const markOnboardingCompleted = async (onboardingData = null) => {
     if (!user?.appleUserId) return { success: false, error: 'No user to update' };
@@ -197,6 +198,11 @@ export function AuthProvider({ children }) {
 }
 
 
+export function useAuth() {
+  return useContext(AuthContext);
+}
+
+// Keep the old export for backward compatibility
 export function useAuthContext() {
   return useContext(AuthContext);
 } 

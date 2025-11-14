@@ -11,8 +11,6 @@ import {
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useWorkoutContext } from "../../../../context/WorkoutsV2/WorkoutContext";
 import { useAuthContext } from "../../../../context/Auth/AuthContext";
-import { generateClient } from 'aws-amplify/api';
-import { createUserExercise } from "../../../../database/graphql/mutations";
 import CustomHeader from "../../../../components/CustomHeader";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -28,9 +26,7 @@ export default function AddExerciseScreen4() {
   const navigation = useNavigation();
   const route = useRoute();
   const { exerciseData } = route.params;
-  const { user } = useAuthContext();
-  const { setExerciseLibrary, userExercises, setUserExercises, exerciseLibrary } = useWorkoutContext();
-  const client = generateClient();
+  const { addUserExercise, exerciseLibrary } = useWorkoutContext();
   
   const [selectedMuscles, setSelectedMuscles] = useState([]);
   const [searchText, setSearchText] = useState("");
@@ -77,7 +73,20 @@ export default function AddExerciseScreen4() {
   };
 
   const handleSave = async () => {
+    // PRESERVE: Input validation and sanitization
     const trimmedName = exerciseData.name.trim();
+    
+    if (!trimmedName) {
+      Alert.alert("Error", "Please enter an exercise name.");
+      return;
+    }
+
+    if (selectedMuscles.length === 0) {
+      Alert.alert("Error", "Please select at least one accessory muscle.");
+      return;
+    }
+
+    // PRESERVE: Duplicate checking logic
     const normalizedInput = trimmedName.toLowerCase();
     const existingNames = Object.keys(exerciseLibrary).map((name) => name.toLowerCase());
     
@@ -86,6 +95,7 @@ export default function AddExerciseScreen4() {
       return;
     }
 
+    // PRESERVE: Fatigue factor calculation
     const fatigueFactor = estimateFatigueFactor({
       mainMuscle: exerciseData.mainMuscle,
       accessoryMuscles: selectedMuscles,
@@ -93,34 +103,16 @@ export default function AddExerciseScreen4() {
       equipmentType: exerciseData.equipmentType,
     });
 
-    const newExercise = {
-      isCompound: exerciseData.isCompound,
-      fatigueFactor,
-      userMax: 0,
-      mainMuscle: exerciseData.mainMuscle,
-      accessoryMuscles: selectedMuscles,
-    };
-
     try {
-      // Save to database
-      const result = await client.graphql({
-        query: createUserExercise,
-        variables: {
-          input: {
-            userId: user.userId,
-            name: trimmedName,
-            isCompound: exerciseData.isCompound,
-            fatigueFactor,
-            userMax: 0,
-            mainMuscle: exerciseData.mainMuscle,
-            accessoryMuscles: selectedMuscles,
-          }
-        }
+      // Use the robust V2 context function with all the calculated data
+      await addUserExercise({
+        name: trimmedName, // Use trimmed name
+        isCompound: exerciseData.isCompound,
+        fatigueFactor, // Use calculated fatigue factor
+        userMax: 0,
+        mainMuscle: exerciseData.mainMuscle,
+        accessoryMuscles: selectedMuscles,
       });
-
-      // Update local state
-      setExerciseLibrary((prev) => ({ ...prev, [trimmedName]: newExercise }));
-      setUserExercises((prev) => [...prev, { name: trimmedName, ...newExercise }]);
 
       Alert.alert("Success", "Exercise added successfully!", [
         { text: "OK", onPress: () => navigation.navigate("UserExercisesScreen") }

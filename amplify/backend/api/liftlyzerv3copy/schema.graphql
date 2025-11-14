@@ -2,14 +2,6 @@
 # all models in this schema. Learn more about authorization rules here: https://docs.amplify.aws/cli/graphql/authorization-rules
 input AMPLIFY { globalAuthRule: AuthRule = { allow: public } } # FOR TESTING ONLY!
 
-# ============================================================================
-# WORKOUT CONTEXT MODELS
-# ============================================================================
-
-# ============================================================================
-# WORKOUT MODELS (V2 FLAT STRUCTURE - PERFORMANCE OPTIMIZED)
-# ============================================================================
-
 type Workout @model {
   id: ID!
   userId: ID!
@@ -27,7 +19,6 @@ type Exercise @model {
   workoutId: ID!
   userId: ID!
   name: String!
-  userMax: Float
   order: Int!
   archived: Boolean
   note: String
@@ -56,16 +47,12 @@ type UserExercise @model {
   name: String!
   isCompound: Boolean!
   fatigueFactor: Float!
-  userMax: Float
   mainMuscle: String!
   accessoryMuscles: [String]
+  synced: Boolean
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
-
-# ============================================================================
-# SETTINGS CONTEXT MODELS
-# ============================================================================
 
 type Nutrition @model {
   id: ID!
@@ -80,6 +67,7 @@ type Nutrition @model {
   isPhoto: Boolean
   ingredients: [String]
   saved: Boolean
+  synced: Boolean
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
@@ -104,6 +92,7 @@ type Settings @model {
   fatsGoal: Int
   onboardingCompleted: Boolean
   lastExercise: String
+  synced: Boolean
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }

@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View, Pressable} from "react-native";
 import Fab from '../../components/Fab.jsx';
 import { useWorkoutContext } from '../../context/WorkoutsV2/WorkoutContext.js';
+import { useBilling } from '../../context/Billing/BillingContext.js';
 import CustomHeader from '../../components/CustomHeader.jsx';
 import LogScreen2 from "./workoutScreens/workoutsScreen.jsx"
 import NutritionScreen from './nutritionScreens/nutritionScreen.jsx'
@@ -23,6 +24,7 @@ import { Fragment } from 'react';
 
 export default function LogScreen() {
   const { mode, setMode} = useSettings();
+  const { hasPremium } = useBilling();
   const navigation = useNavigation();
   const route = useRoute();
   const photoUri = route.params?.photoUri;
@@ -146,6 +148,7 @@ export default function LogScreen() {
               //Coming Soon - AI Workout Generator (react fragment to even out the buttons)
               <Fragment key="ai-workout-generator-placeholder"></Fragment>,
               //Coming Soon - Workout Scheduler (react fragment to even out the buttons)
+              <Fragment key="workout-scheduler-placeholder"></Fragment>,
               //<Fragment key="workout-scheduler-placeholder"></Fragment>
 
               
@@ -176,8 +179,8 @@ export default function LogScreen() {
               //Camera Button
               <TouchableOpacity
                 key="camera"
-                style={[styles.fabButtons, { backgroundColor: '#FF4081' }]}
-                onPress={() => {setTimeout(() => {navigation.navigate('CameraScreen')}, 600) }}
+                style={[styles.fabButtons, { backgroundColor: '#FF4081', opacity: hasPremium ? 1 : 0.5 }]}
+                onPress={() => {hasPremium ? setTimeout(() => {navigation.navigate('CameraScreen')}, 600) : navigation.navigate('Subscription')}}
               >
                 <Ionicons
                   name='camera'
@@ -187,6 +190,7 @@ export default function LogScreen() {
                   shadowRadius={4}
                   shadowOpacity={0.2}
                 />
+       
               </TouchableOpacity>,
 
               //Food Database Button

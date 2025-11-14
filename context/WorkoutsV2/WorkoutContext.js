@@ -116,6 +116,7 @@ export function WorkoutProvider({ children }) {
         userExercises: user.userExercises?.length || 0
       });
       
+      
       setWorkouts(user.workouts || []);
       setExercises(user.exercises || []);
       setLogs(user.exerciseLogs || []);

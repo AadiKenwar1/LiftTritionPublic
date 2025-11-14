@@ -221,6 +221,7 @@ export default function LogLineChart(props) {
             const actualDataPoint = displayedData[index];
             setFocusedPoint(actualDataPoint)
           }}
+          
         />
 
         {focusedModalVisible && <TextOnlyModal title="Data Point Details" text={focusedText} onClose={() => {
@@ -274,7 +275,7 @@ export default function LogLineChart(props) {
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24}}>
           <Ionicons name="alert-circle-outline" size={48} color="grey" style={{marginBottom: 12}} />
           <Text style={{textAlign: 'center', color:'grey', fontSize:24, fontWeight: '600'}}>
-            No Logs Available
+            No Data Available
           </Text>
           {}
           <Text style={{textAlign: 'center', color:'grey', fontSize:16, marginTop: 8}}>

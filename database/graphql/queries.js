@@ -186,6 +186,7 @@ export const getNutrition = /* GraphQL */ `
       isPhoto
       ingredients
       saved
+      synced
       createdAt
       updatedAt
       __typename
@@ -212,6 +213,7 @@ export const listNutritions = /* GraphQL */ `
         isPhoto
         ingredients
         saved
+        synced
         createdAt
         updatedAt
         __typename
@@ -243,6 +245,7 @@ export const getSettings = /* GraphQL */ `
       fatsGoal
       onboardingCompleted
       lastExercise
+      synced
       createdAt
       updatedAt
       __typename
@@ -276,6 +279,7 @@ export const listSettings = /* GraphQL */ `
         fatsGoal
         onboardingCompleted
         lastExercise
+        synced
         createdAt
         updatedAt
         __typename

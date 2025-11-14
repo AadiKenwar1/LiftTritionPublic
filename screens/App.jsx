@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -6,7 +6,9 @@ import { Ionicons } from "@expo/vector-icons";
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Octicons from '@expo/vector-icons/Octicons';
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
+import Constants from "expo-constants";
+import Purchases, { LOG_LEVEL } from "react-native-purchases";
 
 // Import Amplify configuration first (now in AuthContext)
 import "../context/Auth/amplifyConfig";
@@ -16,6 +18,7 @@ import { AuthProvider, useAuthContext } from "../context/Auth/AuthContext";
 import { SettingsProvider, useSettings } from "../context/SettingsContext";
 import { WorkoutProvider, useWorkoutContext } from "../context/WorkoutsV2/WorkoutContext";
 import { NutritionProvider, useNutritionContext } from "../context/Nutrition/NutritionContext";
+import { BillingProvider } from "../context/Billing/BillingContext";
 
 // Screens
 import WelcomeScreen from "./welcomeScreen";
@@ -42,8 +45,8 @@ import TrainingFrequencyScreen from "./settings/SettingsOptions/trainingFrequenc
 import PrivacyScreen from "./settings/SettingsOptions/privacy";
 import AboutScreen from "./settings/SettingsOptions/about";
 import SupportScreen from "./settings/SettingsOptions/support";
+import SubscriptionScreen from "./settings/SettingsOptions/subscription";
 import UserExercisesScreen from "./settings/SettingsOptions/userExercises/userExercises";
-import AddUserExerciseScreen from "./settings/SettingsOptions/userExercises/addUserExercise";
 import AddExerciseScreen1 from "./settings/SettingsOptions/userExercises/AddExerciseScreen1";
 import AddExerciseScreen2 from "./settings/SettingsOptions/userExercises/AddExerciseScreen2";
 import AddExerciseScreen3 from "./settings/SettingsOptions/userExercises/AddExerciseScreen3";
@@ -161,8 +164,8 @@ function AuthenticatedApp() {
             <Stack.Screen name="Privacy" component={PrivacyScreen} options={{ title: "Privacy", ...styles }} />
             <Stack.Screen name="About" component={AboutScreen} options={{ title: "About", ...styles }} />
             <Stack.Screen name="Support" component={SupportScreen} options={{ title: "Support", ...styles }} />
+            <Stack.Screen name="Subscription" component={SubscriptionScreen} options={{ title: "Manage Subscription", ...styles }} />
             <Stack.Screen name="UserExercisesScreen" component={UserExercisesScreen} options={{ title: "UserExercisesScreen", ...styles }} />
-            <Stack.Screen name="AddUserExercise" component={AddUserExerciseScreen} options={{ title: "AddUserExercise", ...styles }} />
             <Stack.Screen name="AddExerciseScreen1" component={AddExerciseScreen1} options={{ title: "Add Exercise", ...styles }} />
             <Stack.Screen name="AddExerciseScreen2" component={AddExerciseScreen2} options={{ title: "Add Exercise", ...styles }} />
             <Stack.Screen name="AddExerciseScreen3" component={AddExerciseScreen3} options={{ title: "Add Exercise", ...styles }} />
@@ -196,8 +199,35 @@ function AuthenticatedApp() {
 
 
 function AppContent() {
+  const { user, loading: authLoading } = useAuthContext();
+
+  useEffect(() => {
+    let apiKey;
+
+    if (Platform.OS === "ios") {
+      apiKey = Constants.expoConfig?.extra?.REVENUECAT_API_KEY_IOS;
+    } else if (Platform.OS === "android") {
+      apiKey = Constants.expoConfig?.extra?.REVENUECAT_API_KEY_ANDROID;
+    }
+
+    if (!apiKey) {
+      console.warn("Missing RevenueCat API key for this platform.");
+      return;
+    }
+
+    Purchases.setLogLevel(LOG_LEVEL.VERBOSE);
+    Purchases.configure({ apiKey });
+  }, []);
+
+  useEffect(() => {
+    if (authLoading) {
+      return;
+    }
+    syncRevenueCatUser(user);
+  }, [user, authLoading]);
+
   return (
-    <AuthProvider>
+    <BillingProvider>
       <SettingsProvider>
         <WorkoutProvider>
           <NutritionProvider>
@@ -207,7 +237,7 @@ function AppContent() {
           </NutritionProvider>
         </WorkoutProvider>
       </SettingsProvider>
-    </AuthProvider>
+    </BillingProvider>
   );
 }
 
@@ -224,5 +254,21 @@ const styles = {
 };
 
 export default function App() {
-  return <AppContent />;
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
+}
+
+function syncRevenueCatUser(user) {
+  if (user?.appleUserId) {
+    return Purchases.logIn(user.appleUserId).catch((error) => {
+      console.warn("[RevenueCat] Failed to log in user", error);
+    });
+  }
+
+  return Purchases.logOut().catch((error) => {
+    console.warn("[RevenueCat] Failed to log out user", error);
+  });
 }

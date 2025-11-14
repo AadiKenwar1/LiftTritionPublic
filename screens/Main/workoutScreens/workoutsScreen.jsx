@@ -15,42 +15,15 @@ import { useWorkoutContext } from "../../../context/WorkoutsV2/WorkoutContext";
 import { Alert } from "react-native";
 
 export default function LogScreen() {
-  //Screen variables
   const navigation = useNavigation();
-  const [workoutName, setWorkoutName] = useState("");
-  const [modalVisible, setModalVisible] = useState(false);
-  const [exerciseModalVisible, setExerciseModalVisible] = useState(false)
 
-  // V1 Context (keeping for reference)
-  const {
-    workouts: workoutsV1,
-    addWorkout: addWorkoutV1,
-    reorderWorkouts: reorderWorkoutsV1,
-    deleteWorkout: deleteWorkoutV1,
-    renameWorkout: renameWorkoutV1,
-    archiveWorkout: archiveWorkoutV1,
-  } = useWorkoutContext();
-
-  // V2 Context - now using for main functionality
   const {
     workouts,
-    addWorkout,
     reorderWorkouts,
     deleteWorkout,
     renameWorkout,
     archiveWorkout,
-    loading
   } = useWorkoutContext();
-
-  //Adds workouts
-  function handleAddWorkout(inputName) {
-    console.log('🚀 Adding workout with V2 context:', inputName);
-    console.log('📊 Current V2 workouts count:', workouts.length);
-    console.log('📋 V2 Workout names:', workouts.map(w => w.name));
-    addWorkout(inputName);
-    setWorkoutName(""); // clear input
-    setModalVisible(false); // close modal
-  }
 
   //Navigates to exerciseScreen when workout is clicked
   function goToWorkoutDetails(workout) {

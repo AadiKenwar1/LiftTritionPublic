@@ -4,9 +4,13 @@ import { useState } from 'react';
 import { askOpenAI } from '../../../utils/openAI';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useNutritionContext } from '../../../context/Nutrition/NutritionContext';
+import { useBilling } from '../../../context/Billing/BillingContext.js';
+import { useNavigation } from '@react-navigation/native';
 
 export default function AddNutritionScreen(props) {
 
+  const { hasPremium } = useBilling();
+  const navigation = useNavigation();
   const [mode, setMode] = useState(0) // 0 = manual
   const [mainInput, setMainInput] = useState('');
   const [cals, setCals] = useState(0)
@@ -137,6 +141,11 @@ export default function AddNutritionScreen(props) {
     setFats(0);
   }
 
+  function handleNotPremium(){
+    navigation.navigate('Subscription');
+    props.onClose();
+  }
+
 
   function content(){
     const header = (
@@ -172,8 +181,8 @@ export default function AddNutritionScreen(props) {
           </View>
           {mode === 0 &&
           <TouchableOpacity 
-            style={[styles.aiButton, loadingCals && styles.aiButtonDisabled]} 
-            onPress={() => handleGenerateSpecificMacro('calories')}
+            style={[styles.aiButton, (loadingCals || !hasPremium) && styles.aiButtonDisabled]} 
+            onPress={() => hasPremium ? handleGenerateSpecificMacro('calories') : handleNotPremium()}
             disabled={loadingCals}
           >
             <Ionicons name="sparkles-sharp" size={18} color="#ffffff" />
@@ -202,8 +211,8 @@ export default function AddNutritionScreen(props) {
           </View>
           {mode === 0 &&
           <TouchableOpacity 
-            style={[styles.aiButton, loadingProtein && styles.aiButtonDisabled]} 
-            onPress={() => handleGenerateSpecificMacro('protein')}
+            style={[styles.aiButton, (loadingProtein || !hasPremium) && styles.aiButtonDisabled]} 
+            onPress={() => hasPremium ? handleGenerateSpecificMacro('protein') : handleNotPremium()}
             disabled={loadingProtein}
           >
             <Ionicons name="sparkles-sharp" size={18} color="#ffffff" />
@@ -232,8 +241,8 @@ export default function AddNutritionScreen(props) {
           </View>
           {mode === 0 &&
           <TouchableOpacity 
-            style={[styles.aiButton, loadingCarbs && styles.aiButtonDisabled]} 
-            onPress={() => handleGenerateSpecificMacro('carbs')}
+            style={[styles.aiButton, (loadingCarbs || !hasPremium) && styles.aiButtonDisabled]} 
+            onPress={() => hasPremium ? handleGenerateSpecificMacro('carbs') : handleNotPremium()}
             disabled={loadingCarbs}
           >
             <Ionicons name="sparkles-sharp" size={18} color="#ffffff" />
@@ -262,8 +271,8 @@ export default function AddNutritionScreen(props) {
           </View>
           {mode === 0 &&
           <TouchableOpacity 
-            style={[styles.aiButton, loadingFats && styles.aiButtonDisabled]} 
-            onPress={() => handleGenerateSpecificMacro('fats')}
+            style={[styles.aiButton, (loadingFats || !hasPremium) && styles.aiButtonDisabled]} 
+            onPress={() => hasPremium ? handleGenerateSpecificMacro('fats') : handleNotPremium()}
             disabled={loadingFats}
           >
             <Ionicons name="sparkles-sharp" size={18} color="#ffffff" />
@@ -531,8 +540,8 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 13,
   },
   aiButtonDisabled: {
-    backgroundColor: '#B8B8B8',
-    opacity: 0.6,
+    backgroundColor: '#D94CC4',
+    opacity: 0.4,
   },
   generateButton: {
     backgroundColor: '#D94CC4',

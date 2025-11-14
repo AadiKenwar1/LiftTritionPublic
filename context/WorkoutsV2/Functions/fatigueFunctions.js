@@ -86,6 +86,8 @@ export function getFatigueForLastXDaysV2(numDays, logs, exercises, exerciseLibra
   const executionTime = endTime - startTime;
   const logsProcessed = logs.length;
   
+  // Log today's logs specifically if calculating for today (1 day)
+  
   console.log(`🚀 V2 Fatigue Calculation Performance:`, {
     executionTime: `${executionTime.toFixed(2)}ms`,
     logsProcessed,

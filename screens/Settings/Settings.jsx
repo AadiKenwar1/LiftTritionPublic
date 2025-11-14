@@ -49,6 +49,19 @@ export default function Settings() {
               </View>
             </TouchableOpacity>
 
+            <TouchableOpacity
+              style={styles.settingRow}
+              onPress={() => navigation.navigate("Subscription")}
+            >
+              <View style={styles.rowContent}>
+                <View style={styles.settingInfo}>
+                  <Text style={styles.settingText}>Manage Subscription</Text>
+                  <Text style={styles.settingSubtext}>Upgrade, restore, or cancel your plan</Text>
+                </View>
+                <Ionicons name="card-outline" size={28} color="black" />
+              </View>
+            </TouchableOpacity>
+
             <TouchableOpacity style={styles.settingRow} onPress={() => navigation.navigate("UserExercisesScreen")}>
               <View style={styles.rowContent}>
                 <View style={styles.settingInfo}>

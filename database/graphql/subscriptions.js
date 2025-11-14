@@ -237,6 +237,7 @@ export const onCreateNutrition = /* GraphQL */ `
       isPhoto
       ingredients
       saved
+      synced
       createdAt
       updatedAt
       __typename
@@ -260,6 +261,7 @@ export const onUpdateNutrition = /* GraphQL */ `
       isPhoto
       ingredients
       saved
+      synced
       createdAt
       updatedAt
       __typename
@@ -283,6 +285,7 @@ export const onDeleteNutrition = /* GraphQL */ `
       isPhoto
       ingredients
       saved
+      synced
       createdAt
       updatedAt
       __typename
@@ -311,6 +314,7 @@ export const onCreateSettings = /* GraphQL */ `
       fatsGoal
       onboardingCompleted
       lastExercise
+      synced
       createdAt
       updatedAt
       __typename
@@ -339,6 +343,7 @@ export const onUpdateSettings = /* GraphQL */ `
       fatsGoal
       onboardingCompleted
       lastExercise
+      synced
       createdAt
       updatedAt
       __typename
@@ -367,6 +372,7 @@ export const onDeleteSettings = /* GraphQL */ `
       fatsGoal
       onboardingCompleted
       lastExercise
+      synced
       createdAt
       updatedAt
       __typename

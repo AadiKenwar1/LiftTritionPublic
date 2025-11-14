@@ -50,7 +50,7 @@ export default function CustomHeader(props) {
           style={[styles.modeButton, mode === false && styles.activeModeButtonMacros]}
           onPress={() => setMode(false)}
         >
-          <Text style={[styles.modeButtonText, mode === false && styles.activeModeText]}>Macros</Text>
+          <Text style={[styles.modeButtonText, mode === false && styles.activeModeText]}>Nutrition</Text>
         </TouchableOpacity>
       </View>
       )

@@ -1,5 +1,6 @@
 // theme/ThemeContext.js
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { Alert } from 'react-native';
 import { getLocalDateKey } from '../utils/date';
 import { generateClient } from 'aws-amplify/api';
 import { getSettings, listSettings } from '../database/graphql/queries';
@@ -312,6 +313,7 @@ export const SettingsProvider = ({ children }) => {
                 }
             } catch (e) {
                 console.error('[SettingsContext] Error saving settings to AppSync:', e);
+                Alert.alert('Settings Save Failed', 'Unable to save your settings. Please check your connection and try again.');
             }
         }
         saveSettings();

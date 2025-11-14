@@ -54,14 +54,16 @@ export default function OnboardingScreen12() {
         goalWeight,
         goalPace,
         calculatedMacros
-      }
+      };
+
       const result = await markOnboardingCompleted(onboardingData);
       if (!result.success) {
         Alert.alert('Error', result.error || 'Failed to complete onboarding');
+        return;
       }
-      else {
-        updateWeight(weight);
-      }
+
+      updateWeight(weight);
+      navigation.replace('Tabs');
     } catch (error) {
       console.error('Error completing onboarding:', error);
       Alert.alert('Error', 'Something went wrong. Please try again.');
@@ -170,7 +172,7 @@ export default function OnboardingScreen12() {
           </TouchableOpacity>
           
           <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
-            <Text style={styles.nextButtonText}>Create Account</Text>
+            <Text style={styles.nextButtonText}>Next</Text>
           </TouchableOpacity>
         </View>
       </View>

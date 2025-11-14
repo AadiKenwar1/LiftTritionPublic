@@ -12,12 +12,12 @@ import {
 } from 'react-native';
 import LogLineChart from '../../components/Charts/LogChart/LogLineChart';
 import MetricLineChart from '../../components/Charts/MetricsChart/MetricLineChart';
-import FatigueMeter from '../../components/FatigueMeter';
 import CustomHeader from '../../components/CustomHeader';
 import ProgressWheel from '../../components/ProgressWheel';
 import { useSettings } from '../../context/SettingsContext';
 import { useNutritionContext } from '../../context/Nutrition/NutritionContext';
 import { useWorkoutContext } from '../../context/WorkoutsV2/WorkoutContext';
+import { useAuth } from '../../context/Auth/AuthContext';
 
 const { width: screenWidth } = Dimensions.get('window');
 export default function ProgressScreen() {
@@ -27,18 +27,10 @@ export default function ProgressScreen() {
     const {getFatigueForLastXDays, loading} = useWorkoutContext()
     
     // Calculate V2 fatigue percentages
-    console.log('🚀 Calculating fatigue with V2 context');
     const fatigueTodayPercent = getFatigueForLastXDays(1);
     const fatigueLast3DaysPercent = getFatigueForLastXDays(3);
     const fatigueLast6DaysPercent = getFatigueForLastXDays(6);
     const fatigueLast9DaysPercent = getFatigueForLastXDays(9);
-    
-    console.log('📊 V2 Fatigue percentages:', {
-      today: fatigueTodayPercent,
-      last3Days: fatigueLast3DaysPercent,
-      last6Days: fatigueLast6DaysPercent,
-      last9Days: fatigueLast9DaysPercent
-    });
 
     const todaysCalories = getTodaysMacro("calories");
     const calPercent = (todaysCalories / calorieGoal) * 100;

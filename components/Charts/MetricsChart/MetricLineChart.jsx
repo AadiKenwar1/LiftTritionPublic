@@ -211,14 +211,13 @@ export default function MetricLineChart(props) {
           yAxisLabelWidth={40}
           yAxisThickness={2}
           xAxisThickness={2}
-          hideRules
+          //hideRules
           isAnimated={false}
           showDataPoint={selectedData <= 10}
           dataPointsColor={mode === true ? "#2D9CFF" : '#4CD964'} // outline color
           dataPointsRadius={6} // outer circle size
           dataPointsWidth={3} // inner filled dot (leave smaller)
           dataPointsShape="circle"
-          showRules
           //rotateLabel
           yAxisLabelContainerStyle={{ marginTop: 1 }}
           // 🔥 Enable focus

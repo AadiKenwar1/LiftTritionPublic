@@ -74,6 +74,8 @@ export default {
       // GraphQL API
       GRAPHQL_ENDPOINT: process.env.GRAPHQL_ENDPOINT,
       GRAPHQL_API_KEY: process.env.GRAPHQL_API_KEY,
+      REVENUECAT_API_KEY_IOS: process.env.REVENUECAT_API_KEY_IOS,
+      REVENUECAT_API_KEY_ANDROID: process.env.REVENUECAT_API_KEY_ANDROID,
       
       eas: {
         projectId: "30f35f1b-1628-4ec9-83c4-83cca617f111",
