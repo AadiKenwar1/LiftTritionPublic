@@ -14,7 +14,7 @@ export default {
        resizeMode: "contain",
        backgroundColor: "#ffffff",
     },
-    platforms: ["ios", "android"],
+    platforms: process.env.EXPO_NO_WEB === "1" ? ["ios", "android"] : ["ios", "android", "web"],
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.LiftLyzerCo.liftlyzer.app",
@@ -51,6 +51,7 @@ export default {
       },
       edgeToEdgeEnabled: true,
     },
+
     extra: {
       OPENAI_API_KEY: process.env.OPENAI_API_KEY,      
       FATSECRET_CLIENT_ID: process.env.FATSECRET_CLIENT_ID,
@@ -69,20 +70,7 @@ export default {
     plugins: [
       "expo-font",
       "expo-apple-authentication",
-      [
-        "expo-build-properties",
-        {
-          ios: {
-            useFrameworks: "static",
-            deploymentTarget: "16.0",
-          },
-          android: {
-            compileSdkVersion: 34,
-            targetSdkVersion: 34,
-            buildToolsVersion: "34.0.0",
-          },
-        },
-      ],
+      
     ],
   },
 };

@@ -21,10 +21,7 @@
     "preview": {
       "distribution": "internal",
       "ios": {
-        "resourceClass": "medium",
-        "cache": {
-          "disabled": true
-        }
+        "resourceClass": "medium"
       },
       "env": {
         "EXPO_NO_WEB": "1"
@@ -37,10 +34,7 @@
         "resourceClass": "medium",
         "credentialsSource": "remote",
         "distribution": "store",
-        "image": "latest",
-        "cache": {
-          "disabled": true
-        }
+        "image": "latest"
       },
       "env": {
         "EXPO_NO_WEB": "1",
