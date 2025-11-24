@@ -2,19 +2,19 @@ import 'dotenv/config';
 
 export default {
   expo: {
-    name: "LiftLyzerV3",
+    name: "LiftTrition",
     slug: "LiftLyzerV3",
     version: "1.0.0",
     orientation: "portrait",
-    // icon: "./assets/icon.png",
+    icon: "./assets/iconMinimal.png",
     userInterfaceStyle: "light",
-    // newArchEnabled: true, // Removed for SDK 52 compatibility
-    // Temporarily disabled splash screen to avoid permission issues during iOS build
-    // splash: {
-    //   image: "./assets/splash-icon.png",
-    //   resizeMode: "contain",
-    //   backgroundColor: "#ffffff",
-    // },
+    //newArchEnabled: true,
+    splash: {
+       image: "./assets/splash-icon.png",
+       resizeMode: "contain",
+       backgroundColor: "#ffffff",
+    },
+    platforms: ["ios", "android"],
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.LiftLyzerCo.liftlyzer.app",
@@ -51,27 +51,12 @@ export default {
       },
       edgeToEdgeEnabled: true,
     },
-    // Temporarily disabled web platform to avoid permission issues during iOS build
-    // web: {
-    //   favicon: "./assets/favicon.png",
-    // },
     extra: {
-      // AWS Cognito
-      COGNITO_USER_POOL_ID: process.env.COGNITO_USER_POOL_ID,
-      COGNITO_USER_POOL_CLIENT_ID: process.env.COGNITO_USER_POOL_CLIENT_ID,
-      
-      //Open AI API
-      OPENAI_API_KEY: process.env.OPENAI_API_KEY,
-      
-      // Nutritionix API
-      NUTRITIONX_APP_ID: process.env.NUTRITIONX_APP_ID,
-      NUTRITIONX_API_KEY: process.env.NUTRITIONX_API_KEY,
-      
-      // AppSync API
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY,      
+      FATSECRET_CLIENT_ID: process.env.FATSECRET_CLIENT_ID,
+      FATSECRET_CLIENT_SECRET: process.env.FATSECRET_CLIENT_SECRET,
       APPSYNC_ENDPOINT: process.env.APPSYNC_ENDPOINT,
       APPSYNC_API_KEY: process.env.APPSYNC_API_KEY,
-      
-      // GraphQL API
       GRAPHQL_ENDPOINT: process.env.GRAPHQL_ENDPOINT,
       GRAPHQL_API_KEY: process.env.GRAPHQL_API_KEY,
       REVENUECAT_API_KEY_IOS: process.env.REVENUECAT_API_KEY_IOS,

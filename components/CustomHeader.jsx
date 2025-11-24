@@ -2,7 +2,8 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import {useSettings} from '../context/SettingsContext'
+import { useSettings } from '../context/SettingsContext';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function CustomHeader(props) {
 
@@ -22,7 +23,7 @@ export default function CustomHeader(props) {
           style={styles.sideButton}
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="arrow-back" size={24} color="black" marginTop={40} />
+          <Ionicons name="arrow-back" size={24} color="white" marginTop={40} />
         </TouchableOpacity>
         
       ) : (
@@ -39,19 +40,51 @@ export default function CustomHeader(props) {
       ):(
       <View style={styles.modeSelectorContainer}>
         {/**Mode Selector */}
-        <TouchableOpacity
-          style={[styles.modeButton, mode === true && styles.activeModeButtonLift]}
-          onPress={() => setMode(true)}
-        >
-          <Text style={[styles.modeButtonText, mode === true && styles.activeModeText]}>Lift</Text>
-        </TouchableOpacity>
+        {mode === true ? (
+          <Pressable
+            style={styles.modeButton}
+            onPress={() => setMode(true)}
+          >
+            <LinearGradient
+              colors={['#1A7FE0', '#2D9CFF', '#3DAFFF']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              style={styles.gradientButton}
+            >
+              <Text style={[styles.modeButtonText, styles.activeModeText]}>LIFT</Text>
+            </LinearGradient>
+          </Pressable>
+        ) : (
+          <TouchableOpacity
+            style={[styles.modeButton, styles.inactiveModeButton]}
+            onPress={() => setMode(true)}
+          >
+            <Text style={styles.modeButtonText}>LIFT</Text>
+          </TouchableOpacity>
+        )}
 
-        <TouchableOpacity
-          style={[styles.modeButton, mode === false && styles.activeModeButtonMacros]}
-          onPress={() => setMode(false)}
-        >
-          <Text style={[styles.modeButtonText, mode === false && styles.activeModeText]}>Nutrition</Text>
-        </TouchableOpacity>
+        {mode === false ? (
+          <Pressable
+            style={styles.modeButton}
+            onPress={() => setMode(false)}
+          >
+            <LinearGradient
+              colors={['#3CB855', '#4CD964', '#5CE073']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              style={styles.gradientButton}
+            >
+              <Text style={[styles.modeButtonText, styles.activeModeText]}>NUTRITION</Text>
+            </LinearGradient>
+          </Pressable>
+        ) : (
+          <TouchableOpacity
+            style={[styles.modeButton, styles.inactiveModeButton]}
+            onPress={() => setMode(false)}
+          >
+            <Text style={styles.modeButtonText}>NUTRITION</Text>
+          </TouchableOpacity>
+        )}
       </View>
       )
       
@@ -64,7 +97,7 @@ export default function CustomHeader(props) {
 const styles = StyleSheet.create({
   header: {
     height: 100,
-    backgroundColor: "#F2F2F2",
+    backgroundColor: "#121212",
     alignItems: "center",
     justifyContent: "center",
     flexDirection:"row",
@@ -79,7 +112,7 @@ const styles = StyleSheet.create({
   title: {
     flex: 1,
     textAlign: "center",
-    color: "black",
+    color: "white",
     fontSize: 24,
     fontWeight: 'bold',
     fontFamily: 'Inter_700Bold',
@@ -104,41 +137,44 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: 35,
-    backgroundColor: '#F2F2F2', // light gray
+    backgroundColor: 'transparent', // light gray
     padding: 4,
     borderRadius: 10,
-
     elevation: 4,
     gap: 2,
   },
 
   modeButton: {
     flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
     borderRadius: 8,
+    overflow: 'hidden',
+    borderWidth: 0.3,
+    borderColor: 'grey',
+  },
+  inactiveModeButton: {
+    backgroundColor: '#1A1A1A',
+    paddingVertical: 10,
     alignItems: 'center',
-    borderWidth: 1,
-    borderWidth: 1.3,
-    borderColor: 'black',
-    borderBottomWidth: 4,
-    borderBottomColor: 'black',
-    shadowColor: '#000',
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
-
-  activeModeButtonLift: {
-    backgroundColor: '#2D9CFF', // indigo
-  },
-  activeModeButtonMacros: {
-    backgroundColor: '#4CD964', // indigo
+  gradientButton: {
+    paddingVertical: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 3,
   },
   modeButtonText: {
     fontSize: 16,
     fontFamily: 'Inter_500Medium',
-    color: 'black', // gray-700
+    color: 'white', // gray-700
   },
 
   activeModeText: {

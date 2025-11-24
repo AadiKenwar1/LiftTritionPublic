@@ -3,16 +3,18 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, KeyboardAvo
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
+import { Ruler } from 'lucide-react-native';
 
 export default function OnboardingScreen4() {
   const navigation = useNavigation();
   const route = useRoute();
-  const { birthDate, age } = route.params || {};
+  const { birthDate, age, gender } = route.params || {};
   
   const [feet, setFeet] = useState(5);
   const [inches, setInches] = useState(8);
   const [weight, setWeight] = useState('');
   const [unit, setUnit] = useState(true); // true = imperial, false = metric
+  const [cmValue, setCmValue] = useState('');
 
   // Generate arrays for picker options
   const feetOptions = Array.from({ length: 5 }, (_, i) => i + 3); // 3-7 feet
@@ -35,16 +37,22 @@ export default function OnboardingScreen4() {
       return;
     }
 
-    // Convert height to total inches for storage
-    console.log('Height calculation debug:', { feet, inches, feetType: typeof feet, inchesType: typeof inches });
-    const totalInches = Number(feet) * 12 + Number(inches);
-    console.log('Total inches calculated:', totalInches);
+    // Store height in user's preferred unit (cm for metric, inches for imperial)
+    let heightValue;
+    if (unit) {
+      // Imperial: use feet/inches
+      heightValue = Number(feet) * 12 + Number(inches);
+    } else {
+      // Metric: use cmValue directly if available, otherwise calculate from feet/inches
+      heightValue = cmValue ? parseFloat(cmValue) : (Number(feet) * 12 + Number(inches)) * 2.54;
+    }
 
     // Store all data collected so far
     navigation.navigate('Onboarding6', {
       birthDate,
       age,
-      height: totalInches,
+      gender,
+      height: heightValue,
       weight: weightNum,
       unit,
       feet,
@@ -53,7 +61,16 @@ export default function OnboardingScreen4() {
   };
 
   const toggleUnit = () => {
+    const wasMetric = !unit;
     setUnit(!unit);
+    if (!wasMetric && !unit) {
+      // Switching to metric - initialize cmValue from feet/inches
+      const totalInches = Number(feet) * 12 + Number(inches);
+      setCmValue(Math.round(totalInches * 2.54).toString());
+    } else {
+      // Switching to imperial - clear cmValue
+      setCmValue('');
+    }
     // Reset to defaults when switching units
     setFeet(5);
     setInches(8);
@@ -68,11 +85,14 @@ export default function OnboardingScreen4() {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.container}>
           <View style={styles.content}>
-            <Text style={styles.title}>What are your measurements?</Text>
-            
-            <Text style={styles.description}>
-              This information helps us calculate your personalized nutrition and fitness recommendations.
-            </Text>
+            <Ruler size={32} color="#00B8A9" style={styles.rulerIcon} />
+            <View style={styles.headerSection}>
+              <Text style={styles.title}>What are your measurements?</Text>
+              
+              <Text style={styles.description}>
+                This helps us calculate your personalized fitness recommendations.
+              </Text>
+            </View>
 
             {/* Unit Toggle */}
             <View style={styles.unitToggleContainer}>
@@ -81,7 +101,7 @@ export default function OnboardingScreen4() {
                 onPress={() => setUnit(true)}
               >
                 <Text style={[styles.unitButtonText, unit && styles.unitButtonTextActive]}>
-                  Imperial (lbs, in)
+                  Imperial
                 </Text>
               </TouchableOpacity>
               
@@ -90,76 +110,83 @@ export default function OnboardingScreen4() {
                 onPress={() => setUnit(false)}
               >
                 <Text style={[styles.unitButtonText, !unit && styles.unitButtonTextActive]}>
-                  Metric (kg, cm)
+                  Metric
                 </Text>
               </TouchableOpacity>
             </View>
 
-            {/* Height Input */}
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Height</Text>
-              {unit ? (
-                <View style={styles.heightInputRow}>
-                  <View style={styles.heightInputGroup}>
-                    <Picker
-                      selectedValue={feet}
-                      onValueChange={(value) => setFeet(Number(value))}
-                      style={styles.inlinePicker}
-                      itemStyle={styles.inlinePickerItem}
-                    >
-                      {feetOptions.map((foot) => (
-                        <Picker.Item key={foot} label={`${foot} ft`} value={foot} />
-                      ))}
-                    </Picker>
+            {/* Inputs Card */}
+            <View style={styles.inputsCard}>
+              {/* Height Input */}
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Height ({unit ? 'in' : 'cm'})</Text>
+                {unit ? (
+                  <View style={styles.heightInputRow}>
+                    <View style={styles.heightInputGroup}>
+                      <Picker
+                        selectedValue={feet}
+                        onValueChange={(value) => setFeet(Number(value))}
+                        style={styles.inlinePicker}
+                        itemStyle={styles.inlinePickerItem}
+                      >
+                        {feetOptions.map((foot) => (
+                          <Picker.Item key={foot} label={`${foot} ft`} value={foot} />
+                        ))}
+                      </Picker>
+                    </View>
+                    <View style={styles.heightInputGroup}>
+                      <Picker
+                        selectedValue={inches}
+                        onValueChange={(value) => setInches(Number(value))}
+                        style={styles.inlinePicker}
+                        itemStyle={styles.inlinePickerItem}
+                      >
+                        {inchesOptions.map((inch) => (
+                          <Picker.Item key={inch} label={`${inch} in`} value={inch} />
+                        ))}
+                      </Picker>
+                    </View>
                   </View>
-                  <View style={styles.heightInputGroup}>
-                    <Picker
-                      selectedValue={inches}
-                      onValueChange={(value) => setInches(Number(value))}
-                      style={styles.inlinePicker}
-                      itemStyle={styles.inlinePickerItem}
-                    >
-                      {inchesOptions.map((inch) => (
-                        <Picker.Item key={inch} label={`${inch} in`} value={inch} />
-                      ))}
-                    </Picker>
-                  </View>
-                </View>
-              ) : (
-                <TextInput
-                  style={styles.input}
-                  keyboardType="numeric"
-                  value={Math.round((feet * 12 + inches) * 2.54).toString()}
-                  onChangeText={(value) => {
-                    const cm = parseFloat(value) || 0;
-                    const totalInches = cm / 2.54;
-                    const newFeet = Math.floor(totalInches / 12);
-                    const newInches = Math.round(totalInches % 12);
-                    setFeet(newFeet);
-                    setInches(newInches);
-                  }}
-                  placeholder="Enter height in cm"
-                  placeholderTextColor="#999"
-                />
-              )}
-            </View>
+                ) : (
+                  <TextInput
+                    style={styles.weightInput}
+                    keyboardType="numeric"
+                    value={cmValue}
+                    onChangeText={(value) => {
+                      setCmValue(value); // Store raw input
+                      const cm = parseFloat(value) || 0;
+                      if (cm > 0) {
+                        const totalInches = cm / 2.54;
+                        const newFeet = Math.floor(totalInches / 12);
+                        const newInches = Math.round(totalInches % 12);
+                        setFeet(newFeet);
+                        setInches(newInches);
+                      }
+                    }}
+                    placeholder="Enter height in cm"
+                    placeholderTextColor="#9CA3AF"
+                  
+                  />
+                )}
+              </View>
 
-            {/* Weight Input */}
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Weight ({unit ? 'lbs' : 'kg'})</Text>
-              <TextInput
-                style={styles.weightInput}
-                keyboardType="numeric"
-                value={weight}
-                onChangeText={setWeight}
-                placeholder={`Enter your weight in ${unit ? 'lbs' : 'kg'}`}
-                placeholderTextColor="#999"
-              />
+              {/* Weight Input */}
+              <View style={[styles.inputContainer, styles.inputContainerLast]}>
+                <Text style={styles.inputLabel}>Weight ({unit ? 'lbs' : 'kg'})</Text>
+                <TextInput
+                  style={styles.weightInput}
+                  keyboardType="numeric"
+                  value={weight}
+                  onChangeText={setWeight}
+                  placeholder={`Enter weight in ${unit ? 'lbs' : 'kg'}`}
+                  placeholderTextColor="#9CA3AF"
+                />
+              </View>
             </View>
             
             <View style={styles.buttonContainer}>
               <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-                <Ionicons name="arrow-back" size={20} color="#666666" />
+                <Ionicons name="arrow-back" size={20} color="white" />
                 <Text style={styles.backButtonText}>Back</Text>
               </TouchableOpacity>
               
@@ -181,197 +208,212 @@ export default function OnboardingScreen4() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#242424',
   },
   content: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 30,
+    paddingVertical: 20,
+    width: '100%',
+    
+  },
+  rulerIcon: {
+    marginBottom: 5,
+  },
+  headerSection: {
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 20,
   },
   title: {
     fontSize: 28,
     fontWeight: '800',
-    color: '#1A1A1A',
-    marginBottom: 8,
+    color: '#00B8A9',
+    marginBottom: 5,
     textAlign: 'center',
+    fontFamily: 'Inter_800ExtraBold',
   },
   description: {
     fontSize: 15,
-    color: '#666666',
+    color: 'white',
     textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 20,
+    lineHeight: 22,
     paddingHorizontal: 10,
-    maxWidth: 300,
+    maxWidth: 320,
+    fontFamily: 'Inter_400Regular',
+    opacity: 0.9,
   },
   unitToggleContainer: {
     flexDirection: 'row',
-    marginBottom: 20,
-    borderRadius: 12,
-    backgroundColor: '#F8F9FA',
-    padding: 4,
-    gap:10 
+    marginBottom: 15,
+    gap: 12,
+    width: '100%',
+    maxWidth: 320,
   },
   unitButton: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: 10,
     paddingHorizontal: 16,
-    borderRadius: 8,
+    borderRadius: 10,
     alignItems: 'center',
-    shadowColor: '#000',
+    justifyContent: 'center',
+    backgroundColor: '#1A1A1A',
+    borderWidth: 0.3,
+    borderColor: 'grey',
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
-    borderWidth: 1,
-    borderColor: 'black',
-    borderBottomWidth: 4,
-    borderBottomColor: 'black',
-    borderBottomLeftRadius: 12,
-    borderBottomRightRadius: 12
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
   },
   unitButtonActive: {
     backgroundColor: '#00B8A9',
+    borderColor: '#00B8A9',
   },
   unitButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#666666',
+    fontSize: 16,
+    fontWeight: '700',
+    color: 'white',
+    fontFamily: 'Inter_700Bold',
   },
   unitButtonTextActive: {
     color: '#FFFFFF',
   },
+  inputsCard: {
+    width: '100%',
+    maxWidth: 320,
+    backgroundColor: '#242424',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 10,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
+  },
   inputContainer: {
     width: '100%',
-    marginBottom: 25,
+    marginBottom: 20,
+  },
+  inputContainerLast: {
+    marginBottom: 0,
   },
   inputLabel: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '600',
-    color: '#1A1A1A',
-    marginBottom: 6,
-    textAlign: 'center',
+    color: 'white',
+    marginBottom: 12,
+    textAlign: 'left',
+    fontFamily: 'Inter_600SemiBold',
   },
   input: {
-    borderWidth: 2,
-    borderColor: '#E9ECEF',
+    borderWidth: 0.3,
+    borderColor: 'grey',
     borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 16,
     fontSize: 16,
-    backgroundColor: '#F8F9FA',
-    color: '#1A1A1A',
-    shadowColor: '#000',
+    backgroundColor: '#1A1A1A',
+    color: 'white',
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
-    borderWidth: 1,
-    borderColor: 'black',
-    borderBottomWidth: 4,
-    borderBottomColor: 'black',
-    borderBottomLeftRadius: 12,
-    borderBottomRightRadius: 12
-    
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    fontFamily: 'Inter_400Regular',
   },
   heightInputRow: {
     flexDirection: 'row',
-    gap: 10,
-    
-    
+    gap: 12,
   },
   heightInputGroup: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: 'black',
+    borderWidth: 0.3,
+    borderColor: 'grey',
     borderRadius: 12,
-    backgroundColor: '#F8F9FA',
     overflow: 'hidden',
-    height: 100,
-    shadowColor: '#000',
+    height: 120,
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
-    borderWidth: 1,
-    borderColor: 'black',
-    borderBottomWidth: 4,
-    borderBottomColor: 'black',
-    borderBottomLeftRadius: 12,
-    borderBottomRightRadius: 12
-    
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    backgroundColor: '#1A1A1A',
+
   },
   inlinePicker: {
     height: 50,
+    
   },
   inlinePickerItem: {
-    fontSize: 15,
-    color: '#1A1A1A',
+    fontSize: 17,
+    color: 'white',
     height: 100,
+    fontFamily: 'Inter_400Regular',
   },
   weightInput: {
-    borderWidth: 2,
-    borderColor: '#E9ECEF',
+    borderWidth: 0.3,
+    borderColor: 'grey',
     borderRadius: 12,
     paddingHorizontal: 18,
-    paddingVertical: 15,
+    paddingVertical: 16,
     fontSize: 17,
-    backgroundColor: '#F8F9FA',
-    color: '#1A1A1A',
+    backgroundColor: '#1A1A1A',
+    color: 'white',
     textAlign: 'center',
     fontWeight: '600',
-    shadowColor: '#000',
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
-    borderWidth: 1,
-    borderColor: 'black',
-    borderBottomWidth: 4,
-    borderBottomColor: 'black',
-    borderBottomLeftRadius: 12,
-    borderBottomRightRadius: 12
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    fontFamily: 'Inter_600SemiBold',
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
-    marginTop: 15,
+    maxWidth: 320,
+    marginTop: 20,
   },
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 20,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    backgroundColor: 'transparent',
+    borderRadius: 12,
   },
   backButtonText: {
-    color: '#666666',
+    color: 'white',
     fontSize: 16,
     fontWeight: '600',
-    marginLeft: 8,
+    marginLeft: 6,
+    fontFamily: 'Inter_600SemiBold',
   },
   nextButton: {
     backgroundColor: '#00B8A9',
     paddingVertical: 16,
-    paddingHorizontal: 40,
-    borderRadius: 16,
-    shadowColor: '#00B8A9',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
+    paddingHorizontal: 32,
+    borderRadius: 10,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
+    minWidth: 120,
+    alignItems: 'center',
   },
   nextButtonDisabled: {
-    backgroundColor: '#CCCCCC',
-    shadowOpacity: 0,
-    elevation: 0,
+    backgroundColor: '#666666',
+    opacity: 0.6,
   },
   nextButtonText: {
     color: 'white',
-    fontWeight: '700',
+    fontWeight: '600',
     fontSize: 18,
+    fontFamily: 'Inter_600SemiBold',
   },
 }); 

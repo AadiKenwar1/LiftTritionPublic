@@ -8,7 +8,10 @@
       "developmentClient": true,
       "distribution": "internal",
       "ios": {
-        "resourceClass": "medium"
+        "resourceClass": "medium",
+        "cache": {
+          "disabled": true
+        }
       },
       "env": {
         "EXPO_NO_WEB": "1"
@@ -18,7 +21,10 @@
     "preview": {
       "distribution": "internal",
       "ios": {
-        "resourceClass": "medium"
+        "resourceClass": "medium",
+        "cache": {
+          "disabled": true
+        }
       },
       "env": {
         "EXPO_NO_WEB": "1"
@@ -31,17 +37,18 @@
         "resourceClass": "medium",
         "credentialsSource": "remote",
         "distribution": "store",
-        "image": "latest"
+        "image": "latest",
+        "cache": {
+          "disabled": true
+        }
       },
       "env": {
         "EXPO_NO_WEB": "1",
         "GRAPHQL_API_KEY": "GRAPHQL_API_KEY",
         "GRAPHQL_ENDPOINT": "GRAPHQL_ENDPOINT",
-        "COGNITO_USER_POOL_ID": "COGNITO_USER_POOL_ID",
-        "COGNITO_USER_POOL_CLIENT_ID": "COGNITO_USER_POOL_CLIENT_ID",
         "OPENAI_API_KEY": "OPENAI_API_KEY",
-        "NUTRITIONX_APP_ID": "NUTRITIONX_APP_ID",
-        "NUTRITIONX_API_KEY": "NUTRITIONX_API_KEY"
+        "FATSECRET_CLIENT_ID": "FATSECRET_CLIENT_ID",
+        "FATSECRET_CLIENT_SECRET": "FATSECRET_CLIENT_SECRET"
       },
       "node": "20.11.0"
     }

@@ -82,7 +82,7 @@ export default function AddExerciseScreen2() {
                     <Ionicons 
                       name={item.icon} 
                       size={24} 
-                      color={selectedEquipment === item.id ? "#fff" : "#00B8A9"} 
+                      color={selectedEquipment === item.id ? "#fff" : "#2D9CFF"} 
                     />
                   </View>
                   <Text style={[
@@ -93,7 +93,7 @@ export default function AddExerciseScreen2() {
                   </Text>
                 </View>
                 {selectedEquipment === item.id && (
-                  <Ionicons name="checkmark-circle" size={24} color="#00B8A9" />
+                  <Ionicons name="checkmark-circle" size={24} color="#2D9CFF" />
                 )}
               </TouchableOpacity>
             )}
@@ -124,7 +124,7 @@ export default function AddExerciseScreen2() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F2F2F2",
+    backgroundColor: "#242424",
   },
   content: {
     flex: 1,
@@ -138,20 +138,22 @@ const styles = StyleSheet.create({
   },
   progressText: {
     fontSize: 14,
-    color: "#666",
+    color: "#8E8E93",
     marginBottom: 8,
     textAlign: "center",
     fontFamily: "Inter_400Regular",
   },
   progressBar: {
     height: 4,
-    backgroundColor: "#E0E0E0",
+    backgroundColor: "#1A1A1A",
     borderRadius: 2,
     overflow: "hidden",
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   progressFill: {
     height: "100%",
-    backgroundColor: "#00B8A9",
+    backgroundColor: "#2D9CFF",
     borderRadius: 2,
   },
   headerContainer: {
@@ -160,13 +162,13 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: "700",
-    color: "#000",
+    color: "white",
     marginBottom: 8,
     fontFamily: "Inter_700Bold",
   },
   headerSubtitle: {
     fontSize: 16,
-    color: "#666",
+    color: "#8E8E93",
     lineHeight: 22,
     fontFamily: "Inter_400Regular",
     textAlign: "center",
@@ -176,18 +178,22 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   equipmentCard: {
-    backgroundColor: "#fff",
+    backgroundColor: "#1A1A1A",
     borderRadius: 16,
     padding: 20,
-    borderWidth: 2,
-    borderColor: "#E0E0E0",
+    borderWidth: 0.3,
+    borderColor: "grey",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
   },
   equipmentCardSelected: {
-    borderColor: "#00B8A9",
-    backgroundColor: "#F0FDFA",
+    borderColor: "#2D9CFF",
+    backgroundColor: "#1A1A1A",
   },
   equipmentContent: {
     flexDirection: "row",
@@ -198,22 +204,25 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "#F0FDFA",
+    backgroundColor: "#242424",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 16,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   equipmentIconSelected: {
-    backgroundColor: "#00B8A9",
+    backgroundColor: "#2D9CFF",
+    borderColor: "#2D9CFF",
   },
   equipmentName: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#000",
+    color: "white",
     fontFamily: "Inter_600SemiBold",
   },
   equipmentNameSelected: {
-    color: "#00B8A9",
+    color: "#2D9CFF",
   },
   separator: {
     height: 12,
@@ -231,28 +240,27 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     fontSize: 16,
-    color: "#666",
+    color: "#8E8E93",
     marginLeft: 4,
     fontFamily: "Inter_400Regular",
   },
   nextButton: {
-    backgroundColor: "#00B8A9",
+    backgroundColor: "#2D9CFF",
     paddingVertical: 16,
     paddingHorizontal: 24,
     borderRadius: 12,
     flexDirection: "row",
     alignItems: "center",
-    borderWidth: 1,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    borderWidth: 0.3,
     borderColor: 'black',
-    borderBottomWidth: 4,
-    borderBottomColor: 'black',
-    borderBottomLeftRadius: 12,
-    borderBottomRightRadius: 12,
   },
   nextButtonDisabled: {
-    backgroundColor: "#CCC",
-    borderColor: "#999",
-    borderBottomColor: "#999",
+    backgroundColor: "#1A1A1A",
+    borderColor: "grey",
   },
   nextButtonText: {
     color: "#fff",

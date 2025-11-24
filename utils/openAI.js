@@ -165,22 +165,21 @@ export const askOpenAIVisionBarcode = async (base64Image) => {
                             {
                                 type: 'text',
                                 text: `Identify this product from the barcode image and provide typical nutrition info. Focus on:
+                                        1. Product name and brand
+                                        2. Standard serving size for this product
+                                        3. Typical nutrition values (protein, carbs, fats, calories)
 
-1. Product name and brand
-2. Standard serving size for this product
-3. Typical nutrition values (protein, carbs, fats, calories)
+                                        Respond ONLY with JSON:
 
-Respond ONLY with JSON:
+                                        {
+                                        "name": string,
+                                        "protein": number,
+                                        "carbs": number,
+                                        "fats": number,
+                                        "calories": number
+                                        }
 
-{
-  "name": string,
-  "protein": number,
-  "carbs": number,
-  "fats": number,
-  "calories": number
-}
-
-If you can't read the barcode clearly, provide generic nutrition info for the most likely product type.`,
+                                        If you can't read the barcode clearly, provide generic nutrition info for the most likely product type.`,
                             },
                             {
                                 type: 'image_url',

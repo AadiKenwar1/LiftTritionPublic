@@ -70,10 +70,10 @@ export default function ProgressScreen() {
                 <View style={styles.rectangularCard}>
                     {mode === true? <ProgressWheel percent={fatigueTodayPercent} /> : <ProgressWheel percent={calPercent} />}
                     <View style={styles.textContainer}>
-                        <Text style={{fontSize:18, fontFamily:'Inter_700Bold', fontWeight: 'bold', textAlign:'center', flexShrink: 1}} numberOfLines={2} adjustsFontSizeToFit>{mode === true? "Todays Fatigue" : "Todays Calories:"}</Text>
-                        {mode === false && <Text style={{fontSize:18, fontFamily:'Inter_700Bold', fontStyle:'italic', textAlign:'center', fontWeight: '600', flexShrink: 1}} numberOfLines={2} adjustsFontSizeToFit> {todaysCalories}/{calorieGoal}</Text>}
-                        {mode === false && <Text style={{fontSize:12, fontFamily:'Inter_400Regular', textAlign:'center', fontWeight: '500', flexShrink: 1}} numberOfLines={5} adjustsFontSizeToFit>You have {calorieGoal - todaysCalories} calories to go!</Text>}
-                        {mode === true && <Text style={{fontSize:12, fontFamily:'Inter_400Regular', textAlign:'center', fontWeight: '500', flexShrink: 1}} numberOfLines={5} adjustsFontSizeToFit>{fatigueFeedback()}</Text>}
+                        <Text style={{fontSize:18, fontFamily:'Inter_700Bold', fontWeight: 'bold', textAlign:'center', flexShrink: 1, color: 'white'}} numberOfLines={2} adjustsFontSizeToFit>{mode === true? "Todays Fatigue" : "Todays Calories:"}</Text>
+                        {mode === false && <Text style={{fontSize:18, fontFamily:'Inter_700Bold', fontStyle:'italic', textAlign:'center', fontWeight: '600', flexShrink: 1, color: 'white'}} numberOfLines={2} adjustsFontSizeToFit> {todaysCalories}/{calorieGoal}</Text>}
+                        {mode === false && <Text style={{fontSize:12, fontFamily:'Inter_400Regular', textAlign:'center', fontWeight: '500', flexShrink: 1, color: 'white'}} numberOfLines={5} adjustsFontSizeToFit>You have {calorieGoal - todaysCalories} calories to go!</Text>}
+                        {mode === true && <Text style={{fontSize:12, fontFamily:'Inter_400Regular', textAlign:'center', fontWeight: '500', flexShrink: 1, color: 'white'}} numberOfLines={5} adjustsFontSizeToFit>{fatigueFeedback()}</Text>}
                     </View>
                 </View>
 
@@ -96,14 +96,14 @@ export default function ProgressScreen() {
                 </View>
 
                 {/*Card Two */}
-                <View alignSelf={'center'} marginTop={5}>
+                <View alignSelf={'center'} marginTop={0}>
                     <SafeAreaView>
                         <MetricLineChart />
                     </SafeAreaView>
                 </View>
 
                 {/*Card Three */}
-                <View alignSelf={'center'} marginTop={5}>
+                <View alignSelf={'center'} marginTop={10}>
                     <SafeAreaView>
                         <LogLineChart />
                     </SafeAreaView>
@@ -118,12 +118,12 @@ const styles = StyleSheet.create({
     container: {
         paddingTop: 10,
         flex: 1,
-        backgroundColor: '#F2F2F2',
+        backgroundColor: '#242424',
     },
     rectangularCard: {
         width: screenWidth - 32,
         height: (screenWidth - 32) / 2.5,
-        backgroundColor: '#ffffff',
+        backgroundColor: '#1A1A1A',
         borderRadius: 16,
         marginBottom: 10,
         padding: 20,
@@ -131,17 +131,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         flexDirection:'row',
         gap:10,
-        shadowColor: '#000',
+        shadowColor: "black",
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 12,
-        elevation: 4,
-        borderWidth: 1.3,
-        borderColor: 'black',
-        borderBottomWidth: 4,
-        borderBottomColor: 'black',
-        borderBottomLeftRadius: 16,
-        borderBottomRightRadius: 16
+        shadowOpacity: 0.8,
+        shadowRadius: 3,
+        borderWidth: 0.3,
+        borderColor: 'grey',
         
     },
     textContainer: {
@@ -156,23 +151,18 @@ const styles = StyleSheet.create({
     oneThirdSquareCard: {
         width: (screenWidth - 32 - 20) / 3,
         height: (screenWidth - 32) / 2.5,
-        backgroundColor: '#ffffff',
+        backgroundColor: '#1A1A1A',
         borderRadius: 16,
-        marginBottom: 5,
+        marginBottom: 10,
         alignItems: 'center',
         flexDirection: 'column',
         justifyContent: 'center',
-        shadowColor: '#000',
+        shadowColor: "black",
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 12,
-        elevation: 4,
-        borderWidth: 1.3,
-        borderColor: 'black',
-        borderBottomWidth: 4,
-        borderBottomColor: 'black',
-        borderBottomLeftRadius: 16,
-        borderBottomRightRadius: 16
+        shadowOpacity: 0.8,
+        shadowRadius: 3,
+        borderWidth: 0.3,
+        borderColor: 'grey',
     },
     oneThirdTopText:{
         fontSize:12, 
@@ -181,6 +171,7 @@ const styles = StyleSheet.create({
         marginBottom:5, 
         textAlign:'center',
         fontWeight: 'bold',
+        color: 'white',
     },
     oneThirdBottomText:{
         fontSize:12, 
@@ -189,6 +180,7 @@ const styles = StyleSheet.create({
         marginTop:5, 
         textAlign:'center',
         fontWeight: 'bold',
+        color: 'white',
     },
     squareCard: {
         width: screenWidth - 32,

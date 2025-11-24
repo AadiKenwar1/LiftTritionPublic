@@ -67,10 +67,9 @@ export default function FoodSearch(props) {
     }
   }
 
-  // Dismiss keyboard and clear results when tapping outside
+  // Dismiss keyboard when tapping outside
   function handleOutsideTap() {
     Keyboard.dismiss();
-    setResults([]);
   }
 
   // Clear the search bar and results
@@ -83,7 +82,7 @@ export default function FoodSearch(props) {
     <TouchableWithoutFeedback onPress={handleOutsideTap}>
       <View style={styles.container}>
         {/* Results list and search bar */}
-        <View style={{backgroundColor: "white", marginBottom:15 }}>
+        <View style={{backgroundColor: "#242424", marginBottom:15 }}>
           <FlatList
             data={query ? results : []}
             ListHeaderComponent={
@@ -93,6 +92,7 @@ export default function FoodSearch(props) {
                         <TextInput
                             style={styles.input}
                             placeholder="e.g: McDonalds Cheeseburger"
+                            placeholderTextColor="#9CA3AF"
                             value={query}
                             onChangeText={setQuery}
                         />
@@ -101,15 +101,15 @@ export default function FoodSearch(props) {
                                 style={styles.clearButton}
                                 onPress={handleClearSearch}
                             >
-                                <Ionicons name="close-circle" size={20} color="#666" />
+                                <Ionicons name="close-circle" size={20} color="#9CA3AF" />
                             </TouchableOpacity>
                         )}
                     </View>
-                    {loading && <ActivityIndicator size="small" color="#4f46e5" style={{ marginBottom: 10 }} />}
+                    {loading && <ActivityIndicator size="small" color="#D94CC4" style={{ marginBottom: 10 }} />}
                 </>
             }
             ItemSeparatorComponent={() => (
-                <View style={{ height: 4, backgroundColor: 'white' }} />
+                <View style={{ height: 4, backgroundColor: 'transparent' }} />
             )}
             // Use a unique key for each item (id + index)
             keyExtractor={(item, index) => {
@@ -130,7 +130,7 @@ export default function FoodSearch(props) {
             )}
             ListEmptyComponent={
               query && !loading ? (
-                <Text style={{ color: '#666', textAlign: 'center', marginTop: 20, marginBottom: 20 }}>
+                <Text style={{ color: '#9CA3AF', textAlign: 'center', marginTop: 20, marginBottom: 20, fontFamily: 'Inter_400Regular' }}>
                   No results found
                 </Text>
               ) : null
@@ -141,7 +141,7 @@ export default function FoodSearch(props) {
         </View>
         {/* Show loading indicator when fetching details */}
         {fetchingDetails && (
-          <ActivityIndicator size="small" color="#4f46e5" style={{ marginTop: 10 }} />
+          <ActivityIndicator size="small" color="#D94CC4" style={{ marginTop: 10 }} />
         )}
       </View>
     </TouchableWithoutFeedback>
@@ -157,23 +157,19 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 12,
-    paddingRight: 40, // Add space for the clear button
-    backgroundColor: '#f3f4f6',
-    shadowColor: '#000',
+    borderRadius: 12,
+    padding: 16,
+    paddingRight: 50, // Add space for the clear button
+    fontSize: 16,
+    backgroundColor: '#1A1A1A',
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
-    borderWidth: 1.3,
-    borderColor: 'black',
-    borderBottomWidth: 6,
-    borderBottomColor: 'black',
-    borderBottomLeftRadius: 12,
-    borderBottomRightRadius: 12,
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
+    fontFamily: 'Inter_400Regular',
+    color: 'white',
   },
   clearButton: {
     position: 'absolute',
@@ -195,33 +191,28 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   item: {
-    backgroundColor: '#f9fafb',
-    padding: 10,
+    backgroundColor: '#1A1A1A',
+    padding: 12,
     marginHorizontal: 2,
     marginVertical: 2,
     borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'black',
-    borderLeftWidth: 3,
-    borderLeftColor: 'black',
-    borderTopLeftRadius: 12,
-    borderBottomLeftRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   itemText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1f2937',
+    color: 'white',
     marginBottom: 2,
     fontFamily: 'Inter_600SemiBold',
   },
   brand: {
     fontSize: 12,
-    color: '#6b7280',
+    color: '#9CA3AF',
     fontWeight: '500',
     fontFamily: 'Inter_500Medium',
   },

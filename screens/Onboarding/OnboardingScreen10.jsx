@@ -3,11 +3,12 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import Slider from '@react-native-community/slider';
+import { Turtle, Rabbit } from 'lucide-react-native';
 
 export default function OnboardingScreen10() {
   const navigation = useNavigation();
   const route = useRoute();
-  const { birthDate, age, height, weight, unit, activityFactor, goalType, goalWeight } = route.params || {};
+  const { birthDate, age, gender, height, weight, unit, activityFactor, goalType, goalWeight } = route.params || {};
   
   const [goalPace, setGoalPace] = useState(1.0);
 
@@ -20,6 +21,7 @@ export default function OnboardingScreen10() {
     navigation.navigate('Onboarding11', {
       birthDate,
       age,
+      gender,
       height,
       weight,
       unit,
@@ -69,17 +71,23 @@ export default function OnboardingScreen10() {
                 {goalPace.toFixed(1)} {unit ? 'lbs' : 'kg'} per week
               </Text>
               
-              <Slider
-                style={{ width: '100%', height: 40 }}
-                minimumValue={0.2}
-                maximumValue={3.0}
-                step={0.1}
-                value={goalPace}
-                onValueChange={setGoalPace}
-                minimumTrackTintColor="white"
-                maximumTrackTintColor="#C0C0C0"
-                thumbTintColor="white"
-              />
+              <View style={styles.sliderRow}>
+                <Turtle size={24} color="#00B8A9" />
+                <View style={styles.sliderWrapper}>
+                  <Slider
+                    style={{ flex: 1, height: 40 }}
+                    minimumValue={0.2}
+                    maximumValue={3.0}
+                    step={0.1}
+                    value={goalPace}
+                    onValueChange={setGoalPace}
+                    minimumTrackTintColor="#00B8A9"
+                    maximumTrackTintColor="#666666"
+                    thumbTintColor="#00B8A9"
+                  />
+                </View>
+                <Rabbit size={24} color="#00B8A9" />
+              </View>
               
               <View style={styles.sliderLabels}>
                 <Text style={styles.sliderMinMax}>0.2</Text>
@@ -105,7 +113,7 @@ export default function OnboardingScreen10() {
         
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-            <Ionicons name="arrow-back" size={20} color="#666666" />
+            <Ionicons name="arrow-back" size={20} color="white" />
             <Text style={styles.backButtonText}>Back</Text>
           </TouchableOpacity>
           
@@ -121,58 +129,65 @@ export default function OnboardingScreen10() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#242424',
   },
   content: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 30,
+    paddingVertical: 20,
+    width: '100%',
   },
   title: {
     fontSize: 28,
     fontWeight: '800',
-    color: '#1A1A1A',
-    marginBottom: 8,
+    color: '#00B8A9',
+    marginBottom: 12,
     textAlign: 'center',
+    fontFamily: 'Inter_800ExtraBold',
   },
   description: {
     fontSize: 15,
-    color: '#666666',
+    color: 'white',
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: 22,
     marginBottom: 30,
     paddingHorizontal: 10,
-    maxWidth: 300,
+    maxWidth: 320,
+    fontFamily: 'Inter_400Regular',
+    opacity: 0.9,
   },
   sliderContainer: {
     width: '100%',
+    maxWidth: 320,
     marginBottom: 25,
-    backgroundColor: '#00B8A9',
+    backgroundColor: '#1A1A1A',
     borderRadius: 16,
     padding: 20,
-    borderWidth: 1,
-    shadowColor: '#000',
-    borderColor: 'black',
+    borderWidth: 0.3,
+    borderColor: 'grey',
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
-    borderWidth: 1,
-    borderColor: 'black',
-    borderBottomWidth: 6,
-    borderBottomColor: 'black',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20
-    
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
   },
   sliderLabel: {
     fontSize: 18,
     fontWeight: '700',
     color: 'white',
     textAlign: 'center',
-    marginBottom: 15,
+    marginBottom: 20,
+    fontFamily: 'Inter_700Bold',
+  },
+  sliderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    gap: 12,
+  },
+  sliderWrapper: {
+    flex: 1,
   },
   sliderLabels: {
     flexDirection: 'row',
@@ -180,29 +195,32 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   sliderMinMax: {
-    color: 'white',
+    color: '#9CA3AF',
     fontSize: 14,
+    fontFamily: 'Inter_400Regular',
   },
   paceInfoContainer: {
-    backgroundColor: '#E8F5F5',
+    backgroundColor: '#1A1A1A',
     padding: 18,
-    borderRadius: 16,
+    borderRadius: 12,
     marginBottom: 20,
     alignItems: 'center',
-    borderWidth: 1,
+    borderWidth: 0.3,
     borderColor: '#00B8A9',
-    shadowColor: '#00B8A9',
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    width: '100%',
+    maxWidth: 320,
   },
   paceDescription: {
     fontSize: 15,
-    color: '#1A1A1A',
+    color: 'white',
     fontWeight: '600',
-    marginBottom: 6,
+    marginBottom: 8,
     textAlign: 'center',
+    fontFamily: 'Inter_600SemiBold',
   },
   paceIntensity: {
     fontSize: 13,
@@ -210,6 +228,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+    fontFamily: 'Inter_600SemiBold',
   },
   guidelinesContainer: {
     backgroundColor: '#F8F9FA',
@@ -236,31 +255,34 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   maintainContainer: {
-    backgroundColor: '#E8F5F5',
+    backgroundColor: '#1A1A1A',
     padding: 25,
-    borderRadius: 16,
+    borderRadius: 12,
     marginBottom: 25,
-    borderWidth: 1,
+    borderWidth: 0.3,
     borderColor: '#00B8A9',
     alignItems: 'center',
-    shadowColor: '#00B8A9',
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    width: '100%',
+    maxWidth: 320,
   },
   maintainText: {
     fontSize: 15,
     color: '#00B8A9',
     textAlign: 'center',
     fontWeight: '600',
+    fontFamily: 'Inter_600SemiBold',
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
-    marginTop: 15,
+    maxWidth: 320,
+    marginTop: 20,
   },
   backButton: {
     flexDirection: 'row',
@@ -271,28 +293,30 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   backButtonText: {
-    color: '#666666',
+    color: 'white',
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 6,
+    fontFamily: 'Inter_600SemiBold',
   },
   nextButton: {
     backgroundColor: '#00B8A9',
     paddingVertical: 16,
     paddingHorizontal: 32,
-    borderRadius: 20,
-    shadowColor: '#00B8A9',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 8,
+    borderRadius: 10,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
     minWidth: 120,
     alignItems: 'center',
   },
   nextButtonText: {
     color: 'white',
-    fontWeight: '700',
+    fontWeight: '600',
     fontSize: 18,
-    letterSpacing: 0.5,
+    fontFamily: 'Inter_600SemiBold',
   },
 }); 

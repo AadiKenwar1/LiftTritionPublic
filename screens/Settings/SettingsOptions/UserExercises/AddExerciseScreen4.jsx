@@ -147,11 +147,11 @@ export default function AddExerciseScreen4() {
           </View>
 
           <View style={styles.searchContainer}>
-            <Ionicons name="search" size={20} color="#999" style={styles.searchIcon} />
+            <Ionicons name="search" size={20} color="#8E8E93" style={styles.searchIcon} />
             <TextInput
               style={styles.searchInput}
               placeholder="Search muscles..."
-              placeholderTextColor="#999"
+              placeholderTextColor="#8E8E93"
               value={searchText}
               onChangeText={setSearchText}
             />
@@ -187,7 +187,7 @@ export default function AddExerciseScreen4() {
                     <Ionicons 
                       name="fitness" 
                       size={16} 
-                      color={selectedMuscles.includes(item) ? "#fff" : "#00B8A9"} 
+                      color={selectedMuscles.includes(item) ? "#fff" : "#2D9CFF"} 
                     />
                   </View>
                   <Text style={[
@@ -204,7 +204,7 @@ export default function AddExerciseScreen4() {
 
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-              <Ionicons name="chevron-back" size={20} color="#666" />
+              <Ionicons name="chevron-back" size={20} color="#8E8E93" />
               <Text style={styles.backButtonText}>Back</Text>
             </TouchableOpacity>
 
@@ -222,31 +222,34 @@ export default function AddExerciseScreen4() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F2F2F2",
+    backgroundColor: "#242424",
   },
   content: {
     flex: 1,
     padding: 20,
+    paddingTop: 10,
   },
   progressContainer: {
     marginBottom: 30,
   },
   progressText: {
     fontSize: 14,
-    color: "#666",
+    color: "#8E8E93",
     marginBottom: 8,
     textAlign: "center",
     fontFamily: "Inter_400Regular",
   },
   progressBar: {
     height: 4,
-    backgroundColor: "#E0E0E0",
+    backgroundColor: "#1A1A1A",
     borderRadius: 2,
     overflow: "hidden",
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   progressFill: {
     height: "100%",
-    backgroundColor: "#00B8A9",
+    backgroundColor: "#2D9CFF",
     borderRadius: 2,
   },
   headerContainer: {
@@ -255,26 +258,30 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: "700",
-    color: "#000",
+    color: "white",
     marginBottom: 8,
     fontFamily: "Inter_700Bold",
   },
   headerSubtitle: {
     fontSize: 16,
-    color: "#666",
+    color: "#8E8E93",
     lineHeight: 22,
     fontFamily: "Inter_400Regular",
   },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: "#1A1A1A",
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
     marginBottom: 20,
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
+    borderWidth: 0.3,
+    borderColor: "grey",
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
   },
   searchIcon: {
     marginRight: 12,
@@ -282,7 +289,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: "#000",
+    color: "white",
     fontFamily: "Inter_400Regular",
   },
   muscleList: {
@@ -290,15 +297,19 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   muscleCard: {
-    backgroundColor: "#fff",
+    backgroundColor: "#1A1A1A",
     borderRadius: 12,
     padding: 16,
-    borderWidth: 2,
-    borderColor: "#E0E0E0",
+    borderWidth: 0.3,
+    borderColor: "grey",
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
   },
   muscleCardSelected: {
-    borderColor: "#00B8A9",
-    backgroundColor: "#F0FDFA",
+    borderColor: "#2D9CFF",
+    backgroundColor: "#1A1A1A",
   },
   muscleContent: {
     flexDirection: "row",
@@ -308,37 +319,41 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 4,
-    borderWidth: 2,
-    borderColor: "#E0E0E0",
+    borderWidth: 0.3,
+    borderColor: "grey",
     marginRight: 12,
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "#242424",
   },
   checkboxChecked: {
-    backgroundColor: "#00B8A9",
-    borderColor: "#00B8A9",
+    backgroundColor: "#2D9CFF",
+    borderColor: "#2D9CFF",
   },
   muscleIcon: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#F0FDFA",
+    backgroundColor: "#242424",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   muscleIconSelected: {
-    backgroundColor: "#00B8A9",
+    backgroundColor: "#2D9CFF",
+    borderColor: "#2D9CFF",
   },
   muscleName: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#000",
+    color: "white",
     flex: 1,
     fontFamily: "Inter_600SemiBold",
   },
   muscleNameSelected: {
-    color: "#00B8A9",
+    color: "#2D9CFF",
   },
   separator: {
     height: 8,
@@ -356,23 +371,23 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     fontSize: 16,
-    color: "#666",
+    color: "#8E8E93",
     marginLeft: 4,
     fontFamily: "Inter_400Regular",
   },
   saveButton: {
-    backgroundColor: "#00B8A9",
+    backgroundColor: "#2D9CFF",
     paddingVertical: 16,
     paddingHorizontal: 24,
     borderRadius: 12,
     flexDirection: "row",
     alignItems: "center",
-    borderWidth: 1,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    borderWidth: 0.3,
     borderColor: 'black',
-    borderBottomWidth: 4,
-    borderBottomColor: 'black',
-    borderBottomLeftRadius: 16,
-    borderBottomRightRadius: 16,
   },
   saveButtonText: {
     color: "#fff",

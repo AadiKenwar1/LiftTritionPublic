@@ -10,9 +10,6 @@ export default function OnboardingScreen1() {
     navigation.navigate('Onboarding2');
   };
 
-  const handleBack = () => {
-    navigation.goBack();
-  };
 
   return (
     <View style={styles.container}>
@@ -42,25 +39,18 @@ export default function OnboardingScreen1() {
             <View style={styles.featureIconContainer}>
               <Ionicons name="analytics-outline" size={24} color="#00B8A9" />
             </View>
-            <Text style={styles.featureText}>Visualize your progress and make sense of your fitness data, with insights and analytics.</Text>
+            <Text style={styles.featureText}>Visualize your progress easily and make sense of your fitness data, with insights and analytics.</Text>
           </View>
           
           <View style={styles.featureItem}>
             <View style={styles.featureIconContainer}>
               <Ionicons name="flag-outline" size={24} color="#00B8A9" />
             </View>
-            <Text style={styles.featureText}>Finally, set goals and crush them.</Text>
+            <Text style={styles.featureText}>Set goals and crush them!</Text>
           </View>
         </View>
         
         <View style={styles.buttonContainer}>
-          
-          <TouchableOpacity style={styles.backButton}>
-            <Ionicons name="arrow-back" size={20} color="white" />
-            <Text style={styles.backButtonText}>Back</Text>
-          </TouchableOpacity>
-        
-          
           <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
             <Text style={styles.nextButtonText}>Next</Text>
           </TouchableOpacity>
@@ -73,7 +63,7 @@ export default function OnboardingScreen1() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#242424',
   },
   content: {
     flex: 1,
@@ -89,15 +79,18 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: 'center',
     letterSpacing: 0.5,
+    fontFamily: 'Inter_700Bold',
   },
   description: {
     fontSize: 16,
-    color: '#666666',
+    color: 'white',
     textAlign: 'center',
     lineHeight: 22,
     marginBottom: 40,
     paddingHorizontal: 20,
     maxWidth: 320,
+    fontFamily: 'Inter_400Regular',
+    opacity: 0.9,
   },
   featuresContainer: {
     width: '100%',
@@ -113,57 +106,49 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#E8F5F5',
+    backgroundColor: '#1A1A1A',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 15,
     borderWidth: 1,
     borderColor: '#00B8A9',
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
   },
   featureText: {
     fontSize: 16,
-    color: '#1A1A1A',
+    color: 'white',
     flex: 1,
     fontWeight: '500',
+    fontFamily: 'Inter_400Regular',
   },
   buttonContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
     marginTop: 20,
-  },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    backgroundColor: 'transparent',
-    borderRadius: 12,
-  },
-  backButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 6,
   },
   nextButton: {
     backgroundColor: '#00B8A9',
     paddingVertical: 16,
     paddingHorizontal: 32,
-    borderRadius: 20,
-    shadowColor: '#00B8A9',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 8,
+    borderRadius: 10,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
     minWidth: 140,
     alignItems: 'center',
   },
   nextButtonText: {
     color: 'white',
-    fontWeight: '700',
+    fontWeight: '600',
     fontSize: 18,
-    letterSpacing: 0.5,
+    fontFamily: 'Inter_600SemiBold',
   },
 }); 

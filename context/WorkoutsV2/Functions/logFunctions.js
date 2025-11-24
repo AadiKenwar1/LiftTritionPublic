@@ -1,5 +1,5 @@
 import { generateClient } from 'aws-amplify/api';
-import { createExerciseLog, deleteExerciseLog } from '../../../database/graphql/mutations';
+import { createExerciseLog, deleteExerciseLog } from '../../../graphql/mutations';
 import { getLocalDateKey } from '../../../utils/date';
 import uuid from 'react-native-uuid';
 

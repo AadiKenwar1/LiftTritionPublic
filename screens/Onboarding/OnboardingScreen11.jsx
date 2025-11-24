@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { NotepadText } from 'lucide-react-native';
 
 export default function OnboardingScreen11() {
   const navigation = useNavigation();
@@ -25,6 +26,7 @@ export default function OnboardingScreen11() {
       <View style={styles.content}>
         {/* Header Section */}
         <View style={styles.headerSection}>
+          <NotepadText size={32} color="#00B8A9" style={styles.notepadIcon} />
           <Text style={styles.headerTitle}>Review Your Profile</Text>
           <Text style={styles.headerSubtitle}>
             Here's a summary of all the information you've provided
@@ -32,7 +34,6 @@ export default function OnboardingScreen11() {
         </View>
 
         {/* Profile Summary */}
-        <View style={styles.summaryCard}>
           <View style={styles.summaryGrid}>
             <View style={styles.summaryItem}>
               <Text style={styles.summaryLabel}>Age</Text>
@@ -72,7 +73,6 @@ export default function OnboardingScreen11() {
                   return currentOption ? currentOption.label : 'Not set';
                 })()}
               </Text>
-            </View>
           </View>
         </View>
 
@@ -81,7 +81,7 @@ export default function OnboardingScreen11() {
         {/* Navigation Buttons */}
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-            <Ionicons name="arrow-back" size={20} color="#666666" />
+            <Ionicons name="arrow-back" size={20} color="white" />
             <Text style={styles.backButtonText}>Back</Text>
           </TouchableOpacity>
           
@@ -97,64 +97,67 @@ export default function OnboardingScreen11() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#242424',
   },
   content: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 30,
+    paddingVertical: 20,
+    width: '100%',
   },
   headerSection: {
     alignItems: 'center',
-    marginBottom: 25,
+    marginBottom: 20,
     paddingHorizontal: 10,
+    width: '100%',
   },
   headerTitle: {
     fontSize: 28,
     fontWeight: '800',
-    color: '#1A1A1A',
-    marginBottom: 8,
+    color: '#00B8A9',
+    marginBottom: 5,
     textAlign: 'center',
     letterSpacing: -0.5,
+    fontFamily: 'Inter_800ExtraBold',
+  },
+  notepadIcon: {
+    marginBottom: 5,
   },
   headerSubtitle: {
     fontSize: 16,
-    color: '#666666',
+    color: 'white',
     textAlign: 'center',
     lineHeight: 22,
     paddingHorizontal: 15,
-    maxWidth: 300,
+    maxWidth: 320,
     fontWeight: '500',
+    fontFamily: 'Inter_400Regular',
+    opacity: 0.9,
   },
   summaryCard: {
-    backgroundColor: '#00B8A9',
+    backgroundColor: '#1A1A1A',
     borderRadius: 16,
-    padding: 18,
-    marginBottom: 20,
-    borderWidth: 1,
+    padding: 20,
+    marginBottom: 0,
+    borderWidth: 0.3,
+    borderColor: 'grey',
     width: '100%',
-    maxWidth: 380,
-    shadowColor: '#000',
+    maxWidth: 320,
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
-    borderWidth: 1,
-    borderColor: 'black',
-    borderBottomWidth: 6,
-    borderBottomColor: 'black',
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
   },
   summaryTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1A1A1A',
+    color: 'white',
     marginBottom: 16,
     textAlign: 'center',
     letterSpacing: -0.3,
+    fontFamily: 'Inter_700Bold',
   },
   summaryGrid: {
     flexDirection: 'row',
@@ -163,22 +166,29 @@ const styles = StyleSheet.create({
   },
   summaryItem: {
     width: '48%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    padding: 12,
+    height: '22.5%',
+    backgroundColor: '#1A1A1A',
+    borderRadius: 12,
+    padding: 14,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'black',
-    marginBottom: 10,
+    borderWidth: 0.3,
+    borderColor: 'grey',
+    marginBottom: 15,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    justifyContent: 'center',
   },
   summaryLabel: {
     fontSize: 12,
-    color: '#666666',
-    marginBottom: 4,
+    color: '#9CA3AF',
+    marginBottom: 6,
     fontWeight: '600',
     textAlign: 'center',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+    fontFamily: 'Inter_600SemiBold',
   },
   summaryValue: {
     fontSize: 15,
@@ -186,6 +196,7 @@ const styles = StyleSheet.create({
     color: '#00B8A9',
     textAlign: 'center',
     letterSpacing: -0.2,
+    fontFamily: 'Inter_700Bold',
   },
   infoCard: {
     flexDirection: 'row',
@@ -214,8 +225,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
-    marginTop: 10,
-    paddingHorizontal: 5,
+    maxWidth: 320,
+    marginTop: -50,
   },
   backButton: {
     flexDirection: 'row',
@@ -226,28 +237,30 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   backButtonText: {
-    color: '#666666',
+    color: 'white',
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 6,
+    fontFamily: 'Inter_600SemiBold',
   },
   nextButton: {
     backgroundColor: '#00B8A9',
     paddingVertical: 16,
     paddingHorizontal: 32,
-    borderRadius: 20,
-    shadowColor: '#00B8A9',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 8,
+    borderRadius: 10,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
     minWidth: 120,
     alignItems: 'center',
   },
   nextButtonText: {
     color: 'white',
-    fontWeight: '700',
+    fontWeight: '600',
     fontSize: 18,
-    letterSpacing: 0.5,
+    fontFamily: 'Inter_600SemiBold',
   },
 });

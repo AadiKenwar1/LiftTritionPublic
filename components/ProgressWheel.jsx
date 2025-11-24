@@ -11,7 +11,7 @@ export default function ProgressWheel({
   strokeWidth = 12,
   duration = 1000,
   backgroundColor = "#F0F0F0",
-  textColor = "#1A1A1A",
+  textColor = "white",
   fontSize = 32,
 }) {
   // Validate and sanitize the percent value

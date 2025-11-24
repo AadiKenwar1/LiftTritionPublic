@@ -7,6 +7,7 @@ import {
   Alert,
   TouchableOpacity,
   Pressable,
+  ScrollView,
   Keyboard,
   TouchableWithoutFeedback,
 } from "react-native";
@@ -19,6 +20,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Foundation from '@expo/vector-icons/Foundation';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useSettings } from "../../../context/SettingsContext";
+import { LinearGradient } from 'expo-linear-gradient';
 
 
 
@@ -45,7 +47,7 @@ export default function LogDetails() {
     loading
   } = useWorkoutContext();
 
-  const { setLastExercise } = useSettings();
+  const { setLastExercise, unit } = useSettings();
   //Gets ids of parent exercise and workout
   const route = useRoute();
   const { workoutId, exerciseId } = route.params;
@@ -68,7 +70,6 @@ export default function LogDetails() {
       Alert.alert("Missing Info", "Please enter both reps and weight.");
       return;
     }
-
     const noRPE = rpe === '';
     const logData = {
       workoutId: workoutId,
@@ -81,9 +82,9 @@ export default function LogDetails() {
     console.log('📊 Current V2 logs count for exercise:', exerciseLogs.length);
     addLog(exerciseId, logData);
     setLastExercise(exercise.name);
-    setReps("");
-    setWeight("");
-    setRpe("");
+    //setReps("");
+    //setWeight("");
+    //setRpe("");
   }
 
   //Display logs functions - V2 flat structure
@@ -110,55 +111,79 @@ export default function LogDetails() {
               <View style={styles.line} />
             </View>
 
-            {logsByDate[date].map((entry, index) => (
-              <View key={entry.id || index} style={[
-                styles.logItem,
-                entry.synced === false && styles.logItemUnsynced
-              ]}>
-                <Text style={[
-                  styles.logText,
-                  entry.synced === false && styles.logTextUnsynced
-                ]}>
-                  {entry.weight} lbs x {entry.reps} reps{" "}
-                  {entry.rpe !== undefined && entry.rpe !== 8
-                    ? "x RPE: " + entry.rpe
-                    : ""}
-                </Text>
+            {logsByDate[date].map((entry, index) => {
+              const content = (
+                <>
+                  <Text style={[
+                    styles.logText,
+                    entry.synced === false && styles.logTextUnsynced
+                  ]}>
+                    {entry.weight} {unit ? 'lbs' : 'kg'} x {entry.reps} reps{" "}
+                    {entry.rpe !== undefined && entry.rpe !== 8
+                      ? "x RPE: " + entry.rpe
+                      : ""}
+                  </Text>
 
-                {/* Kebab Menu Button */}
-                <TouchableOpacity
-                  onPress={() => {
-                    Alert.alert(
-                      "Log Options",
-                      `Reps: ${entry.reps}, Weight: ${entry.weight}`,
-                      [
-                        {
-                          text: "Change Reps",
-                        },
-                        {
-                          text: "Change Sets",
-                        },
-                        {
-                          text: "Delete",
-                          style: "destructive",
-                          onPress: () => {
-                            console.log('🚀 Deleting log with V2 context:', entry.id);
-                            deleteLog(entry.id);
-                          },          
-                        },
-                        {
-                          text: "Cancel",
-                          style: "cancel",
-                        },
-                      ],
-                    );
-                  }}
-                  style={styles.kebabButton}
-                >
-                  <Ionicons name="pencil" size={20} color="white" />
-                </TouchableOpacity>
-              </View>
-            ))}
+                  {/* Kebab Menu Button */}
+                  <TouchableOpacity
+                    onPress={() => {
+                      Alert.alert(
+                        "Log Options",
+                        `Reps: ${entry.reps}, Weight: ${entry.weight}`,
+                        [
+                          {
+                            text: "Change Reps",
+                          },
+                          {
+                            text: "Change Sets",
+                          },
+                          {
+                            text: "Delete",
+                            style: "destructive",
+                            onPress: () => {
+                              console.log('🚀 Deleting log with V2 context:', entry.id);
+                              deleteLog(entry.id);
+                            },          
+                          },
+                          {
+                            text: "Cancel",
+                            style: "cancel",
+                          },
+                        ],
+                      );
+                    }}
+                    style={styles.kebabButton}
+                  >
+                    <Ionicons name="pencil" size={20} color="white" />
+                  </TouchableOpacity>
+                </>
+              );
+
+              // Render gradient for synced items; solid style for unsynced
+              if (entry.synced === false) {
+                return (
+                  <View
+                    key={entry.id || index}
+                    style={[styles.logItem, styles.logItemUnsynced]}
+                  >
+                    {content}
+                  </View>
+                );
+              }
+
+              return (
+                <View key={entry.id || index} style={styles.logItemWrapper}>
+                  <LinearGradient
+                    colors={['#1A7FE0', '#2D9CFF', '#3DAFFF']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 0, y: 1 }}
+                    style={styles.logItem}
+                  >
+                    {content}
+                  </LinearGradient>
+                </View>
+              );
+            })}
           </View>
         );
       });
@@ -174,34 +199,12 @@ export default function LogDetails() {
 
   return (
     <>
+      <CustomHeader title={`Logs For ${exercise.name}`} showBack />
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={{ flex: 1 }}>
-          <CustomHeader title={`Logs For ${exercise.name}`} showBack />
-
-          <TouchableOpacity
-            style={styles.notesButton}
-            onPress={() => {
-              setNotesVisible(!notesVisible);
-            }}
+          <ScrollView
+            style={{ flex: 1, backgroundColor: "#242424" }}
+            contentContainerStyle={{ paddingBottom: 120 }}
           >
-            <View>
-              <Foundation
-                name="clipboard-notes"
-                size={40}
-                color="white"
-              />
-            </View>
-
-            <NotesModal
-              visible={notesVisible}
-              onClose={handleClose}
-              note={note}
-              setNote={setNote}
-              title={
-                "Notes for " + exercise.name + " in Workout: " + workout.name
-              }
-            />
-          </TouchableOpacity>
 
           <View style={styles.container}>
             <View style={styles.inputGroup}>
@@ -229,14 +232,46 @@ export default function LogDetails() {
                 value={rpe}
                 onChangeText={setRpe}
               />
-              <Pressable style={styles.add} onPress={handleAddLog}>
-                <Text style={styles.addText}>+</Text>
-              </Pressable>
+              <TouchableOpacity style={styles.add} onPress={handleAddLog}>
+                <LinearGradient
+                  colors={['#1A7FE0', '#2D9CFF', '#3DAFFF']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 0, y: 1 }}
+                  style={styles.addGradient}
+                >
+                  <Text style={styles.addText}>+</Text>
+                </LinearGradient>
+              </TouchableOpacity>
             </View>
             {displayLogs()}
           </View>
-        </View>
+        </ScrollView>
       </TouchableWithoutFeedback>
+      {/* Notes Button outside ScrollView so it doesn't scroll */}
+      <TouchableOpacity
+        style={styles.notesButton}
+        onPress={() => {
+          setNotesVisible(!notesVisible);
+        }}
+      >
+        <View>
+          <Foundation
+            name="clipboard-notes"
+            size={35}
+            color="white"
+          />
+        </View>
+
+        <NotesModal
+          visible={notesVisible}
+          onClose={handleClose}
+          note={note}
+          setNote={setNote}
+          title={
+            "Notes for " + exercise.name + " in " + workout.name
+          }
+        />
+      </TouchableOpacity>
     </>
   );
 }
@@ -245,7 +280,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     flex: 1,
-    backgroundColor: "#F2F2F2", // Light blue-tinted background
+    backgroundColor: "#242424", // Light blue-tinted background
   },
   header: {
     fontSize: 20,
@@ -254,21 +289,24 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#1E3A8A", // Dark blue
   },
+  logItemWrapper: {
+    borderRadius: 12,
+    marginBottom: 12,
+    shadowColor: 'black',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    elevation: 8,
+  },
   logItem: {
-    backgroundColor: "#2D9CFF", // Main color
     height: 60,
     borderRadius: 12,
-    borderColor: "#1E3A8A", // Darker blue border
-    borderWidth: 1.5,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
-    marginBottom: 12,
-    shadowColor: "#2D9CFF",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
+    overflow: 'hidden',
   },
   logItemUnsynced: {
     backgroundColor: "#9CA3AF", // Grey color for unsynced
@@ -290,36 +328,44 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
   input: {
-    backgroundColor: "white",
+    backgroundColor: "#1A1A1A",
     borderWidth: 1.5,
     borderColor: "black", // Main color border
     padding: 12,
     borderRadius: 10,
     width: "25%",
-    color: "black", // Dark blue text
+    color: "white", // Dark blue text
     fontSize: 16,
-    shadowColor: "#2D9CFF",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   add: {
-    backgroundColor: "#007bff", // Main color
     height: 48,
     width: "20%",
     borderRadius: 10,
-    borderWidth: 2,
-    borderColor: "#1E3A8A", // Darker blue border
+    borderWidth: 0.3,
+    borderColor: "grey", // Darker blue border
     alignSelf: "center",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#2D9CFF",
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey'
+  },
+  addGradient: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
   },
   addText: {
     fontSize: 24,
@@ -334,15 +380,16 @@ const styles = StyleSheet.create({
   line: {
     flex: 1,
     height: 1,
-    backgroundColor: 'black', // Light blue line
+    backgroundColor: 'white', // Light blue line
   },
   lineText: {
     marginHorizontal: 12,
     fontSize: 16,
     fontWeight: "600",
-    color: 'black', // Dark blue
-    backgroundColor: '#F2F2F2',
-    paddingHorizontal: 8,
+    fontFamily: 'Inter_500Medium',
+    color: 'white', // Dark blue
+    backgroundColor: 'transparent',
+    paddingHorizontal: 2,
   },
   kebabButton: {
     position: "absolute",
@@ -353,7 +400,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 20,
     bottom: 20,
-    backgroundColor: "#FFD52E",
+    backgroundColor: "#2D9CFF",
     height: 60,
     width: 60,
     borderRadius: 30,
@@ -362,10 +409,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     elevation: 6,
-    shadowColor: '#2D9CFF',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
     zIndex: 10, // ensure it floats above other content
   },
   

@@ -3,7 +3,7 @@ import {
   createUserExercise, 
   updateUserExercise as updateUserExerciseMutation, 
   deleteUserExercise as deleteUserExerciseMutation 
-} from '../../../database/graphql/mutations';
+} from '../../../graphql/mutations';
 import uuid from 'react-native-uuid';
 
 const client = generateClient();

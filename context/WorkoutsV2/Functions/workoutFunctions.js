@@ -1,5 +1,5 @@
 import { generateClient } from 'aws-amplify/api';
-import { createWorkout, updateWorkout, deleteWorkout as deleteWorkoutMutation } from '../../../database/graphql/mutations';
+import { createWorkout, updateWorkout, deleteWorkout as deleteWorkoutMutation } from '../../../graphql/mutations';
 import uuid from 'react-native-uuid';
 
 const client = generateClient();

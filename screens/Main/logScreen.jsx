@@ -60,12 +60,12 @@ export default function LogScreen() {
               // Add Workout Button
               <TouchableOpacity
                 key="add-workout"
-                style={[styles.fabButtons, { backgroundColor: '#007bff' }]}
+                style={[styles.fabButtons, { backgroundColor: '#2D9CFF' }]}
                 onPress={() => setAddWorkoutVisible(true)}
               >
                 <Ionicons
                   name='add'
-                  size={40}
+                  size={35}
                   color='white'
                   shadowColor='black'
                   shadowRadius={4}
@@ -78,25 +78,31 @@ export default function LogScreen() {
                   handleAddWorkout={handleAddWorkout}
                   workoutName={workoutName}
                 >
-                  <Text style={{ marginBottom: 10, textAlign: 'center' }}>
+                  <Text style={{ marginBottom: 20, textAlign: 'center', color: 'white', fontFamily: 'Inter_500Medium', fontSize: 20 }}>
                     Enter Workout
                   </Text>
                   <TextInput
                     placeholder="Workout name"
+                    placeholderTextColor="grey"
                     value={workoutName}
                     onChangeText={setWorkoutName}
                     style={{
                       borderWidth: 1,
-                      padding: 10,
-                      marginBottom: 10,
+                      paddingHorizontal: 16,
+                      paddingVertical: 12,
+                      marginBottom: 20,
                       width: '100%',
+                      color: 'white',
+                      backgroundColor: '#1A1A1A',
+                      borderRadius: 10,
+                      borderWidth: 0.3,
+                      borderColor: 'grey',
                     }}
                   />
                   <View
                     style={{
                       flexDirection: "row",
                       justifyContent: "space-between",
-                      marginTop: 5 ,
                       width: '102%',
                     }}
                   >
@@ -121,7 +127,7 @@ export default function LogScreen() {
               // View Archived Workouts Button
               <TouchableOpacity
                 key="archive"
-                style={[styles.fabButtons, { backgroundColor: '#B0B0B0' }]}
+                style={[styles.fabButtons, { backgroundColor: '#2D9CFF' }]}
                 onPress={() => setArchivedWorkoutsVisible(true)}
               >
                 {/* Archived Workouts Popup */}
@@ -136,7 +142,7 @@ export default function LogScreen() {
                 />
                 <Ionicons
                   name='archive-outline'
-                  size={40}
+                  size={35}
                   color='white'
                   shadowColor='black'
                   shadowRadius={4}
@@ -157,12 +163,12 @@ export default function LogScreen() {
               //Add Nutrition Button
               <TouchableOpacity
                 key="add-nutrition"
-                style={[styles.fabButtons, { backgroundColor: '#00C853' }]}
+                style={[styles.fabButtons, { backgroundColor: '#4CD964' }]}
                 onPress={() => setAddNutritionVisible(!addNutritionVisible)}
               >
                 <Ionicons
                   name='add'
-                  size={40}
+                  size={35}
                   color='#FFFFFF'
                   shadowColor='white'
                   shadowRadius={4}
@@ -179,12 +185,12 @@ export default function LogScreen() {
               //Camera Button
               <TouchableOpacity
                 key="camera"
-                style={[styles.fabButtons, { backgroundColor: '#FF4081', opacity: hasPremium ? 1 : 0.5 }]}
+                style={[styles.fabButtons, { backgroundColor: '#4CD964', opacity: hasPremium ? 1 : 0.5 }]}
                 onPress={() => {hasPremium ? setTimeout(() => {navigation.navigate('CameraScreen')}, 600) : navigation.navigate('Subscription')}}
               >
                 <Ionicons
                   name='camera'
-                  size={40}
+                  size={35}
                   color='#FFFFFF'
                   shadowColor='white'
                   shadowRadius={4}
@@ -196,12 +202,12 @@ export default function LogScreen() {
               //Food Database Button
               <TouchableOpacity
                 key="food-database"
-                style={[styles.fabButtons, { backgroundColor: '#4FC3F7' }]}
+                style={[styles.fabButtons, { backgroundColor: '#4CD964' }]}
                 onPress={() => setFoodDatabaseVisible(!foodDatabaseVisible)}
               >
                 <MaterialCommunityIcons
                   name='database-search'
-                  size={40}
+                  size={35}
                   color='#FFFFFF'
                   shadowColor='white'
                   shadowRadius={4}
@@ -216,7 +222,7 @@ export default function LogScreen() {
               //Saved Foods Button
               <TouchableOpacity
                 key="saved-foods"
-                style={[styles.fabButtons, { backgroundColor: 'gold' }]}
+                style={[styles.fabButtons, { backgroundColor: '#4CD964' }]}
                 onPress={() => setSavedFoodsVisible(!savedFoodsVisible)}
               >
                 <Ionicons
@@ -260,15 +266,16 @@ const styles = StyleSheet.create({
     height: 60,
     width: 60,
     borderRadius: 40,
-    borderWidth: 2,
     borderColor: "black",
     alignItems: "center",
     justifyContent: "center",
     elevation: 5,
     shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    shadowOpacity: 0.6,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'black',
     zIndex: 10,
   },
   addAndCloseButton: {
@@ -281,12 +288,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderColor: "black",
     elevation: 4,
-    borderWidth: 1.3,
-    borderColor: 'black',
-    borderBottomWidth: 6,
-    borderBottomColor: 'black',
-    borderBottomLeftRadius: 12,
-    borderBottomRightRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 10,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   addAndCloseButtonText: {
     color: "#fff",

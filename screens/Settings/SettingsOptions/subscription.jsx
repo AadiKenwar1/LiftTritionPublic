@@ -5,17 +5,19 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
-  SafeAreaView,
   ActivityIndicator,
   Linking,
   Platform,
+  ScrollView,
+  Dimensions,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useBilling } from "../../../context/Billing/BillingContext";
+import CustomHeader from "../../../components/CustomHeader";
+
+const { width: screenWidth } = Dimensions.get('window');
 
 export default function SubscriptionScreen() {
-  const navigation = useNavigation();
   const { offerings, loading, error, purchasePackage, restorePurchases, hasPremium } = useBilling();
   const [processing, setProcessing] = useState(false);
 
@@ -75,193 +77,199 @@ export default function SubscriptionScreen() {
   const priceString = packageToSell?.product?.priceString ?? "$4.99";
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={22} color="#666666" />
-          <Text style={styles.backButtonText}>Back</Text>
-        </TouchableOpacity>
-
-        <Text style={styles.title}>Manage Subscription</Text>
-        <Text style={styles.subtitle}>
-          Upgrade to access AI-powered nutrition insights, barcode lookups, and more.
-        </Text>
-
-        <View style={styles.planCard}>
-          <Text style={styles.planTitle}>Lift Mode AI</Text>
-          <Text style={styles.planPrice}>{priceString} / month</Text>
-          <View style={styles.listItem}>
-            <Ionicons name="checkmark-circle" size={18} color="#00B8A9" style={styles.listIcon} />
-            <Text style={styles.listText}>AI photo and label analysis</Text>
-          </View>
-          <View style={styles.listItem}>
-            <Ionicons name="checkmark-circle" size={18} color="#00B8A9" style={styles.listIcon} />
-            <Text style={styles.listText}>Barcode nutrition lookup</Text>
-          </View>
-          <View style={styles.listItem}>
-            <Ionicons name="checkmark-circle" size={18} color="#00B8A9" style={styles.listIcon} />
-            <Text style={styles.listText}>Priority macro recommendations</Text>
-          </View>
-        </View>
-
-        {hasPremium ? (
-          <View style={styles.statusPill}>
-            <Ionicons name="checkmark-circle" size={18} color="#00B8A9" />
-            <Text style={styles.statusText}>Your subscription is active.</Text>
-          </View>
-        ) : null}
-
-        {loading && !offerings ? (
-          <View style={styles.loadingRow}>
-            <ActivityIndicator size="small" color="#00B8A9" />
-            <Text style={styles.loadingText}>Loading subscription details…</Text>
-          </View>
-        ) : null}
-
-        {error ? (
-          <View style={styles.loadingRow}>
-            <Ionicons name="warning-outline" size={18} color="#E53E3E" style={{ marginRight: 6 }} />
-            <Text style={styles.errorText}>We couldn’t load plans right now.</Text>
-          </View>
-        ) : null}
-
-        <TouchableOpacity
-          style={[styles.primaryButton, (processing || loading) && styles.disabledButton]}
-          onPress={handleSubscribe}
-          disabled={processing || loading}
-        >
-          {processing ? (
-            <ActivityIndicator color="#FFFFFF" />
-          ) : (
-            <Text style={styles.primaryButtonText}>
-              {hasPremium ? "Manage Plan" : "Unlock Lift Mode"}
-            </Text>
-          )}
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.secondaryButton}
-          onPress={handleRestore}
-          disabled={processing}
-        >
-          <Text style={styles.secondaryButtonText}>Restore Purchases</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.linkButton} onPress={handleOpenStore}>
-          <Text style={styles.linkButtonText}>
-            Open {Platform.OS === "ios" ? "App Store" : "Play Store"} subscription settings
+    <>
+      <CustomHeader title="Manage Subscription" showBack />
+      <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 150 }}>
+        <View style={styles.content}>
+          <Text style={styles.subtitle}>
+            Upgrade to access AI-powered nutrition insights, barcode lookups, and more.
           </Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+
+          <View style={styles.planCard}>
+            <Text style={styles.planTitle}>Lift Mode AI</Text>
+            <Text style={styles.planPrice}>{priceString} / month</Text>
+            <View style={styles.featuresList}>
+              <View style={styles.listItem}>
+                <Ionicons name="checkmark-circle" size={18} color="#00B8A9" style={styles.listIcon} />
+                <Text style={styles.listText}>AI photo and label analysis</Text>
+              </View>
+              <View style={styles.listItem}>
+                <Ionicons name="checkmark-circle" size={18} color="#00B8A9" style={styles.listIcon} />
+                <Text style={styles.listText}>Barcode nutrition lookup</Text>
+              </View>
+              <View style={styles.listItem}>
+                <Ionicons name="checkmark-circle" size={18} color="#00B8A9" style={styles.listIcon} />
+                <Text style={styles.listText}>Priority macro recommendations</Text>
+              </View>
+            </View>
+          </View>
+
+          {hasPremium ? (
+            <View style={styles.statusPill}>
+              <Ionicons name="checkmark-circle" size={18} color="#4CD964" />
+              <Text style={styles.statusText}>Your subscription is active.</Text>
+            </View>
+          ) : null}
+
+          {loading && !offerings ? (
+            <View style={styles.loadingRow}>
+              <ActivityIndicator size="small" color="#D94CC4" />
+              <Text style={styles.loadingText}>Loading subscription details…</Text>
+            </View>
+          ) : null}
+
+          {error ? (
+            <View style={styles.errorRow}>
+              <Ionicons name="warning-outline" size={18} color="#FF3B30" style={{ marginRight: 6 }} />
+              <Text style={styles.errorText}>We couldn't load plans right now.</Text>
+            </View>
+          ) : null}
+
+          <TouchableOpacity
+            style={[styles.primaryButton, (processing || loading) && styles.disabledButton]}
+            onPress={handleSubscribe}
+            disabled={processing || loading}
+          >
+            {processing ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.primaryButtonText}>
+                {hasPremium ? "Manage Plan" : "Unlock Lift Mode"}
+              </Text>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.secondaryButton}
+            onPress={handleRestore}
+            disabled={processing}
+          >
+            <Text style={styles.secondaryButtonText}>Restore Purchases</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.linkButton} onPress={handleOpenStore}>
+            <Text style={styles.linkButtonText}>
+              Open {Platform.OS === "ios" ? "App Store" : "Play Store"} subscription settings
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-  },
   container: {
+    paddingTop: 10,
     flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 24,
+    backgroundColor: '#242424',
   },
-  backButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  backButtonText: {
-    marginLeft: 6,
-    color: "#666666",
-    fontSize: 15,
-    fontWeight: "600",
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "800",
-    color: "#1A1A1A",
-    textAlign: "center",
-    marginBottom: 12,
+  content: {
+    paddingHorizontal: 20,
+    paddingTop: 10,
   },
   subtitle: {
-    fontSize: 16,
-    color: "#666666",
+    fontSize: 14,
+    color: 'white',
     textAlign: "center",
     lineHeight: 22,
     marginBottom: 24,
+    fontFamily: 'Inter_400Regular',
   },
   planCard: {
-    backgroundColor: "#F8F9FA",
-    borderRadius: 18,
-    padding: 24,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 4,
-    marginBottom: 32,
+    backgroundColor: "#1A1A1A",
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 20,
+    alignSelf: 'center',
+    width: screenWidth - 32,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   planTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#1A1A1A",
-    marginBottom: 8,
-  },
-  planPrice: {
     fontSize: 24,
     fontWeight: "700",
+    color: "white",
+    marginBottom: 8,
+    fontFamily: 'Inter_700Bold',
+    textAlign: 'center',
+  },
+  planPrice: {
+    fontSize: 28,
+    fontWeight: "700",
     color: "#00B8A9",
-    marginBottom: 16,
+    marginBottom: 20,
+    fontFamily: 'Inter_700Bold',
+    textAlign: 'center',
+  },
+  featuresList: {
+    marginTop: 10,
   },
   listItem: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 16,
   },
   listIcon: {
-    marginRight: 10,
+    marginRight: 12,
   },
   listText: {
     fontSize: 15,
-    color: "#333333",
+    color: "white",
+    fontFamily: 'Inter_500Medium',
   },
   primaryButton: {
     backgroundColor: "#00B8A9",
     paddingVertical: 16,
-    borderRadius: 20,
+    borderRadius: 10,
     alignItems: "center",
     marginBottom: 12,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   primaryButtonText: {
     color: "#FFFFFF",
-    fontSize: 17,
-    fontWeight: "700",
-    letterSpacing: 0.4,
+    fontSize: 16,
+    fontWeight: "600",
+    fontFamily: 'Inter_600SemiBold',
   },
   secondaryButton: {
-    borderWidth: 1,
-    borderColor: "#00B8A9",
-    borderRadius: 16,
+    borderWidth: 0.3,
+    borderColor: "grey",
+    backgroundColor: '#1A1A1A',
+    borderRadius: 10,
     paddingVertical: 14,
     alignItems: "center",
+    marginBottom: 12,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 3,
   },
   secondaryButtonText: {
-    color: "#00B8A9",
+    color: "white",
     fontSize: 15,
     fontWeight: "600",
+    fontFamily: 'Inter_600SemiBold',
   },
   linkButton: {
-    marginTop: 16,
+    marginTop: 8,
     alignItems: "center",
+    paddingVertical: 12,
   },
   linkButtonText: {
-    color: "#007AFF",
+    color: "#4FC3F7",
     fontSize: 14,
     textAlign: "center",
+    fontFamily: 'Inter_500Medium',
   },
   disabledButton: {
     opacity: 0.6,
@@ -269,31 +277,54 @@ const styles = StyleSheet.create({
   loadingRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 12,
+    justifyContent: "center",
+    marginBottom: 16,
+    padding: 16,
+    backgroundColor: "#1A1A1A",
+    borderRadius: 12,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   loadingText: {
     marginLeft: 8,
-    color: "#666666",
+    color: "white",
     fontSize: 14,
+    fontFamily: 'Inter_400Regular',
+  },
+  errorRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+    padding: 16,
+    backgroundColor: "#1A1A1A",
+    borderRadius: 12,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   errorText: {
-    color: "#E53E3E",
+    color: "#FF3B30",
     fontSize: 14,
+    fontFamily: 'Inter_500Medium',
   },
   statusPill: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#E8F5F5",
+    justifyContent: "center",
+    backgroundColor: "#1A1A1A",
     borderRadius: 20,
-    paddingVertical: 8,
+    paddingVertical: 12,
     paddingHorizontal: 16,
-    marginBottom: 16,
+    marginBottom: 20,
     gap: 8,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   statusText: {
-    color: "#00B8A9",
+    color: "white",
     fontWeight: "600",
     fontSize: 14,
+    fontFamily: 'Inter_600SemiBold',
   },
 });
 

@@ -9,7 +9,7 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import {Entypo, Ionicons } from '@expo/vector-icons';
 
 export default function ViewIngredients({
   visible,
@@ -148,16 +148,17 @@ export default function ViewIngredients({
         <View style={styles.modalContainer}>
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Edit Ingredients</Text>
-            <TouchableOpacity onPress={onClose}>
-              <Text style={styles.closeButton}>✕</Text>
-            </TouchableOpacity>
           </View>
           
-          <ScrollView style={styles.modalContent}>
+          <ScrollView style={styles.modalContent} showsVerticalScrollIndicator={false}>
             {/* Total Macros Display */}
             <View style={styles.totalMacrosContainer}>
               <Text style={styles.totalMacrosTitle}>Total Macros</Text>
               <View style={styles.totalMacrosGrid}>
+              <View style={styles.macroItem}>
+                  <Text style={styles.macroValue}>{totalMacros.calories} </Text>
+                  <Text style={styles.macroLabel}>Calories</Text>
+                </View>
                 <View style={styles.macroItem}>
                   <Text style={styles.macroValue}>{totalMacros.protein}g</Text>
                   <Text style={styles.macroLabel}>Protein</Text>
@@ -170,10 +171,7 @@ export default function ViewIngredients({
                   <Text style={styles.macroValue}>{totalMacros.fats}g</Text>
                   <Text style={styles.macroLabel}>Fats</Text>
                 </View>
-                <View style={styles.macroItem}>
-                  <Text style={styles.macroValue}>{totalMacros.calories} cal</Text>
-                  <Text style={styles.macroLabel}>Calories</Text>
-                </View>
+                
               </View>
             </View>
 
@@ -195,20 +193,21 @@ export default function ViewIngredients({
                 const totalFats = fatsPerUnit * quantity;
                 const totalCalories = caloriesPerUnit * quantity;
                 
-                                 return (
-                                      <View key={ingredient.id} style={styles.ingredientCard}>
+                return (
+                    <View key={ingredient.id} style={styles.ingredientCard}>
                      <View style={styles.ingredientHeader}>
                        <TextInput
                          style={styles.nameInput}
                          value={ingredient.name}
                          onChangeText={(value) => updateIngredient(ingredient.id, 'name', value)}
                          placeholder="Ingredient name"
+                         placeholderTextColor="#9CA3AF"
                        />
                        <TouchableOpacity 
                          style={styles.removeButton}
                          onPress={() => removeIngredient(ingredient.id)}
                        >
-                         <Ionicons name="trash-outline" size={20} color="#FF6B6B" />
+                         <Entypo name="trash" size={20} color="#FF3B30" />
                        </TouchableOpacity>
                      </View>
                     
@@ -219,14 +218,14 @@ export default function ViewIngredients({
                           style={styles.quantityButton}
                           onPress={() => adjustQuantity(ingredient.id, -1)}
                         >
-                          <Ionicons name="remove" size={16} color="#4CD964" />
+                          <Ionicons name="remove" size={16} color="white" />
                         </TouchableOpacity>
                         <Text style={styles.quantityText}>{ingredient.quantity}</Text>
                         <TouchableOpacity 
                           style={styles.quantityButton}
                           onPress={() => adjustQuantity(ingredient.id, 1)}
                         >
-                          <Ionicons name="add" size={16} color="#4CD964" />
+                          <Ionicons name="add" size={16} color="white" />
                         </TouchableOpacity>
                       </View>
                     </View>
@@ -243,6 +242,7 @@ export default function ViewIngredients({
                              updateIngredient(ingredient.id, 'protein', newPerUnit.toString());
                            }}
                            placeholder="0"
+                           placeholderTextColor="#9CA3AF"
                            keyboardType="numeric"
                          />
                        </View>
@@ -257,6 +257,7 @@ export default function ViewIngredients({
                              updateIngredient(ingredient.id, 'carbs', newPerUnit.toString());
                            }}
                            placeholder="0"
+                           placeholderTextColor="#9CA3AF"
                            keyboardType="numeric"
                          />
                        </View>
@@ -271,6 +272,7 @@ export default function ViewIngredients({
                              updateIngredient(ingredient.id, 'fats', newPerUnit.toString());
                            }}
                            placeholder="0"
+                           placeholderTextColor="#9CA3AF"
                            keyboardType="numeric"
                          />
                        </View>
@@ -285,6 +287,7 @@ export default function ViewIngredients({
                              updateIngredient(ingredient.id, 'calories', newPerUnit.toString());
                            }}
                            placeholder="0"
+                           placeholderTextColor="#9CA3AF"
                            keyboardType="numeric"
                          />
                        </View>
@@ -296,7 +299,7 @@ export default function ViewIngredients({
                {/* Add Button */}
                <View style={styles.addButtonContainer}>
                  <TouchableOpacity style={styles.addButton} onPress={addIngredient}>
-                   <Ionicons name="add" size={20} color="#4CD964" />
+                   <Ionicons name="add" size={20} color="white" />
                  </TouchableOpacity>
                </View>
              </View>
@@ -325,80 +328,91 @@ export default function ViewIngredients({
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0,0,0,0.8)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContainer: {
     width: '95%',
-    maxHeight: '90%',
-    backgroundColor: '#FFFFFF',
+    maxHeight: '75%',
+    backgroundColor: '#242424',
+    marginBottom: 50,
     borderRadius: 16,
     padding: 20,
     elevation: 10,
+    borderWidth: 0.3,
+    borderColor: 'grey',
+    shadowColor: 'black',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
   },
   modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 20,
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: '700',
-    color: '#1A1A1A',
+    color: 'white',
     fontFamily: 'Inter_700Bold',
   },
   closeButton: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#8E8E93',
+    color: 'white',
+    fontFamily: 'Inter_700Bold',
   },
   modalContent: {
     maxHeight: 600,
   },
   totalMacrosContainer: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 20,
-    shadowColor: '#000',
+    backgroundColor: '#1A1A1A',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 10,
+    shadowColor: 'black',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
-    borderWidth: 1,
-    borderColor: '#4CD964',
-    borderBottomWidth: 6,
-    borderBottomColor: '#4CD964',
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   totalMacrosTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#1A1A1A',
+    fontWeight: '700',
+    color: 'white',
     marginBottom: 12,
-    fontFamily: 'Inter_600SemiBold',
+    textAlign: 'center',
+    fontFamily: 'Inter_700Bold',
   },
   totalMacrosGrid: {
     flexDirection: 'row',
     justifyContent: 'space-around',
+    backgroundColor: '#1A1A1A',
+    borderRadius: 12,
+    padding: 10,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   macroItem: {
     alignItems: 'center',
+    flex: 1,
   },
   macroValue: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#1A1A1A',
+    color: 'white',
+    marginBottom: 4,
     fontFamily: 'Inter_700Bold',
   },
   macroLabel: {
-    fontSize: 12,
-    color: '#8E8E93',
-    marginTop: 4,
-    fontFamily: 'Inter_400Regular',
+    fontSize: 10,
+    fontWeight: '500',
+    color: 'white',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    fontFamily: 'Inter_500Medium',
   },
   ingredientsSection: {
     marginBottom: 20,
@@ -412,50 +426,49 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1A1A1A',
+    color: 'white',
     fontFamily: 'Inter_600SemiBold',
   },
-     addButtonContainer: {
-     alignItems: 'center',
-     marginTop: 16,
-   },
-   addButton: {
-     backgroundColor: '#F8F9FA',
-     borderRadius: 30,
-     width: 60,
-     height: 60,
-     alignItems: 'center',
-     justifyContent: 'center',
-     borderWidth: 1,
-     borderColor: '#4CD964',
-   },
-     ingredientCard: {
-     backgroundColor: '#FFFFFF',
-     borderRadius: 16,
-     padding: 20,
-     marginBottom: 16,
-     shadowColor: '#000',
-     shadowOffset: { width: 0, height: 2 },
-     shadowOpacity: 0.08,
-     shadowRadius: 8,
-     elevation: 4,
-     borderWidth: 1,
-     borderColor: '#4CD964',
-     borderLeftWidth: 6,
-     borderLeftColor: '#4CD964',
-     borderTopLeftRadius: 24,
-     borderBottomLeftRadius: 24,
-   },
-       ingredientHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 16,
-      gap: 12,
-    },
-   removeButton: {
-     padding: 4,
-   },
+  addButtonContainer: {
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  addButton: {
+    backgroundColor: '#4CD964',
+    borderRadius: 30,
+    width: 60,
+    height: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 0.3,
+    borderColor: 'grey',
+    shadowColor: 'black',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+  },
+  ingredientCard: {
+    backgroundColor: '#1A1A1A',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    shadowColor: 'black',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
+  },
+  ingredientHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+    gap: 12,
+  },
+  removeButton: {
+    padding: 4,
+  },
   inputRow: {
     marginBottom: 12,
   },
@@ -465,30 +478,39 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#1A1A1A',
+    color: 'white',
     marginBottom: 6,
     fontFamily: 'Inter_500Medium',
   },
-           nameInput: {
-        flex: 1,
-        borderWidth: 1,
-        borderColor: '#E8E8E8',
-        borderRadius: 12,
-        padding: 14,
-        fontSize: 16,
-        backgroundColor: '#FAFAFA',
-        fontFamily: 'Inter_400Regular',
-      },
-     quantityContainer: {
-     flexDirection: 'row',
-     alignItems: 'center',
-     backgroundColor: '#FAFAFA',
-     borderRadius: 12,
-     borderWidth: 1,
-     borderColor: '#E8E8E8',
-     paddingHorizontal: 12,
-     alignSelf: 'flex-start',
-   },
+  nameInput: {
+    flex: 1,
+    borderWidth: 0.3,
+    borderColor: 'grey',
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 16,
+    backgroundColor: '#1A1A1A',
+    fontFamily: 'Inter_400Regular',
+    color: 'white',
+    shadowColor: 'black',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+  },
+  quantityContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1A1A1A',
+    borderRadius: 12,
+    borderWidth: 0.3,
+    borderColor: 'grey',
+    paddingHorizontal: 12,
+    alignSelf: 'flex-start',
+    shadowColor: 'black',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+  },
   quantityButton: {
     padding: 8,
     borderRadius: 4,
@@ -496,7 +518,7 @@ const styles = StyleSheet.create({
   quantityText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1A1A1A',
+    color: 'white',
     paddingHorizontal: 16,
     fontFamily: 'Inter_600SemiBold',
   },
@@ -511,21 +533,25 @@ const styles = StyleSheet.create({
   macroInputLabel: {
     fontSize: 12,
     fontWeight: '500',
-    color: '#8E8E93',
+    color: '#9CA3AF',
     marginBottom: 4,
     fontFamily: 'Inter_500Medium',
   },
-     macroTextInput: {
-     borderWidth: 1,
-     borderColor: '#E8E8E8',
-     borderRadius: 10,
-     padding: 10,
-     fontSize: 14,
-     backgroundColor: '#FAFAFA',
-     textAlign: 'center',
-     fontFamily: 'Inter_400Regular',
-   },
-
+  macroTextInput: {
+    borderWidth: 0.3,
+    borderColor: 'grey',
+    borderRadius: 10,
+    padding: 10,
+    fontSize: 14,
+    backgroundColor: '#1A1A1A',
+    textAlign: 'center',
+    fontFamily: 'Inter_400Regular',
+    color: 'white',
+    shadowColor: 'black',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+  },
   modalFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -534,15 +560,19 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#888888',
     borderRadius: 10,
     padding: 16,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E1E8ED',
+    shadowColor: 'black',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   cancelButtonText: {
-    color: '#8E8E93',
+    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
     fontFamily: 'Inter_600SemiBold',
@@ -553,6 +583,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 16,
     alignItems: 'center',
+    shadowColor: 'black',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   saveButtonText: {
     color: '#FFFFFF',

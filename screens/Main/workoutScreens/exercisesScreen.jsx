@@ -61,19 +61,19 @@ export default function WorkoutDetails() {
 
   //Adds exercise to workout
   const [selectedExercise, setSelectedExercise] = useState("");
-        function handleAddExercise() {
-          const alreadyExists = workoutExercises.some(
-            (item) => item.name === selectedExercise,
-          );
-          if (selectedExercise && !alreadyExists) {
-            console.log('🚀 Adding exercise with V2 context:', selectedExercise);
-            console.log('📊 Current V2 exercises count for workout:', workoutExercises.length);
-            addExercise(workoutId, selectedExercise);
-            setModalVisible(false);
-          } else {
-            Alert.alert("", "This exercise has already been added");
-          }
-        }
+  function handleAddExercise() {
+    const alreadyExists = workoutExercises.some(
+      (item) => item.name === selectedExercise,
+    );
+    if (selectedExercise && !alreadyExists) {
+      console.log('🚀 Adding exercise with V2 context:', selectedExercise);
+      console.log('📊 Current V2 exercises count for workout:', workoutExercises.length);
+      addExercise(workoutId, selectedExercise);
+      setModalVisible(false);
+    } else {
+      Alert.alert("", "This exercise has already been added");
+    }
+  }
 
   //Navigates to logsScreen when exercise is clicked
   const navigation = useNavigation();
@@ -151,7 +151,7 @@ export default function WorkoutDetails() {
             >
               <Ionicons
                 name="add"
-                size={40}
+                size={35}
                 color="white"
               />
             </TouchableOpacity>,
@@ -166,7 +166,7 @@ export default function WorkoutDetails() {
             >
               <Ionicons
                 name="archive-outline"
-                size={40}
+                size={35}
                 color="white"
               />
             </TouchableOpacity>,
@@ -181,7 +181,7 @@ export default function WorkoutDetails() {
             >
               <Foundation
                 name="clipboard-notes"
-                size={40}
+                size={35}
                 color="white"
               />
             </TouchableOpacity>
@@ -192,11 +192,18 @@ export default function WorkoutDetails() {
         <PopupModal
           modalVisible={modalVisible}
           setModalVisible={setModalVisible}
+          showButtons={true}
+          onAdd={handleAddExercise}
+          onClose={() => setModalVisible(false)}
+          showSettingsLink={true}
+          onNavigateToSettings={() => {
+            setModalVisible(false);
+            navigation.navigate("UserExercisesScreen");
+          }}
         >
           <ExerciseSelector
             selectedExercise={selectedExercise}
             setSelectedExercise={setSelectedExercise}
-            function={handleAddExercise}
             setModalVisible={setModalVisible}
           />
         </PopupModal>
@@ -214,7 +221,7 @@ export default function WorkoutDetails() {
           onClose={handleClose}
           note={note}
           setNote={setNote}
-          title={"Notes for Workout: " + workout.name}
+          title={"Notes for " + workout.name}
         />
       </View>
     </>
@@ -225,7 +232,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     flex: 1,
-    backgroundColor: "#F2F2F2",
+    backgroundColor: "#242424",
   },
   header: {
     fontSize: 25,
@@ -237,20 +244,19 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   addExerciseButton: {
-    backgroundColor: "#007bff",
+    backgroundColor: "#2D9CFF",
     height: 60,
     width: 60,
     borderRadius: 40,
-    borderWidth: 2,
-    borderColor: "black",
     alignItems: "center",
     justifyContent: "center",
     elevation: 5,
     shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    zIndex: 10,
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   addExerciseText: {
     color: "black",
@@ -280,7 +286,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   archiveButton: {
-    backgroundColor: "#B3B3B3",
+    backgroundColor: "#2D9CFF",
     height: 60,
     width: 60,
     borderRadius: 40,
@@ -291,12 +297,13 @@ const styles = StyleSheet.create({
     elevation: 5,
     shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    zIndex: 10,
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   notesButton: {
-    backgroundColor: "#FFD52E",
+    backgroundColor: "#2D9CFF",
     height: 60,
     width: 60,
     borderRadius: 40,
@@ -307,8 +314,9 @@ const styles = StyleSheet.create({
     elevation: 5,
     shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    zIndex: 10,
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
 })

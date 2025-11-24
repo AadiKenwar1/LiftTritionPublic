@@ -1,6 +1,8 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { Dumbbell } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 function Log(props) {
   const isUnsynced = props.currItem?.synced === false;
@@ -11,11 +13,21 @@ function Log(props) {
       { opacity: props.isActive ? 0.8 : 1 },
       isUnsynced && styles.logButtonUnsynced
     ]}>
+      <Pressable style={styles.iconContainer}>
+        <LinearGradient
+          colors={['#1A7FE0', '#2D9CFF', '#3DAFFF']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={styles.iconGradient}
+        >
+          <Dumbbell size={20} color="white" />
+        </LinearGradient>
+      </Pressable>
       <TouchableOpacity style={styles.textArea} onPress={props.function}>
         <Text
           style={[
             styles.logText, 
-            {fontFamily: props.bold ? "Inter_700Bold" : "Inter_400Regular"},
+            {fontFamily: props.bold ? "Inter_600SemiBold" : "Inter_400Regular"},
             isUnsynced && styles.logTextUnsynced
           ]}
         >
@@ -45,7 +57,7 @@ export default React.memo(Log);
 
 const styles = StyleSheet.create({
    logButton: {
-    backgroundColor: "#2D9CFF",
+    backgroundColor: "#1A1A1A",
     height: 72,
     borderRadius: 16,
     flexDirection: "row",
@@ -54,21 +66,28 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
-    borderWidth: 1.3,
-    borderColor: "black",
-    borderLeftWidth: 6,
-    borderLeftColor: 'black',
-    borderTopLeftRadius: 24,
-    borderBottomLeftRadius: 24,
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   logButtonUnsynced: {
     backgroundColor: "#9CA3AF", // Grey color for unsynced
     borderColor: "#6B7280", // Darker grey border
     borderLeftColor: "#6B7280", // Darker grey left border
     shadowColor: "#9CA3AF",
+  },
+  iconContainer: {
+    marginRight: 12,
+  },
+  iconGradient: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 0.3,
+    borderColor: 'black',
   },
   textArea: {
     flex: 1,
@@ -77,7 +96,6 @@ const styles = StyleSheet.create({
   logText: {
     color: "white",
     fontSize: 20,
-    fontFamily: 'Inter_700Bold',
     fontWeight: '500',
   },
   logTextUnsynced: {

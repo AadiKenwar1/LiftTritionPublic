@@ -1,5 +1,5 @@
 import {useState, useEffect} from 'react';
-import { View, Text, StyleSheet, Dimensions, ScrollView, FlatList, TouchableOpacity, Modal, TextInput, Alert} from 'react-native';
+import { View, Text, StyleSheet, Dimensions, ScrollView, FlatList, TouchableOpacity, Modal, TextInput, Alert, Pressable} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import FoodSearch from '../../../components/FoodSearch';
 import { useNutritionContext } from '../../../context/Nutrition/NutritionContext';
@@ -12,9 +12,10 @@ import { useSettings } from '../../../context/SettingsContext';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { getLocalDateKey } from '../../../utils/date';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Nut, Scale } from 'lucide-react-native';
 
 const { width: screenWidth } = Dimensions.get('window');
-
 export default function NutritionScreen({photoUri, cameraMode, barcodeData}) {
 
   const {bodyWeight, unit, goalWeight} = useSettings()
@@ -192,7 +193,19 @@ export default function NutritionScreen({photoUri, cameraMode, barcodeData}) {
         isUnsynced && styles.itemContainerUnsynced
       ]}>
         <View style={styles.itemHeader}>
-          <Text style={styles.name}>{item.name}</Text>
+          <View style={styles.nameContainer}>
+            <Pressable style={styles.iconContainer}>
+              <LinearGradient
+                colors={['#2ECC71', '#4CD964', '#5DE87A']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                style={styles.iconGradient}
+              >
+                <Nut size={20} color="white" />
+              </LinearGradient>
+            </Pressable>
+            <Text style={styles.name}>{item.name}</Text>
+          </View>
           <View style={styles.headerRight}>
             <View style={styles.caloriesBadge}>
               <Text style={styles.caloriesText}>{item.calories} cal</Text>
@@ -230,7 +243,7 @@ export default function NutritionScreen({photoUri, cameraMode, barcodeData}) {
                 />
               </TouchableOpacity>
               <TouchableOpacity onPress={() => handleMenuPress(item)} style={styles.menuButton}>
-                <Ionicons name="ellipsis-vertical" size={20} color={"white"} />
+                <Ionicons name="pencil" size={20} color={"white"} />
               </TouchableOpacity>
             </View>
           </View>
@@ -277,41 +290,53 @@ export default function NutritionScreen({photoUri, cameraMode, barcodeData}) {
           <View style={styles.headerContainer}>
             {/* Current Weight Section */}
             <View style={styles.weightSection}>
-              <Text style={styles.sectionTitle}>Current Weight</Text>
               <TouchableOpacity 
                 style={styles.weightCard}
                 onPress={() => setShowWeightModal(true)}
                 activeOpacity={0.7}
               >
-                <View style={styles.weightInfo}>
-                  <View style={styles.weightDisplay}>
-                    <Text style={styles.weightValue}>{bodyWeight}</Text>
-                    <Text style={styles.weightUnit}>{unit ? 'lbs' : 'kg'}</Text>
+                <View style={styles.weightCardContent}>
+                  <View style={styles.weightCardLeft}>
+                    <Pressable style={styles.weightIconContainer}>
+                      <LinearGradient
+                        colors={['#2ECC71', '#4CD964', '#5DE87A']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 0, y: 1 }}
+                        style={styles.weightIconGradient}
+                      >
+                        <Scale size={18} color="white" />
+                      </LinearGradient>
+                    </Pressable>
+                    <View style={styles.weightInfo}>
+                      <Text style={styles.sectionTitle}>Current Weight</Text>
+                      <View style={styles.weightDisplay}>
+                        <Text style={styles.weightValue}>{bodyWeight}</Text>
+                        <Text style={styles.weightUnit}>{unit ? 'lbs' : 'kg'}</Text>
+                      </View>
+                      <Text style={styles.goalWeightText}>Goal: {goalWeight} {unit ? 'lbs' : 'kg'}</Text>
+                    </View>
                   </View>
-                  <Text style={styles.goalWeightText}>Goal: {goalWeight} {unit ? 'lbs' : 'kg'}</Text>
-                </View>
-                <View style={styles.weightActions}>
-                  
-                    <Text style={styles.updateText}>Tap to update</Text>
-                    <Ionicons name="pencil" size={16} color="white" />
+                  <Ionicons name="pencil" size={20} color="white" />
                 </View>
               </TouchableOpacity>
             </View>
             {/* Today's Macros Header */}
-            <TouchableOpacity 
+            <Pressable 
               style={styles.headerButton}
               onPress={() => setShowDatePicker(true)}
-              activeOpacity={0.7}
             >
-              <View flexDirection="row" alignItems="center" gap={2}>
-                <Text style={styles.header}>{formatDateForDisplay(selectedDate)}</Text>
-                <TouchableOpacity>
-                <Ionicons name="calendar-outline" size={23} color="#1A1A1A" />
-                </TouchableOpacity>
-              </View>
-              <Text>Click to change date</Text>
               
-            </TouchableOpacity>
+              <View style={styles.headerContent}>
+                <View style={styles.headerTitleRow}>
+                  <View style={styles.headerLine} />
+                  <View flexDirection="row" alignItems="center" gap={0} paddingHorizontal={2.25}>
+                    <Text style={styles.header}>{formatDateForDisplay(selectedDate)}</Text>
+                    <Ionicons name="calendar-outline" size={28} color="white" />
+                  </View>
+                  <View style={styles.headerLine} />
+                </View>
+              </View>
+            </Pressable>
             {/* Show analyzing message when context indicates analysis is in progress */}
             {/* This will persist across mode switches since it's managed by the context */}
             {currentlyAnalyzing && (
@@ -394,43 +419,58 @@ export default function NutritionScreen({photoUri, cameraMode, barcodeData}) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F2',
+    backgroundColor: '#242424',
     paddingBottom: 100
   },
   headerContainer: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 0,
     paddingTop: 20,
     paddingBottom: 0,
   },
   weightSection: {
     marginBottom: 30,//
+    paddingHorizontal: 20,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1A1A1A',
-    marginBottom: 12,
-    letterSpacing: 0.3,
-    fontFamily: 'Inter_700Bold',
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#8E8E93',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+    fontFamily: 'Inter_600SemiBold',
   },
   weightCard: {
-    backgroundColor: '#4CD964',
-    borderRadius: 16,
-    padding: 20,
+    backgroundColor: '#1A1A1A',
+    borderRadius: 14,
+    padding: 16,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
+  },
+  weightCardContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
-    borderWidth: 1.3,
+  },
+  weightCardLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  weightIconContainer: {
+    marginRight: 12,
+  },
+  weightIconGradient: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 0.3,
     borderColor: 'black',
-    borderBottomWidth: 6,
-    borderBottomColor: 'black',
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
   },
   weightInfo: {
     flex: 1,
@@ -438,68 +478,67 @@ const styles = StyleSheet.create({
   weightDisplay: {
     flexDirection: 'row',
     alignItems: 'baseline',
+    marginTop: 4,
+    marginBottom: 4,
   },
   goalWeightText: {
-    fontSize: 14,
-    color: 'white',
+    fontSize: 13,
+    color: '#8E8E93',
     fontWeight: '500',
-    marginTop: 4,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'Inter_500Medium',
   },
   weightValue: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: '700',
     color: 'white',
     letterSpacing: -0.5,
     fontFamily: 'Inter_700Bold',
   },
   weightUnit: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '500',
-    color: 'white',
-    marginLeft: 4,
-    fontFamily: 'Inter_400Regular',
+    color: '#8E8E93',
+    marginLeft: 6,
+    fontFamily: 'Inter_500Medium',
   },
-  weightActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  gradientHeader: {
+    paddingVertical: 0,
+    paddingHorizontal: 10,
+    borderBottomWidth: 3,
+    borderBottomColor: 'black',
   },
-  updateText: {
-    fontSize: 14,
-    color: 'white',
-    fontWeight: '500',
-    fontFamily: 'Inter_400Regular',
-  },
-  headerButton: {
+  headerContent: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 10,
     gap: 8,
-    backgroundColor: 'white',
-    borderRadius: 14,
-    padding:10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
-    borderWidth: 1.3,
-    borderColor: 'black',
-    borderBottomWidth: 6,
-    borderBottomColor: 'black',
-    borderBottomLeftRadius: 15,
-    borderBottomRightRadius: 15,
+    marginBottom: 10,
+    paddingHorizontal: 20,
   },
-
+  headerTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+  },
   header: {
-    textAlign: 'center',
     fontSize: 28,
-    marginTop: -2,
     fontWeight: '700',
-    color: '#1A1A1A',
-    letterSpacing: 0.3,
-    fontFamily: 'Inter_700Bold',
+    color: 'white',
+    letterSpacing: 0.3, 
+    fontFamily: 'Inter_700Medium',
+  },
+  headerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: 'white',
+  },
+  headerSubtext: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: 'white',
+    opacity: 0.9,
+    fontFamily: 'Inter_500Medium',
+    
   },
   analyzingContainer: {
     padding: 20,
@@ -523,22 +562,17 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   itemContainer: {
-    backgroundColor: '#80E69A',
+    backgroundColor: '#1A1A1A',
     borderRadius: 16,
     padding: 20,
     marginHorizontal: 20,
     marginBottom: 10,
-    shadowColor: '#000',
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
-    borderWidth:1.3,
-    borderColor: 'black',
-    borderLeftWidth: 6,
-    borderLeftColor: 'black',
-    borderTopLeftRadius: 24,
-    borderBottomLeftRadius: 24,
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   itemContainerUnsynced: {
     backgroundColor: '#9CA3AF', // Grey color for unsynced
@@ -552,31 +586,48 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
   },
+  nameContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 12,
+  },
+  iconContainer: {
+    marginRight: 12,
+  },
+  iconGradient: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 0.3,
+    borderColor: 'black',
+  },
   headerRight: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
   },
   name: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '700',
     color: 'white',
     flex: 1,
-    marginRight: 12,
     fontFamily: 'Inter_700Bold',
   },
   caloriesBadge: {
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#242424',
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'black',
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   caloriesText: {
     fontSize: 13,
     fontWeight: '700',
-    color: 'black',
+    color: 'white',
     letterSpacing: 0.3,
     fontFamily: 'Inter_700Bold',
   },
@@ -589,10 +640,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     marginBottom: 16,
     paddingVertical: 16,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#242424',
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'black',
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   macroItem: {
     alignItems: 'center',
@@ -601,7 +652,7 @@ const styles = StyleSheet.create({
   macroValue: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1A1A1A',
+    color: 'white',
     marginBottom: 4,
     fontFamily: 'Inter_700Bold',
   },
@@ -621,7 +672,7 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1A1A1A',
+    color: 'white',
     textAlign: 'center',
     marginBottom: 8,
     marginTop: 16,
@@ -656,7 +707,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_500Medium',
   },
   viewIngredientsButton: {
-    backgroundColor: 'black',
+    backgroundColor: '#4CD964',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,

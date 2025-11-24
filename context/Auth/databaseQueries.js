@@ -1,6 +1,6 @@
 import { generateClient } from 'aws-amplify/api';
-import { getSettings, listNutritions, listUserExercises, listWorkouts, listExercises, listExerciseLogs } from '../../database/graphql/queries';
-import { deleteWorkout, deleteNutrition, deleteSettings, createSettings, deleteUserExercise, deleteExercise, deleteExerciseLog } from '../../database/graphql/mutations';
+import { getSettings, listNutritions, listUserExercises, listWorkouts, listExercises, listExerciseLogs } from '../../graphql/queries';
+import { deleteWorkout, deleteNutrition, deleteSettings, createSettings, deleteUserExercise, deleteExercise, deleteExerciseLog } from '../../graphql/mutations';
 
 /**
  * Checks if Apple user exists in the database

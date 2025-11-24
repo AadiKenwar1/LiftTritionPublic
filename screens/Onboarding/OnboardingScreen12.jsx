@@ -19,7 +19,7 @@ export default function OnboardingScreen12() {
   const { calculateMacros, updateWeight } = useSettings();
   
   // Get all onboarding data from previous screens
-  const { birthDate, age, height, weight, unit, activityFactor, goalType, goalWeight, goalPace } = route.params || {};
+  const { birthDate, age, gender, height, weight, unit, activityFactor, goalType, goalWeight, goalPace } = route.params || {};
   
   const [calculatedMacros, setCalculatedMacros] = useState(null);
 
@@ -27,7 +27,7 @@ export default function OnboardingScreen12() {
   // Calculate macros when we get to this onboarding screen
   useEffect(() => {
     if (weight && height && age && activityFactor) {
-      const macroResult = calculateMacros(weight, goalWeight || weight, activityFactor, age, 'male', height, goalType, goalPace, unit);
+      const macroResult = calculateMacros(weight, goalWeight || weight, activityFactor, age, gender || 'male', height, goalPace, unit);
       const macros = {
         calories: Math.round(macroResult.calResult),
         protein: Math.round(macroResult.proteinGrams),
@@ -46,6 +46,7 @@ export default function OnboardingScreen12() {
       const onboardingData = {
         birthDate,
         age,
+        gender,
         height,
         weight,
         unit,
@@ -80,7 +81,7 @@ export default function OnboardingScreen12() {
             Unable to calculate macros. Please complete all previous steps.
           </Text>
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-            <Text style={styles.backButtonText}>Go Back</Text>
+            <Text style={styles.errorBackButtonText}>Go Back</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -93,7 +94,7 @@ export default function OnboardingScreen12() {
         {/* Header Section */}
         <View style={styles.headerSection}>
           <View style={styles.headerIcon}>
-            <Ionicons name="calculator-outline" size={28} color="#00B8A9" />
+            <Ionicons name="calculator-outline" size={28} color="#00B8A9"/>
           </View>
           <Text style={styles.headerTitle}>Your Personalized Plan</Text>
           <Text style={styles.headerSubtitle}>
@@ -167,12 +168,12 @@ export default function OnboardingScreen12() {
         {/* Navigation Buttons */}
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={20} color="#666666" />
+            <Ionicons name="arrow-back" size={20} color="white" />
             <Text style={styles.backButtonText}>Back</Text>
           </TouchableOpacity>
           
           <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
-            <Text style={styles.nextButtonText}>Next</Text>
+            <Text style={styles.nextButtonText}>Finish </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -183,14 +184,15 @@ export default function OnboardingScreen12() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#242424',
   },
   content: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 30,
+    paddingVertical: 20,
+    width: '100%',
   },
   errorContainer: {
     flex: 1,
@@ -200,105 +202,104 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
-    color: '#666',
+    color: 'white',
     textAlign: 'center',
     marginVertical: 20,
+    fontFamily: 'Inter_400Regular',
   },
   headerSection: {
     alignItems: 'center',
     marginBottom: 20,
+    width: '100%',
   },
   headerIcon: {
-    marginBottom: 8,
+    marginBottom: 5,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: '800',
-    color: '#1A1A1A',
-    marginBottom: 4,
+    color: '#00B8A9',
+    marginBottom: 5,
     textAlign: 'center',
+    fontFamily: 'Inter_800ExtraBold',
   },
   headerSubtitle: {
-    fontSize: 14,
-    color: '#666666',
+    fontSize: 15,
+    color: 'white',
     textAlign: 'center',
-    lineHeight: 18,
+    lineHeight: 22,
     paddingHorizontal: 10,
-    maxWidth: 280,
+    maxWidth: 320,
+    fontFamily: 'Inter_400Regular',
+    opacity: 0.9,
   },
   caloriesCard: {
-    backgroundColor: '#F8F9FA',
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 15,
+    backgroundColor: '#1A1A1A',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 20,
     alignItems: 'center',
     width: '100%',
-    maxWidth: 350,
-    shadowColor: '#000',
+    maxWidth: 320,
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
-    borderWidth: 1,
-    borderColor: 'black',
-    borderBottomWidth: 6,
-    borderBottomColor: 'black',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   caloriesHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 12,
   },
   caloriesTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1A1A1A',
+    color: 'white',
     marginLeft: 8,
+    fontFamily: 'Inter_700Bold',
   },
   caloriesValue: {
     fontSize: 42,
     fontWeight: '800',
     color: '#00B8A9',
     marginBottom: 5,
+    fontFamily: 'Inter_700Bold',
   },
   caloriesUnit: {
     fontSize: 18,
-    color: '#666666',
+    color: '#9CA3AF',
     fontWeight: '600',
     marginBottom: 8,
+    fontFamily: 'Inter_600SemiBold',
   },
   caloriesDescription: {
     fontSize: 13,
-    color: '#666666',
+    color: '#9CA3AF',
     textAlign: 'center',
     lineHeight: 18,
+    fontFamily: 'Inter_400Regular',
   },
   macrosGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: 20,
     width: '100%',
-    maxWidth: 350,
+    maxWidth: 320,
+    gap: 12,
   }, 
   macroCard: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#1A1A1A',
     borderRadius: 12,
-    padding: 12,
-    marginHorizontal: 3,
-    shadowColor: '#000',
+    padding: 14,
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
-    borderWidth: 1,
-    borderColor: 'black',
-    borderBottomWidth: 6,
-    borderBottomColor: 'black',
-    borderBottomLeftRadius: 15,
-    borderBottomRightRadius: 15,
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
     alignItems: 'center',
   },
   macroCardFirst: {
@@ -308,53 +309,63 @@ const styles = StyleSheet.create({
     marginRight: 0,
   },
   macroIcon: {
-    marginBottom: 6,
+    marginBottom: 8,
   },
   macroValue: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '800',
-    color: '#1A1A1A',
-    marginBottom: 3,
+    color: 'white',
+    marginBottom: 4,
+    fontFamily: 'Inter_700Bold',
   },
   macroLabel: {
     fontSize: 12,
-    color: '#666666',
-    marginBottom: 3,
+    color: '#9CA3AF',
+    marginBottom: 4,
     fontWeight: '600',
+    fontFamily: 'Inter_600SemiBold',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   macroCalories: {
-    fontSize: 10,
-    color: '#999999',
+    fontSize: 11,
+    color: '#9CA3AF',
     fontStyle: 'italic',
+    fontFamily: 'Inter_400Regular',
   },
   infoCard: {
     flexDirection: 'row',
-    backgroundColor: '#E8F5F5',
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 8,
-    borderWidth: 1,
+    backgroundColor: '#1A1A1A',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 20,
+    borderWidth: 0.3,
     borderColor: '#00B8A9',
     width: '100%',
-    maxWidth: 350,
+    maxWidth: 320,
     alignItems: 'center',
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
   },
   infoText: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#00B8A9',
-    marginLeft: 8,
+    marginLeft: 10,
     flex: 1,
-    lineHeight: 16,
+    lineHeight: 18,
     fontWeight: '500',
     textAlign: 'center',
+    fontFamily: 'Inter_500Medium',
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
-    marginTop: 10,
-    paddingHorizontal: 5,
+    maxWidth: 320,
+    marginTop: 20,
   },
   backButton: {
     flexDirection: 'row',
@@ -365,28 +376,36 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   backButtonText: {
-    color: '#666666',
+    color: 'white',
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 6,
+    fontFamily: 'Inter_600SemiBold',
+  },
+  errorBackButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: 'Inter_600SemiBold',
   },
   nextButton: {
     backgroundColor: '#00B8A9',
     paddingVertical: 16,
     paddingHorizontal: 32,
-    borderRadius: 20,
-    shadowColor: '#00B8A9',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 8,
+    borderRadius: 10,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
     minWidth: 120,
     alignItems: 'center',
   },
   nextButtonText: {
     color: 'white',
-    fontWeight: '700',
+    fontWeight: '600',
     fontSize: 18,
-    letterSpacing: 0.5,
+    fontFamily: 'Inter_600SemiBold',
   },
 });

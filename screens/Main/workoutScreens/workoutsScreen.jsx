@@ -163,7 +163,11 @@ export default function LogScreen() {
       Popup Modal where user enters Workout to add.*/
     <>
       <View style={styles.container}>
-        <Text style={styles.header}>Your Workouts</Text>
+        <View style={styles.headerContainer}>
+          <View style={styles.headerLine} />
+          <Text style={styles.header}>WORKOUTS</Text>
+          <View style={styles.headerLine} />
+        </View>
         {/*Current Workouts*/}
         {workouts.filter((item) => !item.archived).length > 0 && (
           <DraggableLogList
@@ -188,16 +192,27 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     flex: 1,
-    backgroundColor: '#F2F2F2', 
+    backgroundColor: '#242424', 
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
   },
   header: {
-    textAlign: 'center',
     fontSize: 28,
     fontWeight: '800',
-    marginBottom: 24,
-    color: '#2d3748',
+    color: 'white',
     letterSpacing: -0.5,
     fontFamily: 'Inter_700Bold',
+    marginHorizontal: 12,
+  },
+  headerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: 'white',
+    maxWidth: 100,
   },
   addWorkoutButton: {
     backgroundColor: '#4CAF50', // green-ish button

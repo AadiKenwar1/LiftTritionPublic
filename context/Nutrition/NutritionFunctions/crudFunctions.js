@@ -1,8 +1,8 @@
 import uuid from "react-native-uuid";
 import { getLocalDateKey } from "../../../utils/date";
 import { generateClient } from 'aws-amplify/api';
-import { createNutrition, updateNutrition, deleteNutrition as deleteNutritionMutation } from '../../../database/graphql/mutations';
-import { listNutritions } from '../../../database/graphql/queries';
+import { createNutrition, updateNutrition, deleteNutrition as deleteNutritionMutation } from '../../../graphql/mutations';
+import { listNutritions } from '../../../graphql/queries';
 
 const client = generateClient();
 

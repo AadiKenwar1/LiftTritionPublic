@@ -27,6 +27,9 @@ export default function AdjustMacrosScreen() {
     unit,
     activityFactor,
     calculateMacros,
+    age,
+    gender,
+    height,
   } = useSettings();
   
   const navigation = useNavigation();
@@ -100,6 +103,9 @@ export default function AdjustMacrosScreen() {
       currentBodyWeight,
       currentGoalWeight,
       currentActivityFactor,
+      age,
+      gender,
+      height,
       currentGoalPace,
       unit
     );
@@ -131,9 +137,8 @@ export default function AdjustMacrosScreen() {
   return (
     <>
       <CustomHeader title='Adjust Macros' showBack />
-      <ScrollView
-        contentContainerStyle={styles.container}
-        showsVerticalScrollIndicator={false}
+      <View
+        style={styles.container}
       >
         {/* Goal Type Selection */}
         <View style={styles.card}>
@@ -172,7 +177,7 @@ export default function AdjustMacrosScreen() {
             value={localBodyWeight?.toString() ?? ''}
             onChangeText={(val) => setLocalBodyWeight(parseFloat(val) || 0)}
             placeholder={`Enter current weight in ${unit ? 'lbs' : 'kg'}`}
-            placeholderTextColor='#aaa'
+            placeholderTextColor='#8E8E93'
           />
         </View>
 
@@ -191,7 +196,7 @@ export default function AdjustMacrosScreen() {
               value={localGoalWeight?.toString() ?? ''}
               onChangeText={(val) => setLocalGoalWeight(parseFloat(val) || 0)}
               placeholder={`Enter target weight in ${unit ? 'lbs' : 'kg'}`}
-              placeholderTextColor='#aaa'
+              placeholderTextColor='#8E8E93'
             />
             {!isGoalValid() && (
               <Text style={styles.errorText}>
@@ -239,9 +244,9 @@ export default function AdjustMacrosScreen() {
               step={0.1}
               value={localGoalPace}
               onValueChange={setLocalGoalPace}
-              minimumTrackTintColor='#000'
-              maximumTrackTintColor='#ccc'
-              thumbTintColor='#000'
+              minimumTrackTintColor='#2D9CFF'
+              maximumTrackTintColor='#1A1A1A'
+              thumbTintColor='#2D9CFF'
             />
             <View style={styles.sliderLabels}>
               <Text style={styles.sliderLabel}>0.2</Text>
@@ -266,7 +271,7 @@ export default function AdjustMacrosScreen() {
             Calculate Macros
           </Text>
         </TouchableOpacity>
-      </ScrollView>
+      </View>
     </>
   );
 }
@@ -274,30 +279,27 @@ export default function AdjustMacrosScreen() {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    backgroundColor: '#F2F2F2',
+    paddingTop: 10,
+    backgroundColor: '#242424',
+    flex: 1,
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: '#1A1A1A',
     borderRadius: 16,
     padding: 20,
     marginBottom: 20,
-    shadowColor: '#000',
+    shadowColor: 'black',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
-    borderWidth: 1,
-    borderColor: 'black',
-    borderBottomWidth: 6,
-    borderBottomColor: 'black',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   sectionTitle: {
     fontSize: 18,
     fontFamily: 'Inter_700Bold',
     marginBottom: 16,
-    color: '#000',
+    color: 'white',
     fontWeight: '600',
   },
   cardHeader: {
@@ -308,12 +310,12 @@ const styles = StyleSheet.create({
   },
   chevron: {
     fontSize: 24,
-    color: '#666',
+    color: '#8E8E93',
     fontFamily: 'Inter_400Regular',
   },
   cardSubtitle: {
     fontSize: 16,
-    color: '#666',
+    color: '#8E8E93',
     fontFamily: 'Inter_500Medium',
   },
   buttonRow: {
@@ -324,18 +326,18 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     marginHorizontal: 4,
-    borderWidth: 1,
-    borderColor: 'black',
+    borderWidth: 0.3,
+    borderColor: 'grey',
     borderRadius: 30,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#242424',
     alignItems: 'center',
   },
   optionButtonActive: {
-    backgroundColor: '#00B8A9',
-    borderColor: 'black',
+    backgroundColor: '#4CD964',
+    borderColor: '#4CD964',
   },
   optionText: {
-    color: '#000',
+    color: 'white',
     fontFamily: 'Inter_600SemiBold',
     fontSize: 16,
   },
@@ -343,15 +345,15 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
+    borderWidth: 0.3,
+    borderColor: 'grey',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 16,
     fontFamily: 'Inter_400Regular',
-    backgroundColor: '#f8f8f8',
-    color: '#000',
+    backgroundColor: '#242424',
+    color: 'white',
   },
   sliderLabels: {
     flexDirection: 'row',
@@ -359,7 +361,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   sliderLabel: {
-    color: '#666',
+    color: '#8E8E93',
     fontSize: 14,
     fontFamily: 'Inter_400Regular',
   },
@@ -367,21 +369,21 @@ const styles = StyleSheet.create({
     marginTop: 10,
     padding: 20,
     borderRadius: 16,
-    backgroundColor: '#f8f8f8',
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
+    backgroundColor: '#242424',
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   summaryTitle: {
     fontSize: 20,
     fontFamily: 'Inter_700Bold',
     marginBottom: 16,
-    color: '#000',
+    color: 'white',
     textAlign: 'center',
   },
   summaryItem: {
     fontSize: 16,
     fontFamily: 'Inter_400Regular',
-    color: '#000',
+    color: 'white',
     marginBottom: 8,
     textAlign: 'center',
   },
@@ -390,28 +392,21 @@ const styles = StyleSheet.create({
   },
   calculateButton: {
     marginTop: 0,
-    backgroundColor: '#00B8A9',
+    backgroundColor: '#4CD964',
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 4,
-    borderWidth: 1,
+    shadowColor: 'black',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    borderWidth: 0.3,
     borderColor: 'black',
-    borderBottomWidth: 6,
-    borderBottomColor: 'black',
-    borderBottomLeftRadius: 12,
-    borderBottomRightRadius: 12,
-    
   },
   calculateButtonDisabled: {
-    backgroundColor: '#ccc',
-    shadowOpacity: 0,
-    elevation: 0,
+    backgroundColor: '#1A1A1A',
+    borderColor: 'grey',
   },
   calculateButtonText: {
     color: '#fff',
@@ -421,11 +416,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   calculateButtonTextDisabled: {
-    color: '#999',
+    color: '#8E8E93',
   },
   inputError: {
     borderColor: '#ff3b30',
-    backgroundColor: '#fff5f5',
+    backgroundColor: '#242424',
   },
   errorText: {
     color: '#ff3b30',
@@ -437,14 +432,14 @@ const styles = StyleSheet.create({
     marginTop: 20,
     padding: 20,
     borderRadius: 16,
-    backgroundColor: '#f8f8f8',
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
+    backgroundColor: '#242424',
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   macroItem: {
     fontSize: 16,
     fontFamily: 'Inter_400Regular',
-    color: '#000',
+    color: 'white',
     marginBottom: 8,
   },
 });

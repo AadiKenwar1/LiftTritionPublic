@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { Flag } from 'lucide-react-native';
 
 export default function OnboardingScreen8() {
   const navigation = useNavigation();
   const route = useRoute();
-  const { birthDate, age, height, weight, unit, activityFactor } = route.params || {};
+  const { birthDate, age, gender, height, weight, unit, activityFactor } = route.params || {};
   
   const [goalType, setGoalType] = useState('maintain');
   const [goalWeight, setGoalWeight] = useState(weight?.toString() || '');
@@ -49,6 +50,7 @@ export default function OnboardingScreen8() {
     navigation.navigate('Onboarding10', {
       birthDate,
       age,
+      gender,
       height,
       weight,
       unit,
@@ -75,14 +77,14 @@ export default function OnboardingScreen8() {
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
+
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={styles.container}>
-      <View style={styles.content}>
-            <Text style={styles.title}>What's your goal?</Text>
+      <View style={styles.container}>
+        <View style={styles.content}>
+          <Flag size={32} color="#00B8A9" style={styles.flagIcon} />
+          <Text style={styles.title}>What's your goal?</Text>
+            
+            
             
             <Text style={styles.description}>
               Choose your primary fitness goal to help us calculate your personalized nutrition plan.
@@ -120,10 +122,10 @@ export default function OnboardingScreen8() {
                 <TextInput
                   style={[styles.input, !isValidGoal && goalType !== 'maintain' && styles.inputError]}
                   keyboardType="numeric"
-                  value={goalWeight}
+                  value={0}
                   onChangeText={handleGoalWeightChange}
                   placeholder={`Enter target weight in ${unit ? 'lbs' : 'kg'}`}
-                  placeholderTextColor="#999"
+                  placeholderTextColor="#9CA3AF"
                 />
                 {!isValidGoal && errorMessage ? (
                   <Text style={styles.errorText}>
@@ -147,7 +149,7 @@ export default function OnboardingScreen8() {
             
                          <View style={styles.buttonContainer}>
                <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-                 <Ionicons name="arrow-back" size={20} color="#666666" />
+                 <Ionicons name="arrow-back" size={20} color="white" />
                  <Text style={styles.backButtonText}>Back</Text>
                </TouchableOpacity>
                
@@ -162,155 +164,159 @@ export default function OnboardingScreen8() {
            </View>
          </View>
        </TouchableWithoutFeedback>
-     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#242424',
   },
   content: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 30,
+    paddingVertical: 20,
+    width: '100%',
   },
   title: {
     fontSize: 28,
     fontWeight: '800',
-    color: '#1A1A1A',
-    marginBottom: 8,
+    color: '#00B8A9',
+    marginBottom: 5,
     textAlign: 'center',
+    fontFamily: 'Inter_800ExtraBold',
+  },
+  flagIcon: {
+    marginBottom: 5,
   },
   description: {
     fontSize: 15,
-    color: '#666666',
+    color: 'white',
     textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 30,
+    lineHeight: 22,
+    marginBottom: 20,
     paddingHorizontal: 10,
-    maxWidth: 300,
+    maxWidth: 320,
+    fontFamily: 'Inter_400Regular',
+    opacity: 0.9,
   },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
-    marginBottom: 25,
-    gap: 8,
+    maxWidth: 320,
+    marginBottom: 20,
+    gap: 12,
   },
   optionButton: {
     flex: 1,
     paddingVertical: 14,
-    borderRadius: 16,
-    backgroundColor: '#F8F9FA',
+    borderRadius: 10,
+    backgroundColor: '#1A1A1A',
     alignItems: 'center',
-    shadowColor: '#000',
+    justifyContent: 'center',
+    borderWidth: 0.3,
+    borderColor: 'grey',
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
-    borderWidth: 1,
-    borderColor: 'black',
-    borderBottomWidth: 4,
-    borderBottomColor: 'black',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
   },
   optionButtonActive: {
     backgroundColor: '#00B8A9',
-    borderColor: 'black',
-    shadowColor: '#00B8A9',
-    shadowOpacity: 0.2,
+    borderColor: '#00B8A9',
   },
   optionText: {
-    color: '#1A1A1A',
+    color: 'white',
     fontWeight: '600',
     fontSize: 15,
+    fontFamily: 'Inter_600SemiBold',
   },
   optionTextActive: {
     color: '#FFFFFF',
     fontWeight: '700',
+    fontFamily: 'Inter_700Bold',
   },
   inputContainer: {
     width: '100%',
+    maxWidth: 320,
     marginBottom: 25,
   },
   inputLabel: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '600',
-    color: '#1A1A1A',
-    marginBottom: 6,
+    color: 'white',
+    marginBottom: 12,
     textAlign: 'center',
+    fontFamily: 'Inter_600SemiBold',
   },
   input: {
     borderRadius: 12,
     paddingHorizontal: 18,
-    paddingVertical: 15,
+    paddingVertical: 16,
     fontSize: 17,
-    backgroundColor: '#F8F9FA',
-    color: 'black',
+    backgroundColor: '#1A1A1A',
+    color: 'white',
     textAlign: 'center',
     fontWeight: '600',
-    shadowColor: '#000',
+    borderWidth: 0.3,
+    borderColor: 'grey',
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
-    borderWidth: 1,
-    borderColor: 'black',
-    borderBottomWidth: 4,
-    borderBottomColor: 'black',
-    borderBottomLeftRadius: 12,
-    borderBottomRightRadius: 12
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    fontFamily: 'Inter_600SemiBold',
   },
   inputError: {
-    borderColor: 'red',
-    backgroundColor: '#FFE5E5',
-    borderBottomColor: 'red',
-    
+    borderColor: '#E53E3E',
+    backgroundColor: '#1A1A1A',
   },
   inputHint: {
     fontSize: 13,
-    color: '#666666',
-    marginTop: 6,
+    color: '#9CA3AF',
+    marginTop: 8,
     fontStyle: 'italic',
     textAlign: 'center',
+    fontFamily: 'Inter_400Regular',
   },
   errorText: {
     fontSize: 13,
     color: '#E53E3E',
-    marginTop: 6,
+    marginTop: 8,
     textAlign: 'center',
     fontWeight: '500',
+    fontFamily: 'Inter_500Medium',
   },
   maintainInfo: {
-    backgroundColor: '#E8F5F5',
+    backgroundColor: '#1A1A1A',
     padding: 18,
-    borderRadius: 16,
+    borderRadius: 12,
     marginBottom: 25,
-    borderWidth: 2,
+    borderWidth: 0.3,
     borderColor: '#00B8A9',
-    shadowColor: '#00B8A9',
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    width: '100%',
+    maxWidth: 320,
   },
   maintainText: {
     fontSize: 15,
     color: '#00B8A9',
     textAlign: 'center',
     fontWeight: '600',
+    fontFamily: 'Inter_600SemiBold',
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
-    marginTop: 15,
+    maxWidth: 320,
+    marginTop: 20,
   },
   backButton: {
     flexDirection: 'row',
@@ -321,33 +327,34 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   backButtonText: {
-    color: '#666666',
+    color: 'white',
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 6,
+    fontFamily: 'Inter_600SemiBold',
   },
   nextButton: {
     backgroundColor: '#00B8A9',
     paddingVertical: 16,
     paddingHorizontal: 32,
-    borderRadius: 20,
-    shadowColor: '#00B8A9',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 8,
+    borderRadius: 10,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
     minWidth: 120,
     alignItems: 'center',
   },
   nextButtonDisabled: {
-    backgroundColor: '#CCCCCC',
-    shadowOpacity: 0,
-    elevation: 0,
+    backgroundColor: '#666666',
+    opacity: 0.6,
   },
   nextButtonText: {
     color: 'white',
-    fontWeight: '700',
+    fontWeight: '600',
     fontSize: 18,
-    letterSpacing: 0.5,
+    fontFamily: 'Inter_600SemiBold',
   },
 }); 

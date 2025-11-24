@@ -1,5 +1,5 @@
 import { Modal, View, Text, StyleSheet, TouchableOpacity, TextInput, Keyboard, TouchableWithoutFeedback, FlatList, Alert, ActivityIndicator} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, Entypo } from '@expo/vector-icons';
 import { useState } from 'react';
 import FoodSearch from '../../../components/FoodSearch';
 import PopupModal from '../../../components/PopupModal';
@@ -122,18 +122,15 @@ export default function SearchFoodDBPopup(props) {
             </View>
             
             {/* Close Button */}
-            <View flexDirection="row" gap={5} alignItems="center" justifyContent='center' marginTop={10}>
-        <TouchableOpacity style={styles.resetButton} onPress={handleReset} >
-          <Text style={styles.buttonText}>Reset</Text>
+            <View flexDirection="row" gap={5} alignItems="center" justifyContent='center' marginTop={0} marginBottom={0}>
+        <TouchableOpacity style={styles.closeButton} onPress={() => { handleReset(); props.onClose(); }}>
+          <Text style={styles.buttonText}>Close</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
           <Ionicons name="add" size={18} color="#ffffff" />
           <Text style={styles.buttonText}>Add Foods</Text>
         </TouchableOpacity>
       </View>
-            <TouchableOpacity style={styles.closeButton} onPress={props.onClose}>
-              <Text style={styles.buttonText}>Close</Text>
-            </TouchableOpacity>
           </View>
         </View>
         </TouchableWithoutFeedback>
@@ -163,7 +160,7 @@ export default function SearchFoodDBPopup(props) {
                     style={styles.addedFoodsDeleteButton}
                     onPress={() => handleDelete(index)}
                   >
-                    <Ionicons name="trash" size={16} color="#ffffff" />
+                    <Entypo name="trash" size={16} color="#ffffff" />
                   </TouchableOpacity>
                 </View>
               ))}
@@ -185,37 +182,39 @@ export default function SearchFoodDBPopup(props) {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(0,0,0,0.8)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContainer: {
     width: '95%',
-    height: '90%',
-    backgroundColor: '#fff',
+    height: '70%',
+    backgroundColor: '#242424',
     borderRadius: 16,
     padding:20,
     elevation: 10,
-    marginBottom: 0
+    marginBottom: 50,
+    borderWidth: 1,
+    borderColor: 'grey',
   },
   content: {
     flex: 1,
-    marginTop: 10,
+    marginTop: 0,
   },
   headerContainer: {
-    marginBottom: 15,
+    marginBottom: 20,
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#1a202c',
+    color: 'white',
     marginBottom: 5,
     fontFamily: 'Inter_700Bold',
   },
   headerSubtitle: {
     fontSize: 14,
-    color: '#6b7280',
+    color: 'white',
     textAlign: 'center',
     fontFamily: 'Inter_400Regular',
   },
@@ -226,18 +225,15 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 10,
     borderRadius: 10,
-    backgroundColor: '#4FC3F7',
+    backgroundColor: '#4CD964',
     marginBottom: 10,
     marginTop: 2,
-    borderWidth: 1.3,
-    borderColor: 'black',
-    borderBottomWidth: 4,
-    borderBottomColor: 'black',
-    shadowColor: '#000',
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOpacity: 1,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   showAddedFoodsText: {
     color: 'white',
@@ -253,7 +249,7 @@ const styles = StyleSheet.create({
   addedFoodsPopupTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#1a202c',
+    color: 'white',
     marginBottom: 15,
     textAlign: 'center',
     fontFamily: 'Inter_700Bold',
@@ -271,26 +267,22 @@ const styles = StyleSheet.create({
   addedFoodsItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#1A1A1A',
     padding: 12,
     marginBottom: 8,
     borderRadius: 12,
-    borderWidth: 1.3,
-    borderColor: 'black',
-    borderLeftWidth: 3,
-    borderLeftColor: 'black',
-    borderTopLeftRadius: 12,
-    borderBottomLeftRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
     elevation: 2,
   },
   addedFoodsName: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#1f2937',
+    color: 'white',
     marginBottom: 4,
     fontFamily: 'Inter_500Medium',
   },
@@ -328,16 +320,16 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_600SemiBold',
   },
   macroSummaryContainer: {
-    backgroundColor: '#4CD964',
+    backgroundColor: '#1A1A1A',
     borderRadius: 12,
     padding: 16,
     marginBottom: 10,
-    borderWidth: 1.3,
-    borderColor: 'black',
-    borderLeftWidth: 4,
-    borderLeftColor: 'black',
-    borderTopLeftRadius: 16,
-    borderBottomLeftRadius: 16,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   macroSummaryTitle: {
     fontSize: 16,
@@ -350,10 +342,11 @@ const styles = StyleSheet.create({
   macroSummaryGrid: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    backgroundColor: 'white',
+    backgroundColor: '#1A1A1A',
     borderRadius: 12,
     padding: 10,
-    borderWidth: 1,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   macroSummaryItem: {
     alignItems: 'center',
@@ -362,83 +355,49 @@ const styles = StyleSheet.create({
   macroSummaryValue: {
     fontSize: 16,
     fontWeight: '700',
-    color: 'black',
+    color: 'white',
     marginBottom: 4,
     fontFamily: 'Inter_700Bold',
   },
   macroSummaryLabel: {
     fontSize: 10,
     fontWeight: '500',
-    color: 'rgba(0, 0, 0, 0.8)',
+    color: 'white',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     fontFamily: 'Inter_500Medium',
   },
   addButton: {
     backgroundColor: '#4CD964',
-    width:"49%",
+    width:"50%",
     borderRadius: 10,
     padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 0,
     marginBottom: 10,
-    shadowColor: '#000',
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
-    borderWidth: 1.3,
-    borderColor: 'black',
-    borderBottomWidth: 6,
-    borderBottomColor: 'black',
-    borderBottomLeftRadius: 13,
-    borderBottomRightRadius: 13,
+    shadowOpacity: 1,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   closeButton: {
     backgroundColor: '#888888',
-    width:"100%",
-    borderRadius: 10,
-    padding: 16,
-    flexDirection: 'row',
-    alignSelf: 'center',
-    justifyContent: 'center',
-    marginTop: 0,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
-    borderWidth: 1.3,
-    borderColor: 'black',
-    borderBottomWidth: 6,
-    borderBottomColor: 'black',
-    borderBottomLeftRadius: 13,
-    borderBottomRightRadius: 13,
-  },
-  resetButton: {
-    backgroundColor: 'red',
-    width:"49%",
+    width:"50%",
     borderRadius: 10,
     padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 0,
     marginBottom: 10,
-    shadowColor: '#000',
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
-    borderWidth: 1.3,
-    borderColor: 'black',
-    borderBottomWidth: 6,
-    borderBottomColor: 'black',
-    borderBottomLeftRadius: 13,
-    borderBottomRightRadius: 13,
+    shadowOpacity: 1,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   buttonText: {
     color: '#ffffff',

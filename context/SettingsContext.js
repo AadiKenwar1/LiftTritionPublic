@@ -3,8 +3,8 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Alert } from 'react-native';
 import { getLocalDateKey } from '../utils/date';
 import { generateClient } from 'aws-amplify/api';
-import { getSettings, listSettings } from '../database/graphql/queries';
-import { createSettings, updateSettings } from '../database/graphql/mutations';
+import { getSettings, listSettings } from '../graphql/queries';
+import { createSettings, updateSettings } from '../graphql/mutations';
 import { useAuthContext } from './Auth/AuthContext';
 
 const client = generateClient();
@@ -167,37 +167,54 @@ export const SettingsProvider = ({ children }) => {
         currentBodyWeight = bodyWeight,
         currentGoalWeight = goalWeight,
         currentActivityFactor = activityFactor,
+        currentAge = age,
+        currentGender = gender,
+        currentHeight = height,
         currentGoalPace = goalPace,
         currentUnit = unit
     ) {
-        // Base calculation using current body weight (Mifflin-St Jeor Equation)
+        // Convert to imperial units for calculations (formula expects lbs and inches)
+        if (!currentUnit) { // If metric, convert to imperial
+            console.log('Converting to imperial units');    
+            currentBodyWeight = currentBodyWeight * 2.20462; // kg to lbs
+            console.log('Current body weight:', currentBodyWeight);
+            currentHeight = currentHeight / 2.54; // cm to inches
+            console.log('Current height:', currentHeight);
+            currentGoalWeight = currentGoalWeight * 2.20462; // kg to lbs
+            console.log('Current goal weight:', currentGoalWeight);
+            currentGoalPace = currentGoalPace * 2.20462; // kg/week to lbs/week
+            console.log('Current goal pace:', currentGoalPace);
+        }
+        console.log('Current goal pace:', currentGoalPace);
+        
+        // Base calculation using converted values (Mifflin-St Jeor Equation)
         let calResult = 0;
-        if (gender === 'male') {
+        if (currentGender === 'male') {
             calResult =
-                (4.536 * currentBodyWeight + 15.88 * height - 5 * age + 5) *
+                (4.536 * currentBodyWeight + 15.88 * currentHeight - 5 * currentAge + 5) *
                 currentActivityFactor;
-        } else if (gender === 'female') {
+        } else if (currentGender === 'female') {
             calResult =
-                (4.536 * currentBodyWeight + 15.88 * height - 5 * age - 161) *
+                (4.536 * currentBodyWeight + 15.88 * currentHeight - 5 * currentAge - 161) *
                 currentActivityFactor;
         } else {
             calResult =
-                (4.536 * currentBodyWeight + 15.88 * height - 5 * age - 78) *
+                (4.536 * currentBodyWeight + 15.88 * currentHeight - 5 * currentAge - 78) *
                 currentActivityFactor;
         }
 
         // Adjust calories based on goal type and desired pace
-        if (goalType === 'lose') {
-            // For weight loss, reduce calories based on desired pace
-            // 1 lb = 3500 calories, so weekly deficit = pace * 3500
+        // 1 lb = 3500 calories, so weekly deficit = pace * 3500
+        if(currentBodyWeight > currentGoalWeight){
             const weeklyDeficit = currentGoalPace * 3500;
             calResult -= weeklyDeficit / 7; // Daily deficit
-        } else if (goalType === 'gain') {
-            // For weight gain, increase calories based on desired pace
-            // 1 lb = 3500 calories, so weekly surplus = pace * 3500
+        }
+
+        if(currentBodyWeight < currentGoalWeight){
             const weeklySurplus = currentGoalPace * 3500;
             calResult += weeklySurplus / 7; // Daily surplus
         }
+        
         // For 'maintain', no adjustment needed
 
         // Protein calculation with progressive adjustments
@@ -215,17 +232,12 @@ export const SettingsProvider = ({ children }) => {
         }
         
         // Add extra protein for weight loss goals
-        if (goalType === 'lose') {
+        if (currentBodyWeight > currentGoalWeight) {
             proteinMultiplier += 0.1;
         }
         
-        // Convert weight to pounds if in metric mode for protein calculation
-        let weightForProtein = currentGoalWeight ? currentGoalWeight : currentBodyWeight;
-        if (!currentUnit) { // If metric (kg), convert to lbs
-            weightForProtein = weightForProtein * 2.20462; // kg to lbs
-        }
-        
-        const proteinGrams = weightForProtein * proteinMultiplier;
+        // Use converted weight (already in lbs at this point)
+        const proteinGrams = currentBodyWeight * proteinMultiplier;
         const proteinKcal = proteinGrams * 4;
 
         // Fat calculation (27.5% of total calories)

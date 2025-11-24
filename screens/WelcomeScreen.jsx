@@ -32,7 +32,7 @@ export default function WelcomeScreen() {
 
 
         <TouchableOpacity 
-          style={[styles.getStartedButton, { backgroundColor: '#00B8A9' }, loading && styles.buttonDisabled]} 
+          style={[styles.getStartedButton, loading && styles.buttonDisabled]} 
           onPress={signInWithApple}
           disabled={loading}
         >
@@ -51,7 +51,7 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: '#242424',
     padding: 20,
     justifyContent: 'center',
   },
@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
     color: '#00B8A9',
     fontWeight: '600',
     textAlign: 'center',
-    opacity: 0.8,
+    opacity: 0.9,
     fontFamily: 'Inter_400Regular',
   },
   buttonContainer: {
@@ -81,26 +81,27 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   getStartedButton: {
-    backgroundColor: '#00B8A9',
+    backgroundColor: '#121212',
     paddingVertical: 16,
     paddingHorizontal: 32,
-    borderRadius: 16,
+    borderRadius: 10,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
-    shadowColor: '#00B8A9',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   getStartedButtonText: {
     color: 'white',
-    fontWeight: '700',
+    fontWeight: '600',
     fontSize: 18,
     marginRight: 8,
-    fontFamily: 'Inter_700Bold',
+    fontFamily: 'Inter_600SemiBold',
   },
   buttonDisabled: {
     opacity: 0.6,
@@ -110,7 +111,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loginButtonText: {
-    color: '#00B8A9',
+    color: 'white',
     fontWeight: '600',
     fontSize: 16,
     fontFamily: 'Inter_600SemiBold',

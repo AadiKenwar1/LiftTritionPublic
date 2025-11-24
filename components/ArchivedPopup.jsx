@@ -62,12 +62,6 @@ export default function ArchivedPopup(props) {
         <View style={styles.modalContainer}>
           <View style={styles.header}>
             <Text style={styles.title}>{"Archived"}</Text>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={props.onClose}
-            >
-              <Text style={styles.close}>✕</Text>
-            </TouchableOpacity>
           </View>
 
           <View style={styles.content}>
@@ -121,6 +115,11 @@ export default function ArchivedPopup(props) {
             />
             {props.data.length === 0 && <Text style={{ textAlign: 'center', justifyContent: 'center', fontSize: 16, color: 'grey' }}>No archived items</Text>}
           </View>
+
+          {/* Close Button */}
+          <TouchableOpacity style={styles.closeButton} onPress={props.onClose}>
+            <Text style={styles.buttonText}>Close</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -188,40 +187,53 @@ export default function ArchivedPopup(props) {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.4)",
+    backgroundColor: "rgba(0,0,0,0.8)",
     justifyContent: "center",
     alignItems: "center",
   },
   modalContainer: {
     width: "90%",
-    height: "80%",
-    backgroundColor: "white",
+    height: "70%",
+    backgroundColor: "#242424",
     borderRadius: 16,
     padding: 20,
     elevation: 10,
+    marginBottom: 50,
+    borderWidth: 1,
+    borderColor: 'grey',
   },
   header: {
-    position: "relative", // ensure positioning context for absolute child
-    marginBottom: 40,
-    paddingRight: 40, // add padding so the title text doesn't collide with ✕
+    marginBottom: 20,
+    alignItems: "center",
   },
   title: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: "bold",
-    color: "black",
-    
+    color: "white",
+    fontFamily: 'Inter_700Bold',
   },
   closeButton: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    padding: 8, // tap-friendly touch area
-    zIndex: 10,
+    backgroundColor: '#888888',
+    width: "100%",
+    borderRadius: 10,
+    padding: 16,
+    flexDirection: 'row',
+    alignSelf: 'center',
+    justifyContent: 'center',
+    marginTop: 20,
+    marginBottom: 20,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
-  close: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "black",
+  buttonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: 'Inter_600SemiBold',
   },
   content: {
     flex: 1,

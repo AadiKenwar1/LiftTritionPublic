@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
+import { Cake } from 'lucide-react-native';
 
 export default function OnboardingScreen2() {
   const navigation = useNavigation();
@@ -90,7 +91,7 @@ export default function OnboardingScreen2() {
     
     // Create birthDate from selected values and store in navigation params as YYYY-MM-DD
     const birthDate = `${selectedYear}-${String(selectedMonth + 1).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}`;
-    navigation.navigate('Onboarding4', {
+    navigation.navigate('Onboarding3', {
       birthDate,
       age: age
     });
@@ -99,6 +100,7 @@ export default function OnboardingScreen2() {
   const handleBack = () => {
     navigation.goBack();
   };
+
 
   const formatDate = () => {
     const fullMonthNames = [
@@ -113,10 +115,13 @@ export default function OnboardingScreen2() {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
+      <Cake size={32} color="#00B8A9" style={styles.cakeIcon} />
         <Text style={styles.title}>When's your birthday?</Text>
         
+        
+        
         <Text style={styles.description}>
-          This helps us calculate your personalized nutrition and fitness recommendations.
+          This helps us calculate your nutrition and fatigue recommendations.
         </Text>
 
         <View style={styles.pickerSection}>
@@ -145,7 +150,7 @@ export default function OnboardingScreen2() {
                   selectedValue={selectedDay}
                   onValueChange={handleDayChange}
                   style={styles.picker}
-                  itemStyle={{...styles.pickerItem, fontSize: 16}}
+                  itemStyle={{...styles.pickerItem}}
                 >
                   {days.map((day) => (
                     <Picker.Item key={day} label={day.toString()} value={day} />
@@ -173,15 +178,15 @@ export default function OnboardingScreen2() {
           
           <View style={[styles.ageContainer, (age < 12 || age === 0) && styles.ageContainerWarning]}>
             <Text style={[styles.ageText, age < 12 && styles.ageTextWarning]}>
-              {age < 12 && 'Must be at least 12 years old'}
-              {age >= 12 && 'You are ' + age + ' years old'}
+              {age < 13 && 'Must be at least 13 years old'}
+              {age >= 13 && 'You are ' + age + ' years old'}
             </Text>
           </View>
         </View>
         
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-            <Ionicons name="arrow-back" size={20} color="#666666" />
+            <Ionicons name="arrow-back" size={20} color="white" />
             <Text style={styles.backButtonText}>Back</Text>
           </TouchableOpacity>
           
@@ -201,7 +206,7 @@ export default function OnboardingScreen2() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#242424',
   },
   content: {
     flex: 1,
@@ -213,18 +218,24 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: '800',
-    color: '#1A1A1A',
-    marginBottom: 8,
+    color: '#00B8A9',
+    marginBottom: 5,
     textAlign: 'center',
+    fontFamily: 'Inter_800ExtraBold',
+  },
+  cakeIcon: {
+    marginBottom: 5,
   },
   description: {
     fontSize: 15,
-    color: '#666666',
+    color: 'white',
     textAlign: 'center',
     lineHeight: 20,
     marginBottom: 20,
     paddingHorizontal: 10,
     maxWidth: 300,
+    fontFamily: 'Inter_400Regular',
+    opacity: 0.9,
   },
   dateDisplayContainer: {
     backgroundColor: '#00B8A9',
@@ -247,23 +258,18 @@ const styles = StyleSheet.create({
   },
   pickerSection: {
     width: '100%',
-    backgroundColor: '#00B8A9',
-    borderRadius: 20,
+    backgroundColor: '#242424',
+    borderRadius: 16,
     paddingVertical: 18,
     paddingHorizontal: 8,
-    paddingTop: 30,
-    marginBottom: 15,
-    shadowColor: '#000',
+    paddingTop: 20,
+    marginBottom: 0,
+    borderWidth: 0.3,
+    borderColor: 'grey',
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
-    borderWidth: 1,
-    borderColor: 'black',
-    borderBottomWidth: 6,
-    borderBottomColor: 'black',
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
   },
   pickerSectionTitle: {
     fontSize: 16,
@@ -278,7 +284,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom:20,
   },
   monthPickerColumn: {
     width: '30%',
@@ -302,45 +308,57 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+    fontFamily: 'Inter_700Bold',
   },
   pickerWrapper: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#242424',
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'black',
+    borderWidth: 0.3,
+    borderColor: 'grey',
     overflow: 'hidden',
     width: '100%',
     height: 120,
     justifyContent: 'center',
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
   },
   picker: {
     width: '100%',
     height: 220,
+    backgroundColor:'#1A1A1A',
+    borderColor: 'grey',
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
   },
   pickerItem: {
-    fontSize: 16,
-    color: '#1A1A1A',
+    fontSize: 17,
+    color: 'white',
     fontWeight: '500',
     textAlign: 'center',
+    fontFamily: 'Inter_400Regular',
   },
   ageContainer: {
-    backgroundColor: 'white',
+    backgroundColor: '#1A1A1A',
     paddingHorizontal: 20,
     paddingVertical: 15,
-    borderRadius: 18,
-    marginTop: 12,
+    borderRadius: 12,
+    marginTop: 0,
     marginBottom: 5,
-    borderWidth: 1,
-    shadowColor: 'black',
+    borderWidth: 0.3,
+    borderColor: 'grey',
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
+    shadowOpacity: 0.5,
+    shadowRadius: 3,
     alignSelf: 'center',
   },
   ageContainerWarning: {
-    backgroundColor: '#FFE5E5',
-    shadowColor: '#E53E3E',
+    backgroundColor: '#242424',
+    borderColor: '#E53E3E',
   },
   ageText: {
     fontSize: 20,
@@ -348,6 +366,7 @@ const styles = StyleSheet.create({
     color: '#00B8A9',
     textAlign: 'center',
     letterSpacing: 0.3,
+    fontFamily: 'Inter_600SemiBold',
   },
   ageTextWarning: {
     color: '#E53E3E',
@@ -357,8 +376,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
-    marginTop: 10,
-    paddingHorizontal: 5,
+    marginTop: 20,
   },
   backButton: {
     flexDirection: 'row',
@@ -369,33 +387,34 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   backButtonText: {
-    color: '#666666',
+    color: 'white',
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 6,
+    fontFamily: 'Inter_600SemiBold',
   },
   nextButton: {
     backgroundColor: '#00B8A9',
     paddingVertical: 16,
     paddingHorizontal: 32,
-    borderRadius: 20,
-    shadowColor: '#00B8A9',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 8,
-    minWidth: 120,
+    borderRadius: 10,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
+    minWidth: 140,
     alignItems: 'center',
   },
   nextButtonDisabled: {
-    backgroundColor: '#CCCCCC',
-    shadowOpacity: 0,
-    elevation: 0,
+    backgroundColor: '#666666',
+    opacity: 0.6,
   },
   nextButtonText: {
     color: 'white',
-    fontWeight: '700',
+    fontWeight: '600',
     fontSize: 18,
-    letterSpacing: 0.5,
+    fontFamily: 'Inter_600SemiBold',
   },
 }); 

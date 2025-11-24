@@ -2,68 +2,71 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { Dumbbell } from 'lucide-react-native';
+import { User, Mars, Venus } from 'lucide-react-native';
 
-const frequencyOptions = [
-  { label: '0 times a week', value: 1.2 },
-  { label: '1–2 times a week', value: 1.375 },
-  { label: '3–4 times a week', value: 1.55 },
-  { label: '5+ times a week', value: 1.725 },
+const genderOptions = [
+  { label: 'Male', value: 'male', icon: Mars },
+  { label: 'Female', value: 'female', icon: Venus },
 ];
 
-export default function OnboardingScreen6() {
+export default function OnboardingScreen3() {
   const navigation = useNavigation();
   const route = useRoute();
-  const { birthDate, age, gender, height, weight, unit } = route.params || {};
+  const { birthDate, age } = route.params || {};
   
-  const [activityFactor, setActivityFactor] = useState(1.2);
+  const [gender, setGender] = useState('male');
 
   const handleBack = () => {
     navigation.goBack();
   };
 
   const handleNext = () => {
-    // Store all data collected so far
-    navigation.navigate('Onboarding8', {
+    // Pass all data collected so far to next screen
+    navigation.navigate('Onboarding4', {
       birthDate,
       age,
-      gender,
-      height,
-      weight,
-      unit,
-      activityFactor
+      gender
     });
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <Dumbbell size={32} color="#00B8A9" style={styles.dumbbellIcon} />
-        <Text style={styles.title}>Whats your training frequency?</Text>
+        <User size={32} color="#00B8A9" style={styles.userIcon} />
+        <Text style={styles.title}>What's Your Biological Sex?</Text>
         <Text style={styles.description}>
-          Your training frequency helps us calculate your personalized nutrition goals and fatigue tracking.
+            Your biological sex helps us calculate nutrition goals.
         </Text>
 
         <View style={styles.optionsContainer}>
-          {frequencyOptions.map((option) => (
-            <TouchableOpacity
-              key={option.value}
-              style={[
-                styles.option,
-                activityFactor === option.value && styles.selectedOption,
-              ]}
-              onPress={() => setActivityFactor(option.value)}
-            >
-              <Text
+          {genderOptions.map((option) => {
+            const IconComponent = option.icon;
+            const isSelected = gender === option.value;
+            return (
+              <TouchableOpacity
+                key={option.value}
                 style={[
-                  styles.optionText,
-                  activityFactor === option.value && styles.selectedOptionText,
+                  styles.option,
+                  isSelected && styles.selectedOption,
                 ]}
+                onPress={() => setGender(option.value)}
               >
-                {option.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
+                <IconComponent 
+                  size={24} 
+                  color={isSelected ? '#FFFFFF' : 'white'} 
+                  style={styles.optionIcon}
+                />
+                <Text
+                  style={[
+                    styles.optionText,
+                    isSelected && styles.selectedOptionText,
+                  ]}
+                >
+                  {option.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
         
         <View style={styles.buttonContainer}>
@@ -102,9 +105,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: 'Inter_800ExtraBold',
   },
-  dumbbellIcon: {
+  userIcon: {
     marginBottom: 5,
-    transform: [{ rotate: '45deg' }],
   },
   description: {
     fontSize: 15,
@@ -123,6 +125,9 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
   option: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     padding: 18,
     borderRadius: 12,
     borderWidth: 0.3,
@@ -133,8 +138,10 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.8,
     shadowRadius: 3,
-    alignItems: 'center',
-    justifyContent: 'center',
+    gap: 12,
+  },
+  optionIcon: {
+    marginRight: 0,
   },
   selectedOption: {
     backgroundColor: '#00B8A9',
@@ -151,15 +158,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: '700',
     fontFamily: 'Inter_700Bold',
-  },
-  infoText: {
-    fontSize: 13,
-    color: '#666666',
-    textAlign: 'center',
-    marginTop: 15,
-    marginBottom: 25,
-    fontStyle: 'italic',
-    paddingHorizontal: 20,
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -204,4 +202,5 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: 'Inter_600SemiBold',
   },
-}); 
+});
+

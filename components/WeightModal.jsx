@@ -10,11 +10,23 @@ import {
   Keyboard,
 } from 'react-native';
 import { useSettings } from '../context/SettingsContext';
-import { getLocalDateKey } from '../utils/date';
 
 export default function WeightUpdateModal({ visible, onClose }) {
   // Access context
-  const {unit, bodyWeight, updateWeight} = useSettings();
+  const {
+    unit, 
+    bodyWeight, 
+    updateWeight,
+    calculateMacros,
+    setNutritionGoals,
+    age,
+    gender,
+    height,
+    goalType,
+    goalWeight,
+    goalPace,
+    activityFactor
+  } = useSettings();
 
   // Local state for input field
   const [tempWeight, setTempWeight] = useState(bodyWeight?.toString() ?? '');
@@ -33,12 +45,34 @@ export default function WeightUpdateModal({ visible, onClose }) {
   const handleUpdate = () => {
     const parsedWeight = parseFloat(tempWeight);
     if (!isNaN(parsedWeight) && parsedWeight > 0) {
-        updateWeight(parsedWeight);
-        onClose();
+      // Update weight first
+      updateWeight(parsedWeight);
+      
+      // Recalculate macros with the new weight
+      const macroResult = calculateMacros(
+        parsedWeight,           // currentBodyWeight (new weight)
+        goalWeight,             // currentGoalWeight
+        activityFactor,         // currentActivityFactor
+        age,                    // currentAge
+        gender,                 // currentGender
+        height,                 // currentHeight
+        goalPace,               // currentGoalPace
+        unit                    // currentUnit
+      );
+      
+      // Update macro goals (this will automatically save to database via useEffect)
+      setNutritionGoals(
+        macroResult.calResult,
+        macroResult.proteinGrams,
+        macroResult.fatGrams,
+        macroResult.carbGrams
+      );
+      
+      onClose();
     } else {
-        alert('Please enter a valid weight.');
+      alert('Please enter a valid weight.');
     }
-    };
+  };
 
     //console.log(JSON.stringify(weightProgress, null, 2));
 
@@ -55,7 +89,7 @@ export default function WeightUpdateModal({ visible, onClose }) {
           <View style={styles.modalContainer}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Update Weight</Text>
-              <Text style={styles.modalSubtitle}>Enter your current weight</Text>
+              <Text style={styles.modalSubtitle}>Enter your current weight{'\n'}Macros will be updated automatically</Text>
             </View>
 
             <View style={styles.modalContent}>
@@ -67,7 +101,7 @@ export default function WeightUpdateModal({ visible, onClose }) {
                     value={tempWeight}
                     onChangeText={setTempWeight}
                     placeholder="Enter weight"
-                    placeholderTextColor="#999"
+                    placeholderTextColor="#9CA3AF"
                     keyboardType="numeric"
                     autoFocus
                   />
@@ -109,41 +143,45 @@ export default function WeightUpdateModal({ visible, onClose }) {
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    marginBottom:80,
   },
   modalContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: '#242424',
     borderRadius: 16,
-    width: '100%',
+    width: '95%',
     maxWidth: 400,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 3,
+    borderWidth: 1,
+    borderColor: 'grey',
+    marginBottom: 50,
   },
   modalHeader: {
     paddingHorizontal: 24,
     paddingTop: 24,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    paddingBottom: 0,
+    alignItems: 'center',
+    borderBottomWidth: 0,
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: '700',
-    color: '#000',
+    color: 'white',
     marginBottom: 8,
-    letterSpacing: 0.3,
+    fontFamily: 'Inter_700Bold',
+    textAlign: 'center',
   },
   modalSubtitle: {
     fontSize: 14,
-    color: '#666',
+    color: 'white',
     lineHeight: 20,
+    fontFamily: 'Inter_400Regular',
+    textAlign: 'center',
   },
   modalContent: {
     paddingHorizontal: 24,
@@ -155,9 +193,9 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#000',
-    marginBottom: 8,
-    letterSpacing: 0.2,
+    color: 'white',
+    marginBottom: 12,
+    fontFamily: 'Inter_600SemiBold',
   },
   weightInputContainer: {
     flexDirection: 'row',
@@ -166,26 +204,37 @@ const styles = StyleSheet.create({
   },
   weightInput: {
     flex: 1,
-    borderWidth: 2,
-    borderColor: '#e0e0e0',
-    borderRadius: 8,
+    borderWidth: 0.3,
+    borderColor: 'grey',
+    borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 16,
     fontSize: 16,
-    color: '#000',
-    backgroundColor: '#fff',
+    color: 'white',
+    backgroundColor: '#1A1A1A',
+    fontFamily: 'Inter_400Regular',
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
   },
   unitButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 6,
-    backgroundColor: '#000',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderRadius: 12,
+    backgroundColor: '#1A1A1A',
+    borderWidth: 0.3,
+    borderColor: 'grey',
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
   },
   unitButtonText: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '600',
-    color: '#666',
     color: '#fff',
+    fontFamily: 'Inter_600SemiBold',
   },
 
   modalActions: {
@@ -199,23 +248,29 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 10,
     alignItems: 'center',
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   cancelButton: {
-    backgroundColor: '#f8f8f8',
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
+    backgroundColor: '#888888',
   },
   cancelButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#000',
+    color: '#fff',
+    fontFamily: 'Inter_600SemiBold',
   },
   updateButton: {
-    backgroundColor: '#000',
+    backgroundColor: '#4CD964',
   },
   updateButtonText: {
     fontSize: 16,
     fontWeight: '600',
     color: '#fff',
+    fontFamily: 'Inter_600SemiBold',
   },
 });

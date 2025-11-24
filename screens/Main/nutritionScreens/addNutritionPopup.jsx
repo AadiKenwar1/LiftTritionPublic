@@ -6,6 +6,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { useNutritionContext } from '../../../context/Nutrition/NutritionContext';
 import { useBilling } from '../../../context/Billing/BillingContext.js';
 import { useNavigation } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function AddNutritionScreen(props) {
 
@@ -185,7 +186,14 @@ export default function AddNutritionScreen(props) {
             onPress={() => hasPremium ? handleGenerateSpecificMacro('calories') : handleNotPremium()}
             disabled={loadingCals}
           >
-            <Ionicons name="sparkles-sharp" size={18} color="#ffffff" />
+            <LinearGradient
+              colors={['#C63DE8', '#D94CC4', '#E55AB0']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              style={styles.gradientAiButton}
+            >
+              <Ionicons name="sparkles-sharp" size={18} color="#ffffff" />
+            </LinearGradient>
           </TouchableOpacity>
           }
         </View>
@@ -215,7 +223,14 @@ export default function AddNutritionScreen(props) {
             onPress={() => hasPremium ? handleGenerateSpecificMacro('protein') : handleNotPremium()}
             disabled={loadingProtein}
           >
-            <Ionicons name="sparkles-sharp" size={18} color="#ffffff" />
+            <LinearGradient
+              colors={['#C63DE8', '#D94CC4', '#E55AB0']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              style={styles.gradientAiButton}
+            >
+              <Ionicons name="sparkles-sharp" size={18} color="#ffffff" />
+            </LinearGradient>
           </TouchableOpacity>
           }
         </View>
@@ -245,7 +260,14 @@ export default function AddNutritionScreen(props) {
             onPress={() => hasPremium ? handleGenerateSpecificMacro('carbs') : handleNotPremium()}
             disabled={loadingCarbs}
           >
-            <Ionicons name="sparkles-sharp" size={18} color="#ffffff" />
+            <LinearGradient
+              colors={['#C63DE8', '#D94CC4', '#E55AB0']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              style={styles.gradientAiButton}
+            >
+              <Ionicons name="sparkles-sharp" size={18} color="#ffffff" />
+            </LinearGradient>
           </TouchableOpacity>
           }
         </View>
@@ -275,7 +297,14 @@ export default function AddNutritionScreen(props) {
             onPress={() => hasPremium ? handleGenerateSpecificMacro('fats') : handleNotPremium()}
             disabled={loadingFats}
           >
-            <Ionicons name="sparkles-sharp" size={18} color="#ffffff" />
+            <LinearGradient
+              colors={['#C63DE8', '#D94CC4', '#E55AB0']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              style={styles.gradientAiButton}
+            >
+              <Ionicons name="sparkles-sharp" size={18} color="#ffffff" />
+            </LinearGradient>
           </TouchableOpacity>
           }
         </View>
@@ -284,8 +313,8 @@ export default function AddNutritionScreen(props) {
 
 
       <View flexDirection="row" gap={5} alignItems="center" justifyContent='center'>
-        <TouchableOpacity style={styles.resetButton} onPress={handleReset} >
-          <Text style={styles.buttonText}>Reset</Text>
+        <TouchableOpacity style={styles.closeButton} onPress={() => { handleReset(); props.onClose(); }}>
+          <Text style={styles.buttonText}>Close</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
           <Ionicons name="add" size={18} color="#ffffff" />
@@ -331,11 +360,6 @@ export default function AddNutritionScreen(props) {
 
             
           </View>
-          
-          {/* Close Button */}
-          <TouchableOpacity style={styles.closeButton} onPress={props.onClose}>
-            <Text style={styles.buttonText}>Close</Text>
-          </TouchableOpacity>
         </View>
       </View>
       </TouchableWithoutFeedback>
@@ -347,32 +371,27 @@ export default function AddNutritionScreen(props) {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(0,0,0,0.8)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContainer: {
     width: '95%',
-    height: '80%',
-    backgroundColor: '#fff',
+    height: '70%',
+    backgroundColor: '#242424',
     borderRadius: 16,
     padding:20,
     elevation: 10,
     marginBottom: 50,
     borderWidth: 1,
-    borderColor: 'black',
+    borderColor: 'grey',
 
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
   },
   title: {
     fontSize: 18,
     fontWeight: 'bold',
     fontFamily: 'Inter_700Bold',
+    color: 'white',
   },
   close: {
     fontSize: 22,
@@ -380,10 +399,11 @@ const styles = StyleSheet.create({
     right: 0,
     position: 'absolute',
     fontFamily: 'Inter_700Bold',
+    color: 'white',
   },
   content: {
     flex: 1,
-    marginTop: 10,
+    marginTop: 0,
   },
   headerContainer: {
     marginBottom: 20,
@@ -392,13 +412,13 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#1a202c',
+    color: 'white',
     marginBottom: 5,
     fontFamily: 'Inter_700Bold',
   },
   headerSubtitle: {
     fontSize: 14,
-    color: '#6b7280',
+      color: 'white',
     textAlign: 'center',
     fontFamily: 'Inter_400Regular',
   },
@@ -449,27 +469,22 @@ const styles = StyleSheet.create({
   },
   mainInput: {
     borderWidth: 1,
-    borderColor: 'black',
     borderRadius: 12,
     padding: 16,
     fontSize: 16,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#1A1A1A',
     marginBottom: 15,
     minHeight: 80,
     width: '99%',
     alignSelf: 'center',
-    shadowColor: '#000',
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
-    borderWidth: 1.3,
-    borderColor: 'black',
-    borderBottomWidth: 6,
-    borderBottomColor: 'black',
-    borderBottomLeftRadius: 12,
-    borderBottomRightRadius: 12,
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
     fontFamily: 'Inter_400Regular',
+    color:"white"
   },
   macroInputsContainer: {
     marginBottom: 15,
@@ -483,9 +498,9 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1a202c',
+    color: 'white',
     width: 70,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'Inter_500Medium',
   },
   inputContainer: {
     flex: 1,
@@ -495,24 +510,20 @@ const styles = StyleSheet.create({
   macroInput: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#e1e8ed',
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#1A1A1A',
     marginLeft: 0,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
     elevation: 4,
-    borderWidth: 1.3,
-    borderColor: 'black',
-    borderBottomWidth: 2.5,
-    borderBottomColor: 'black',
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
     fontFamily: 'Inter_400Regular',
+    color:"white"
   },
   loadingIcon: {
     position: 'absolute',
@@ -521,103 +532,58 @@ const styles = StyleSheet.create({
     transform: [{ translateY: -10 }],
   },
   aiButton: {
-    backgroundColor: '#D94CC4',
     borderRadius: 10,
     width:45,
     height:45,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
+    overflow: 'hidden',
+  },
+  gradientAiButton: {
+    width: '100%',
+    height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
-    borderWidth: 1.3,
-    borderColor: 'black',
-    borderBottomWidth: 4,
-    borderBottomColor: 'black',
-    borderBottomLeftRadius: 13,
-    borderBottomRightRadius: 13,
+    borderRadius: 10,
   },
   aiButtonDisabled: {
-    backgroundColor: '#D94CC4',
     opacity: 0.4,
-  },
-  generateButton: {
-    backgroundColor: '#D94CC4',
-    borderRadius: 12,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: -20,
-    marginBottom: 20,
   },
   addButton: {
     backgroundColor: '#4CD964',
-    width:"49%",
+    width:"50%",
     borderRadius: 10,
     padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: -10,
-    marginBottom: 20,
-    shadowColor: '#000',
+    marginBottom: 10,
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
-    borderWidth: 1.3,
-    borderColor: 'black',
-    borderBottomWidth: 6,
-    borderBottomColor: 'black',
-    borderBottomLeftRadius: 13,
-    borderBottomRightRadius: 13,
+    shadowOpacity: 1,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   closeButton: {
     backgroundColor: '#888888',
-    width:"100%",
-    borderRadius: 10,
-    padding: 16,
-    flexDirection: 'row',
-    alignSelf: 'center',
-    justifyContent: 'center',
-    marginTop: -10,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
-    borderWidth: 1.3,
-    borderColor: 'black',
-    borderBottomWidth: 6,
-    borderBottomColor: 'black',
-    borderBottomLeftRadius: 13,
-    borderBottomRightRadius: 13,
-  },
-  resetButton: {
-    backgroundColor: 'red',
-    width:"49%",
+    width:"50%",
     borderRadius: 10,
     padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: -10,
-    marginBottom: 20,
-    shadowColor: '#000',
+    marginBottom: 10,
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
-    borderWidth: 1.3,
-    borderColor: 'black',
-    borderBottomWidth: 6,
-    borderBottomColor: 'black',
-    borderBottomLeftRadius: 13,
-    borderBottomRightRadius: 13,
+    shadowOpacity: 1,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   buttonText: {
     color: '#ffffff',

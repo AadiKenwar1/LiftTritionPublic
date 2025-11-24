@@ -153,7 +153,7 @@ export default function LogLineChart(props) {
           style={styles.helpButton}
           onPress={() => setInfoVisible(true)}
         >
-          <FontAwesome name="question-circle-o" size={30} color="#333333" />
+          <FontAwesome name="question-circle-o" size={30} color="white" />
         </TouchableOpacity>
         {infoVisible && <TextOnlyModal
           title="What Is This Graph?"
@@ -177,37 +177,44 @@ export default function LogLineChart(props) {
         />}
 
         <LineChart
+          key={`${mode ? selectedLift : selectedMacro}-${selectedData}-${displayedData.length}-${displayedData[0]?.value || 0}-${displayedData[displayedData.length - 1]?.value || 0}`}
           data={displayedData}
           height={screenWidth-32 - 130}
           width={screenWidth-32}
           showFractionalValues={false}
+          curved
+          isAnimated={true}
+          animationDuration={800}
           spacing={20}
           initialSpacing={20}
           endSpacing={40}
           color={mode === true ? "#2D9CFF" : '#4CD964'}
           thickness={2}
-          yAxisTextStyle={{ color: 'black'}}
-          xAxisLabelTextStyle={{ color: "red", fontSize:12, opacity: 0 }}
-          yAxisColor={"black"}
+          areaChart
+          startFillColor={mode === true ? "#2D9CFF" : '#4CD964'}
+          endFillColor={mode === true ? "#2D9CFF" : '#4CD964'}
+          startOpacity={0.3}
+          endOpacity={0.1}
+          yAxisTextStyle={{ color: 'white', fontFamily: 'Inter_400Regular' }}
+          yAxisColor={"white"}
+          xAxisLabelTextStyle={{ opacity: 0 }}
           xAxisLabelsVerticalShift={5}
-          xAxisColor={"black"}
+          xAxisColor={"white"}
           noOfSections={4}
           yAxisOffset={Math.floor(minValue * 0.6)}
-          //showXAxisIndices
-          //hideAxesAndRules
-          //hideYAxisText
+          showYAxisIndices
+          yAxisIndicesColor="white"
+          yAxisIndicesWidth={8}
           yAxisLabelWidth={40}
           yAxisThickness={2}
           xAxisThickness={2}
-          hideRules
-          isAnimated={false}
+          rulesColor="rgba(255, 255, 255, 0.1)"
+          rulesThickness={1}
           showDataPoint={selectedData <= 10}
-          dataPointsColor={mode === true? "#2D9CFF": "#4CD964"} // outline color
+          dataPointsColor={mode === true ? "#2D9CFF" : '#4CD964'} // outline color
           dataPointsRadius={6} // outer circle size
           dataPointsWidth={3} // inner filled dot (leave smaller)
           dataPointsShape="circle"
-          showRules
-          //rotateLabel
           yAxisLabelContainerStyle={{ marginTop: 1 }}
           // 🔥 Enable focus
           focusEnabled

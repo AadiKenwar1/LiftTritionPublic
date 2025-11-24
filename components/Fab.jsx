@@ -4,9 +4,11 @@ import {
   TouchableOpacity,
   StyleSheet,
   Animated,
+  Pressable,
 } from 'react-native';
 import { Entypo } from '@expo/vector-icons';
 import { useSettings } from '../context/SettingsContext';
+import { LinearGradient } from 'expo-linear-gradient';
 
 function FloatingActionMenu (props){
   const {mode} = useSettings()
@@ -87,13 +89,20 @@ function FloatingActionMenu (props){
         })}
 
 
-      <TouchableOpacity style={[styles.fab, {backgroundColor: mode === true? "#2D9CFF": "#4CD964"}]} onPress={toggleMenu}>
-        <Entypo
-          name={isOpen ? 'cross' : 'dots-three-vertical'}
-          size={28}
-          color="white"
-        />
-      </TouchableOpacity>
+      <Pressable style={styles.fab} onPress={toggleMenu}>
+        <LinearGradient
+          colors={mode === true ? ['#1A7FE0', '#2D9CFF', '#3DAFFF'] : ['#3CB855', '#4CD964', '#5CE073']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={styles.gradientFab}
+        >
+          <Entypo
+            name={isOpen ? 'cross' : 'dots-three-vertical'}
+            size={28}
+            color="white"
+          />
+        </LinearGradient>
+      </Pressable>
     </View>
   );
 };
@@ -104,20 +113,25 @@ const styles = StyleSheet.create({
     right: 15,
     alignItems: 'flex-end',
     zIndex: 10,
+    
   },
   fab: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    borderWidth: 2,
+    borderWidth: 0.3,
     borderColor: 'black',
+    overflow: 'hidden',
+    borderColor: 'grey',
+
+  },
+  gradientFab: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.8,
-    shadowRadius: 0,
+    
   },
 });
 

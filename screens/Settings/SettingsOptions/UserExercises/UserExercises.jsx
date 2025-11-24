@@ -11,7 +11,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useWorkoutContext } from "../../../../context/WorkoutsV2/WorkoutContext";
 import { useAuthContext } from "../../../../context/Auth/AuthContext";
 import { generateClient } from 'aws-amplify/api';
-import { deleteUserExercise } from "../../../../database/graphql/mutations";
+import { deleteUserExercise } from "../../../../graphql/mutations";
 import CustomHeader from "../../../../components/CustomHeader";
 import { Entypo, Ionicons } from "@expo/vector-icons";
 
@@ -64,7 +64,7 @@ export default function UserExercises() {
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Ionicons name="barbell-outline" size={64} color="#ccc" />
+              <Ionicons name="barbell-outline" size={64} color="#8E8E93" />
               <Text style={styles.emptyText}>No exercises added yet</Text>
               <Text style={styles.emptySubText}>
                 Start building your custom workout library
@@ -120,8 +120,9 @@ export default function UserExercises() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F2F2F2",
+    backgroundColor: "#242424",
     paddingHorizontal: 20,
+    paddingTop: 10,
   },
   listContainer: {
     paddingTop: 24,
@@ -131,18 +132,18 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 30,
     right: 20,
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: "#00B8A9",
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#2D9CFF",
     alignItems: "center",
     justifyContent: "center",
     elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.8,
-    shadowRadius: 0,
-    borderWidth: 2,
+    shadowRadius: 3,
+    borderWidth: 0.3,
     borderColor: 'black',
   },
   emptyContainer: {
@@ -152,34 +153,29 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 20,
-    color: "#000",
+    color: "white",
     fontWeight: "700",
-    fontFamily: "Inter",
+    fontFamily: "Inter_700Bold",
     marginTop: 20,
     marginBottom: 8,
   },
   emptySubText: {
     fontSize: 16,
-    color: "#666",
-    fontFamily: "Inter",
+    color: "#8E8E93",
+    fontFamily: "Inter_400Regular",
     textAlign: "center",
     lineHeight: 22,
   },
   exerciseCard: {
-    backgroundColor: "#fff",
+    backgroundColor: "#1A1A1A",
     borderRadius: 16,
     padding: 20,
-    shadowColor: "#000",
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: "black",
-    borderBottomWidth: 4,
-    borderBottomColor: "black",
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   cardHeader: {
     flexDirection: "row",
@@ -193,8 +189,8 @@ const styles = StyleSheet.create({
   exerciseName: {
     fontSize: 20,
     fontWeight: "700",
-    fontFamily: "Inter",
-    color: "#000",
+    fontFamily: "Inter_700Bold",
+    color: "white",
     marginBottom: 16,
     letterSpacing: 0.3,
   },
@@ -203,55 +199,54 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   muscleTag: {
-    backgroundColor: "#F8F8F8",
+    backgroundColor: "#242424",
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 8,
-    borderLeftWidth: 3,
-    borderLeftColor: "#00B8A9",
-    borderWidth: 1,
-    borderColor: "#e0e0e0",
+    borderWidth: 0.3,
+    borderColor: "grey",
   },
   muscleLabel: {
     fontSize: 11,
     fontWeight: "600",
-    fontFamily: "Inter",
-    color: "#666",
+    fontFamily: "Inter_600SemiBold",
+    color: "#8E8E93",
     letterSpacing: 0.5,
     marginBottom: 2,
+    textTransform: 'uppercase',
   },
   muscleValue: {
     fontSize: 14,
-    color: "#000",
+    color: "white",
     fontWeight: "500",
-    fontFamily: "Inter",
+    fontFamily: "Inter_500Medium",
   },
   exerciseDetails: {
     flexDirection: "row",
     gap: 12,
   },
   detailItem: {
-    backgroundColor: "#F0F0F0",
+    backgroundColor: "#242424",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   detailLabel: {
     fontSize: 12,
-    color: "#666",
+    color: "#8E8E93",
     fontWeight: "500",
-    fontFamily: "Inter",
+    fontFamily: "Inter_500Medium",
   },
   deleteButton: {
     padding: 12,
-    backgroundColor: "#fff",
+    backgroundColor: "#242424",
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
+    borderWidth: 0.3,
     borderColor: "#ff4d4f",
-    borderBottomWidth: 3,
-    borderBottomColor: "#ff4d4f",
   },
   separator: {
     height: 16,

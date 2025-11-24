@@ -109,7 +109,7 @@ export default function ProfileScreen() {
   return (
     <>
       <CustomHeader title="Profile" showBack />
-      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+      <View style={styles.container} >
 
         <View style={styles.card}>
           <Text style={styles.label}>Email</Text>
@@ -141,7 +141,7 @@ export default function ProfileScreen() {
             <Text style={[styles.actionButtonText, styles.deleteButtonText]}>Delete Account</Text>
           </TouchableOpacity>
         </View>
-      </ScrollView>
+      </View>
     </>
   );
 }
@@ -149,7 +149,9 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    backgroundColor: '#F2F2F2',
+    backgroundColor: '#242424',
+    flex: 1,
+
   },
   headerTitle: {
     fontSize: 28,
@@ -159,35 +161,31 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: '#1A1A1A',
     borderRadius: 16,
     padding: 20,
     marginBottom: 10,
     borderWidth: 1,
     borderColor: 'black',
-    shadowColor: '#000',
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
-    borderWidth: 1,
+    shadowOpacity: 0.5,
+    shadowRadius: 3,
+    borderWidth: 0.3,
     borderColor: 'black',
-    borderBottomWidth: 4,
-    borderBottomColor: 'black',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    borderColor: 'grey',
 
   },
   label: {
     fontSize: 16,
-    color: '#888',
+    color: 'white',
     marginBottom: 8,
     fontFamily: 'Inter_600SemiBold',
     fontWeight: '700',
   },
   value: {
     fontSize: 20,
-    color: '#000',
+    color: 'white',
     fontFamily: 'Inter_700Bold',
     
   },
@@ -196,34 +194,27 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   actionButton: {
-    backgroundColor: '#fff',
+    backgroundColor: '#1A1A1A',
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
     marginBottom: 10,
-    shadowColor: '#000',
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
-    borderWidth: 1,
-    borderColor: 'black',
-    borderBottomWidth: 4,
-    borderBottomColor: 'black',
-    borderBottomLeftRadius: 12,
-    borderBottomRightRadius: 12,
+    shadowOpacity: 0.5,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   actionButtonText: {
-    color: '#000',
+    color: 'white',
     fontSize: 16,
     fontFamily: 'Inter_700Bold',
   },
   deleteButton: {
-    borderColor: '#ff4d4f',
-    backgroundColor: '#fff',
-    borderBottomColor: '#ff4d4f',
+    backgroundColor: '#1A1A1A',
   },
   deleteButtonText: {
-    color: '#ff4d4f',
+    color: 'red',
   },
 });

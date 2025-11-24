@@ -1,6 +1,6 @@
 // utils/foodCache.js
 //
-// Nutritionix API integration for food search and nutrition details.
+// FatSecret API integration for food search and nutrition details.
 //
 // Caching: This file uses an in-memory cache (foodSearchCache) to store search results for each query string.
 // The cache key is the lowercased, trimmed query. Each entry stores the data and a timestamp.
@@ -9,17 +9,93 @@
 
 import Constants from 'expo-constants';
 
-// Get Nutritionix credentials with fallback pattern
-const APP_ID = process.env.NUTRITIONX_APP_ID || 
-               Constants.expoConfig?.extra?.NUTRITIONX_APP_ID 
+// Get FatSecret credentials with fallback pattern
+const CLIENT_ID = process.env.FATSECRET_CLIENT_ID || 
+                  Constants.expoConfig?.extra?.FATSECRET_CLIENT_ID;
 
-const API_KEY = process.env.NUTRITIONX_API_KEY || 
-                Constants.expoConfig?.extra?.NUTRITIONX_API_KEY 
-                
-const BASE_URL = 'https://trackapi.nutritionix.com/v2';
+const CLIENT_SECRET = process.env.FATSECRET_CLIENT_SECRET || 
+                      Constants.expoConfig?.extra?.FATSECRET_CLIENT_SECRET;
+
+const BASE_URL = 'https://platform.fatsecret.com/rest/server.api';
+const TOKEN_URL = 'https://oauth.fatsecret.com/connect/token';
 
 const foodSearchCache = {}; // { [query: string]: { data: any, timestamp: number } }
+const tokenCache = { accessToken: null, expiresAt: 0 };
 const TTL = 15 * 60 * 1000; // Cache Time-To-Live: 15 minutes
+
+// Simple base64 encoder for React Native (btoa is not available)
+function base64Encode(str) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+  let output = '';
+  let i = 0;
+  while (i < str.length) {
+    const a = str.charCodeAt(i++);
+    const b = i < str.length ? str.charCodeAt(i++) : 0;
+    const c = i < str.length ? str.charCodeAt(i++) : 0;
+    const bitmap = (a << 16) | (b << 8) | c;
+    output += chars.charAt((bitmap >> 18) & 63);
+    output += chars.charAt((bitmap >> 12) & 63);
+    output += i - 2 < str.length ? chars.charAt((bitmap >> 6) & 63) : '=';
+    output += i - 1 < str.length ? chars.charAt(bitmap & 63) : '=';
+  }
+  return output;
+}
+
+// Get OAuth 2.0 access token from FatSecret
+async function getAccessToken() {
+  // Check if cached token is still valid (refresh 10 minutes before expiry)
+  if (tokenCache.accessToken && Date.now() < tokenCache.expiresAt - (10 * 60 * 1000)) {
+    return tokenCache.accessToken;
+  }
+
+  try {
+    // Verify credentials are loaded
+    if (!CLIENT_ID || !CLIENT_SECRET) {
+      throw new Error('FatSecret credentials not found. Please check your environment variables.');
+    }
+
+    // Create Basic Auth header (base64 encode CLIENT_ID:CLIENT_SECRET)
+    const credentials = base64Encode(`${CLIENT_ID}:${CLIENT_SECRET}`);
+    
+    const response = await fetch(TOKEN_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Basic ${credentials}`,
+      },
+      body: 'grant_type=client_credentials&scope=basic',
+    });
+
+    // Get the response text first to see what the error is
+    const responseText = await response.text();
+    
+    if (!response.ok) {
+      let errorMessage = `Token request failed: ${response.status}`;
+      try {
+        const errorData = JSON.parse(responseText);
+        errorMessage += ` - ${errorData.error || errorData.error_description || responseText}`;
+      } catch (e) {
+        errorMessage += ` - ${responseText}`;
+      }
+      console.error('FatSecret token error details:', errorMessage);
+      throw new Error(errorMessage);
+    }
+
+    const data = JSON.parse(responseText);
+    
+    if (data.access_token) {
+      // Cache token (use expires_in from response if available, otherwise default to 50 minutes)
+      tokenCache.accessToken = data.access_token;
+      const expiresIn = data.expires_in ? data.expires_in * 1000 : (50 * 60 * 1000);
+      tokenCache.expiresAt = Date.now() + expiresIn;
+      return data.access_token;
+    }
+    throw new Error('No access token in response');
+  } catch (err) {
+    console.error('FatSecret token error:', err);
+    throw err;
+  }
+}
 
 // Retrieve cached search results for a query if still fresh
 function getCached(query) {
@@ -39,7 +115,7 @@ function setCache(query, data) {
   };
 }
 
-// Search for branded foods using Nutritionix, rank/filter by word match count
+// Search for foods using FatSecret API, rank/filter by word match count
 export async function getFoodSearchResults(query) {
   const trimmed = query.trim().toLowerCase();
   if (!trimmed) return [];
@@ -52,28 +128,43 @@ export async function getFoodSearchResults(query) {
   if (cached) return cached;
 
   try {
-    // Fetch more branded results for better client-side filtering
-    const res = await fetch(`${BASE_URL}/search/instant?query=${encodeURIComponent(trimmed)}`, {
+    // Get access token
+    const accessToken = await getAccessToken();
+
+    // FatSecret uses method parameter in query string
+    const params = new URLSearchParams({
+      method: 'foods.search',
+      search_expression: trimmed,
+      format: 'json',
+      max_results: '50',
+    });
+
+    const res = await fetch(`${BASE_URL}?${params.toString()}`, {
       headers: {
-        'Content-Type': 'application/json',
-        'X-APP-ID': APP_ID,
-        'X-APP-KEY': API_KEY,
+        'Authorization': `Bearer ${accessToken}`,
       },
     });
-    const data = await res.json();
-    const branded = data.branded || [];
 
-    // For each branded result, count how many search words match food_name or brand_name
-    const scored = branded.map(food => {
-      const haystack = `${food.food_name} ${food.brand_name || ''}`.toLowerCase();
+    if (!res.ok) {
+      throw new Error(`Search request failed: ${res.status}`);
+    }
+
+    const data = await res.json();
+    const foods = data.foods?.food || [];
+
+    // For each result, count how many search words match food_name or brand_name
+    const scored = foods.map(food => {
+      const foodName = food.food_name || food.food_description || '';
+      const brandName = food.brand_name || '';
+      const haystack = `${foodName} ${brandName}`.toLowerCase();
       const matchCount = searchWords.reduce((count, word) =>
         haystack.includes(word) ? count + 1 : count, 0
       );
       return {
-        description: food.food_name,
-        brandName: food.brand_name || '',
-        fdcId: food.tag_id || food.nix_item_id || food.food_name,
-        isBranded: !!food.nix_item_id,
+        description: foodName,
+        brandName: brandName,
+        fdcId: food.food_id || foodName,
+        isBranded: !!brandName,
         matchCount,
       };
     });
@@ -85,62 +176,64 @@ export async function getFoodSearchResults(query) {
     });
 
     // Take top 20 best matches
-    const foods = scored.slice(0, 20);
-    setCache(trimmed, foods);
-    return foods;
+    const results = scored.slice(0, 20);
+    setCache(trimmed, results);
+    return results;
   } catch (err) {
-    console.error('Nutritionix search error:', err);
+    console.error('FatSecret search error:', err);
     return [];
   }
 }
 
-// Get detailed nutrition info for a food item
-// Uses /search/item for branded foods, /natural/nutrients for common foods
+// Get detailed nutrition info for a food item using FatSecret API
 // Accepts the full item object from search results
 export async function getFoodDetails(item) {
   try {
-    let food = null;
-    if (item.isBranded && item.fdcId) {
-      // Branded food: fetch details by nix_item_id
-      const res = await fetch(`${BASE_URL}/search/item?nix_item_id=${encodeURIComponent(item.fdcId)}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'X-APP-ID': APP_ID,
-          'X-APP-KEY': API_KEY,
-        },
-      });
-      const data = await res.json();
-      food = data.foods && data.foods[0];
-    } else {
-      // Common food: fetch nutrition using a natural language query with quantity
-      const query = `1 serving ${item.description}`;
-      const res = await fetch(`${BASE_URL}/natural/nutrients`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-APP-ID': APP_ID,
-          'X-APP-KEY': API_KEY,
-        },
-        body: JSON.stringify({ query }),
-      });
-      const data = await res.json();
-      food = data.foods && data.foods[0];
+    // Get access token
+    const accessToken = await getAccessToken();
+
+    // FatSecret uses food_id to get details
+    const params = new URLSearchParams({
+      method: 'food.get.v3',
+      food_id: item.fdcId,
+      format: 'json',
+    });
+
+    const res = await fetch(`${BASE_URL}?${params.toString()}`, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error(`Details request failed: ${res.status}`);
     }
+
+    const data = await res.json();
+    const food = data.food;
+
     if (!food) return null;
-    // Map Nutritionix response to expected structure
+
+    // Extract nutrition data from FatSecret response
+    // FatSecret returns servings as an array
+    const servings = food.servings?.serving || [];
+    const serving = servings[0] || {}; // Use first serving
+
+    // Map FatSecret response to expected structure
     const result = {
-      name: food.food_name,
+      name: food.food_name || food.food_description || item.description,
       fdcId: item.fdcId,
-      calories: food.nf_calories || 0,
-      protein: food.nf_protein || 0,
-      carbs: food.nf_total_carbohydrate || 0,
-      fats: food.nf_total_fat || 0,
-      servingSize: `${food.serving_qty} ${food.serving_unit} (${food.serving_weight_grams}g)`,
-      brandName: food.brand_name || '',
+      calories: parseFloat(serving.calories || 0),
+      protein: parseFloat(serving.protein || 0),
+      carbs: parseFloat(serving.carbohydrate || 0),
+      fats: parseFloat(serving.fat || 0),
+      servingSize: serving.serving_description || 
+                   `${serving.metric_serving_amount || '1'} ${serving.metric_serving_unit || 'serving'}`,
+      brandName: food.brand_name || item.brandName || '',
     };
     return result;
   } catch (err) {
-    console.error('Nutritionix details error:', err);
+    console.error('FatSecret details error:', err);
     return null;
   }
 }

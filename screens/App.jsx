@@ -9,6 +9,13 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Platform, View } from "react-native";
 import Constants from "expo-constants";
 import Purchases, { LOG_LEVEL } from "react-native-purchases";
+import { useFonts } from 'expo-font';
+import {
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+} from '@expo-google-fonts/inter';
 
 // Import Amplify configuration first (now in AuthContext)
 import "../context/Auth/amplifyConfig";
@@ -27,6 +34,7 @@ import ProgressScreen from "./main/progressScreen";
 import SettingsScreen from "./settings/settings";
 import OnboardingScreen1 from "./onboarding/onboardingScreen1";
 import OnboardingScreen2 from "./onboarding/onboardingScreen2";
+import OnboardingScreen3 from "./onboarding/onboardingScreen3";
 import OnboardingScreen4 from "./onboarding/onboardingScreen4";
 import OnboardingScreen6 from "./onboarding/onboardingScreen6";
 import OnboardingScreen8 from "./onboarding/onboardingScreen8";
@@ -179,6 +187,7 @@ function AuthenticatedApp() {
           <>
             <Stack.Screen name="Onboarding1" component={OnboardingScreen1} />
             <Stack.Screen name="Onboarding2" component={OnboardingScreen2} />
+            <Stack.Screen name="Onboarding3" component={OnboardingScreen3} />
             <Stack.Screen name="Onboarding4" component={OnboardingScreen4} />
             <Stack.Screen name="Onboarding6" component={OnboardingScreen6} />
             <Stack.Screen name="Onboarding8" component={OnboardingScreen8} />
@@ -254,6 +263,17 @@ const styles = {
 };
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+  });
+
+  if (!fontsLoaded) {
+    return <LoadingScreen message="Loading fonts..." />;
+  }
+
   return (
     <AuthProvider>
       <AppContent />

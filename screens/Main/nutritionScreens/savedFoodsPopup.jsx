@@ -1,9 +1,11 @@
-import { Modal, View, Text, StyleSheet, TouchableOpacity, FlatList, Alert } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Modal, View, Text, StyleSheet, TouchableOpacity, FlatList, Alert, Pressable } from 'react-native';
+import { Ionicons, Entypo } from '@expo/vector-icons';
 import { useNutritionContext } from '../../../context/Nutrition/NutritionContext';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Nut } from 'lucide-react-native';
 
 export default function SavedFoodsPopup(props) {
-  const { addNutrition, nutritionData, setNutritionData } = useNutritionContext();
+  const { addNutrition, nutritionData, setNutritionData, editNutrition } = useNutritionContext();
 
   const savedItems = nutritionData.filter(item => item.saved);
 
@@ -33,12 +35,23 @@ export default function SavedFoodsPopup(props) {
                   renderItem={({ item }) => (
                     <View style={styles.savedItem}>
                       <View style={styles.savedItemHeader}>
+                        <View style={styles.savedItemNameContainer}>
+                          <Pressable style={styles.savedItemIconContainer}>
+                            <LinearGradient
+                              colors={['#2ECC71', '#4CD964', '#5DE87A']}
+                              start={{ x: 0, y: 0 }}
+                              end={{ x: 0, y: 1 }}
+                              style={styles.savedItemIconGradient}
+                            >
+                              <Nut size={20} color="white" />
+                            </LinearGradient>
+                          </Pressable>
                         <Text style={styles.savedItemName}>{item.name}</Text>
+                        </View>
                         <View style={styles.savedItemHeaderRight}>
                           <View style={styles.savedItemCaloriesBadge}>
                             <Text style={styles.savedItemCaloriesText}>{item.calories} cal</Text>
                           </View>
-                          
                         </View>
                       </View>
                       <View style={styles.savedItemMacrosGrid}>
@@ -58,7 +71,7 @@ export default function SavedFoodsPopup(props) {
                       
                       <View style={styles.savedItemButtonContainer}>
                         <TouchableOpacity 
-                          style={[styles.savedItemAddButton, { borderWidth: 2, borderColor: 'black', borderRadius: 30, backgroundColor: 'white' }]}
+                          style={styles.savedItemAddButton}
                           onPress={() => {
                             addNutrition(
                               item.name,
@@ -70,23 +83,28 @@ export default function SavedFoodsPopup(props) {
                             Alert.alert('Added', 'Nutrition item added to your log!');
                           }}
                         >
-                          <Ionicons name="add" size={30} color="black"/>
+                          <Ionicons name="add" size={24} color="white"/>
                         </TouchableOpacity>
    
                         <TouchableOpacity 
-                          style={[styles.savedItemAddButton, { backgroundColor: '#FF3B30', borderWidth: 2, borderColor: 'black', borderRadius: 15 }]}
-                          onPress={() => {
-                            setNutritionData(prevData => 
-                              prevData.map(nutritionItem => 
-                                nutritionItem.id === item.id 
-                                  ? { ...nutritionItem, saved: false }
-                                  : nutritionItem
-                              )
-                            );
-                            Alert.alert('Removed', 'Item removed from saved foods!');
+                          style={styles.savedItemDeleteButton}
+                          onPress={async () => {
+                            try {
+                              await editNutrition(
+                                item.id,
+                                item.name,
+                                item.protein,
+                                item.carbs,
+                                item.fats,
+                                item.calories,
+                                false // Set saved to false - this persists to database
+                              );
+                            } catch (error) {
+                              console.error('Error removing item from saved foods:', error);
+                            }
                           }}
                         >
-                          <Ionicons name="trash" size={30} color="white" />
+                          <Entypo name="trash" size={18} color="white" />
                         </TouchableOpacity>
                       </View>
                     </View>
@@ -95,7 +113,7 @@ export default function SavedFoodsPopup(props) {
                 />
               ) : (
                 <View style={styles.emptySavedContainer}>
-                  <Ionicons name="bookmark-outline" size={48} color="#8E8E93" />
+                  <Ionicons name="bookmark-outline" size={48} color="#9CA3AF" />
                   <Text style={styles.emptySavedText}>No saved items yet</Text>
                   <Text style={styles.emptySavedSubtext}>Bookmark nutrition items to see them here</Text>
                 </View>
@@ -116,22 +134,24 @@ export default function SavedFoodsPopup(props) {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(0,0,0,0.8)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContainer: {
     width: '95%',
-    height: '90%',
-    backgroundColor: '#fff',
+    height: '70%',
+    backgroundColor: '#242424',
     borderRadius: 16,
     padding: 20,
     elevation: 10,
-    marginBottom: 0
+    marginBottom: 50,
+    borderWidth: 1,
+    borderColor: 'grey',
   },
   content: {
     flex: 1,
-    marginTop: 10,
+    marginTop: 0,
   },
   headerContainer: {
     marginBottom: 20,
@@ -140,13 +160,13 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#1a202c',
+    color: 'white',
     marginBottom: 5,
     fontFamily: 'Inter_700Bold',
   },
   headerSubtitle: {
     fontSize: 14,
-    color: '#6b7280',
+    color: 'white',
     textAlign: 'center',
     fontFamily: 'Inter_400Regular',
   },
@@ -156,28 +176,40 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
   },
   savedItem: {
-    backgroundColor: 'gold',
-    borderRadius: 12,
-    padding: 12,
-    minHeight: 200,
+    backgroundColor: '#1A1A1A',
+    borderRadius: 16,
+    padding: 20,
     marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
-    borderWidth: 1.3,
-    borderColor: 'black',
-    borderLeftWidth: 4,
-    borderLeftColor: 'black',
-    borderTopLeftRadius: 16,
-    borderBottomLeftRadius: 16,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   savedItemHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
+  },
+  savedItemNameContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 12,
+  },
+  savedItemIconContainer: {
+    marginRight: 12,
+  },
+  savedItemIconGradient: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 0.3,
+    borderColor: 'black',
   },
   savedItemHeaderRight: {
     flexDirection: 'row',
@@ -185,68 +217,77 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   savedItemName: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '700',
     color: 'white',
     flex: 1,
-    marginRight: 8,
     fontFamily: 'Inter_700Bold',
-    
   },
   savedItemCaloriesBadge: {
-    backgroundColor: 'white',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'black',
+    backgroundColor: '#242424',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   savedItemCaloriesText: {
     fontSize: 14,
     fontWeight: '700',
-    color: 'black',
+    color: 'white',
     letterSpacing: 0.3,
     fontFamily: 'Inter_700Bold',
   },
   savedItemMacrosGrid: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingVertical: 12,
-    backgroundColor: 'white',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'black',
+    paddingVertical: 16,
+    backgroundColor: '#242424',
+    borderRadius: 12,
+    borderWidth: 0.3,
+    borderColor: 'grey',
+    marginBottom: 16,
   },
   savedItemMacroItem: {
     alignItems: 'center',
     flex: 1,
   },
   savedItemMacroValue: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '700',
-    color: '#1A1A1A',
-    marginBottom: 2,
+    color: 'white',
+    marginBottom: 4,
     fontFamily: 'Inter_700Bold',
   },
   savedItemMacroLabel: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: '500',
     color: '#8E8E93',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     fontFamily: 'Inter_500Medium',
   },
-  savedItemAddButton: {
-    padding: 4,
-    borderRadius: 8,
-  },
   savedItemButtonContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 12,
-    gap: 20,
-    paddingVertical: 8,
+    gap: 16,
+  },
+  savedItemAddButton: {
+    backgroundColor: '#4CD964',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  savedItemDeleteButton: {
+    backgroundColor: '#FF3B30',
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   emptySavedContainer: {
     alignItems: 'center',
@@ -257,13 +298,13 @@ const styles = StyleSheet.create({
   emptySavedText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1f2937',
+    color: 'white',
     marginTop: 16,
     fontFamily: 'Inter_600SemiBold',
   },
   emptySavedSubtext: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#9CA3AF',
     marginTop: 8,
     textAlign: 'center',
     fontFamily: 'Inter_400Regular',
@@ -277,17 +318,13 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     justifyContent: 'center',
     marginTop: 20,
-    shadowColor: '#000',
+    marginBottom: 20,
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
-    borderWidth: 1.3,
-    borderColor: 'black',
-    borderBottomWidth: 6,
-    borderBottomColor: 'black',
-    borderBottomLeftRadius: 13,
-    borderBottomRightRadius: 13,
+    shadowOpacity: 1,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   buttonText: {
     color: '#ffffff',
