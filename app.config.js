@@ -6,13 +6,13 @@ export default {
     slug: "LiftLyzerV3",
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/iconMinimal.png",
+    icon: "./assets/LiftTrition_App_Icon.png",
     userInterfaceStyle: "light",
     //newArchEnabled: true,
     splash: {
-       image: "./assets/splash-icon.png",
+       image: "./assets/LiftTrition_Icon_Transparent.png",
        resizeMode: "contain",
-       backgroundColor: "#ffffff",
+       backgroundColor: "#242424",
     },
     platforms: process.env.EXPO_NO_WEB === "1" ? ["ios", "android"] : ["ios", "android", "web"],
     ios: {
@@ -70,7 +70,6 @@ export default {
     plugins: [
       "expo-font",
       "expo-apple-authentication",
-      
     ],
   },
 };

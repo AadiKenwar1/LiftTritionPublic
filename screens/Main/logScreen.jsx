@@ -249,19 +249,6 @@ export default function LogScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-    flex: 1,
-    backgroundColor: "white",
-  },
-  header: {
-    fontSize: 25,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginTop: 10,
-    marginBottom: 20,
-    color: "black",
-  },
   fabButtons: {
     height: 60,
     width: 60,
@@ -301,12 +288,4 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     fontSize: 16,
   },
-  comingSoonText: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: 12,
-    textAlign: "center",
-    marginTop: 2,
-    fontFamily: "Inter_600SemiBold",
-  }
 });

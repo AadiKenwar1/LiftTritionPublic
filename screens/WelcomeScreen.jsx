@@ -91,9 +91,9 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
+    shadowOpacity: 0,
     shadowRadius: 3,
-    borderWidth: 0.3,
+    borderWidth: 0,
     borderColor: 'grey',
   },
   getStartedButtonText: {
@@ -105,15 +105,5 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     opacity: 0.6,
-  },
-  loginButton: {
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  loginButtonText: {
-    color: 'white',
-    fontWeight: '600',
-    fontSize: 16,
-    fontFamily: 'Inter_600SemiBold',
   },
 }); 

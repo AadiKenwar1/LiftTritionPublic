@@ -159,13 +159,6 @@ const styles = StyleSheet.create({
   headerContainer: {
     marginBottom: 15,
   },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "white",
-    marginBottom: 8,
-    fontFamily: "Inter_700Bold",
-  },
   headerSubtitle: {
     fontSize: 16,
     color: "#8E8E93",

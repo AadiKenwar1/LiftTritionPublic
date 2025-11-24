@@ -152,15 +152,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontFamily: 'Inter_700Bold',
   },
-  infoText: {
-    fontSize: 13,
-    color: '#666666',
-    textAlign: 'center',
-    marginTop: 15,
-    marginBottom: 25,
-    fontStyle: 'italic',
-    paddingHorizontal: 20,
-  },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',

@@ -146,40 +146,6 @@ const styles = StyleSheet.create({
         fontFamily: 'Inter_700Bold',
         marginTop: 40,
     },
-    userInfoSection: {
-        backgroundColor: '#FFFFFF',
-        padding: 20,
-        borderRadius: 16,
-        marginBottom: 24,
-        borderWidth: 1,
-        borderColor: '#E5E5EA',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 8,
-        elevation: 4,
-    },
-    userInfo: {
-        alignItems: 'center',
-    },
-    userName: {
-        fontSize: 20,
-        fontWeight: '700',
-        color: '#1A1A1A',
-        marginBottom: 4,
-        fontFamily: 'Inter_700Bold',
-    },
-    userEmail: {
-        fontSize: 14,
-        color: '#8E8E93',
-        marginBottom: 8,
-        fontFamily: 'Inter_400Regular',
-    },
-    authProvider: {
-        fontSize: 12,
-        color: '#007AFF',
-        fontFamily: 'Inter_400Regular',
-    },
     settingRow: {
         backgroundColor: '#1A1A1A',
         paddingVertical: 20,
@@ -207,29 +173,6 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontFamily: 'Inter_400Regular',
     },
-
-    card: {
-        width: cardSize,
-        height: cardSize, // square
-        backgroundColor: 'white',
-        borderRadius: 16,
-        padding: 0,
-        margin: 0,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-
-        // Shadow
-        shadowColor: 'black',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.5,
-        shadowRadius: 6,
-        elevation: 6, // Android
-    },
-    weightText: {
-        fontSize: 20,
-        fontWeight: 'bold',
-    },
     rowContent: {
       flexDirection: 'row',
       justifyContent: 'space-between',
@@ -238,25 +181,5 @@ const styles = StyleSheet.create({
     settingInfo: {
       flex: 1,
       marginRight: 16,
-    },
-    debugSection: {
-        backgroundColor: '#FFFFFF',
-        padding: 20,
-        borderRadius: 16,
-        marginBottom: 24,
-        borderWidth: 1,
-        borderColor: '#E5E5EA',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 8,
-        elevation: 4,
-    },
-    debugSectionTitle: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: '#1A1A1A',
-        marginBottom: 16,
-        fontFamily: 'Inter_700Bold',
     },
 });

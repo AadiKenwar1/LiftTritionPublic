@@ -153,13 +153,6 @@ const styles = StyleSheet.create({
     flex: 1,
 
   },
-  headerTitle: {
-    fontSize: 28,
-    fontFamily: 'Inter_700Bold',
-    color: '#000',
-    marginBottom: 24,
-    textAlign: 'center',
-  },
   card: {
     backgroundColor: '#1A1A1A',
     borderRadius: 16,

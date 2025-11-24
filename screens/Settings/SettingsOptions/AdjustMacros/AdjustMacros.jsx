@@ -428,18 +428,4 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontFamily: 'Inter_500Medium',
   },
-  macrosCard: {
-    marginTop: 20,
-    padding: 20,
-    borderRadius: 16,
-    backgroundColor: '#242424',
-    borderWidth: 0.3,
-    borderColor: 'grey',
-  },
-  macroItem: {
-    fontSize: 16,
-    fontFamily: 'Inter_400Regular',
-    color: 'white',
-    marginBottom: 8,
-  },
 });

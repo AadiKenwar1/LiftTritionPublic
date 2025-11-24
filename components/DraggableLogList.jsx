@@ -49,7 +49,7 @@ export default function DraggableLogList(props) {
         <View style={{ marginBottom: 16, paddingHorizontal: 20 }}>
           <View
             style={{
-              backgroundColor: "#F0F0F0",
+              backgroundColor: "#1A1A1A",
               height: 72,
               borderRadius: 16,
               flexDirection: "row",

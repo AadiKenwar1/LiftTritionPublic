@@ -119,20 +119,6 @@ const styles = StyleSheet.create({
     marginTop: 40,
     marginRight:40
   },
-  buttonRow: {
-    flexDirection: "row",
-    marginTop:30,
-    gap: 10,
-  },
-  tabButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    borderRadius: 10,
-  },
-  tabText: {
-    color: "#000",
-    fontFamily: 'Inter_700Bold',
-  },
   modeSelectorContainer: {
     flexDirection: 'row',
     justifyContent: 'center',

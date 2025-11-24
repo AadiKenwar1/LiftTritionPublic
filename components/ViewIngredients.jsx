@@ -357,12 +357,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontFamily: 'Inter_700Bold',
   },
-  closeButton: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
-    fontFamily: 'Inter_700Bold',
-  },
   modalContent: {
     maxHeight: 600,
   },

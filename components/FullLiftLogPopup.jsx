@@ -91,37 +91,6 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
-  dataSelector:{
-    justifyContent:'center',
-    alignItems:'center',
-    flexDirection: 'row'
-  },
-  dataSelectorButton:{
-    backgroundColor: '#172337',
-    height: 40,
-    width: '25%',
-    borderRadius: 10,
-    borderWidth:1.5,
-    borderColor:'#00CFFF',
-    alignSelf: 'center',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop:20
-  },
-    dataSelectorButtonClicked:{
-    backgroundColor: '#00CFFF',
-    height: 40,
-    width: '30%',
-    borderRadius: 10,
-    borderWidth:1.5,
-    borderColor:'#172337',
-    alignSelf: 'center',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop:20
-  },
   lineWithText: {
     flexDirection: 'row',
     alignItems: 'center',
