@@ -111,6 +111,7 @@ export default function ProfileScreen() {
       <CustomHeader title="Profile" showBack />
       <View style={styles.container} >
 
+      
         <View style={styles.card}>
           <Text style={styles.label}>Email</Text>
           <Text style={styles.value}>{user?.email || "Not available"}</Text>

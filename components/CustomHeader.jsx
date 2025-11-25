@@ -4,6 +4,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useSettings } from '../context/SettingsContext';
 import { LinearGradient } from 'expo-linear-gradient';
+import {ArrowBigLeft} from 'lucide-react-native';
+
 
 export default function CustomHeader(props) {
 
@@ -23,7 +25,7 @@ export default function CustomHeader(props) {
           style={styles.sideButton}
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="arrow-back" size={24} color="white" marginTop={40} />
+          <ArrowBigLeft size={24} color="white" marginTop={40} fill="white"/>
         </TouchableOpacity>
         
       ) : (
@@ -34,9 +36,11 @@ export default function CustomHeader(props) {
       {console.log(props.title)}
       {/* Title */}
       {props.title? (
+        <View style={styles.titleContainer}>
         <Text style={styles.title} numberOfLines={1}>
           {props.title}
         </Text>
+        </View>
       ):(
       <View style={styles.modeSelectorContainer}>
         {/**Mode Selector */}
@@ -102,22 +106,29 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flexDirection:"row",
     paddingHorizontal: 16,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
     zIndex: 100,
   },
   sideButton: {
-    width: 40,
-    alignItems: "center",
-    justifyContent: "center",
+    position: 'absolute',
+    zIndex: 100,
+    left: 20,
+  },
+  titleContainer: {
+    width: '80%',
+    marginTop: 40,
   },
   title: {
-    flex: 1,
     textAlign: "center",
     color: "white",
     fontSize: 24,
     fontWeight: 'bold',
     fontFamily: 'Inter_700Bold',
-    marginTop: 40,
-    marginRight:40
+    
+
   },
   modeSelectorContainer: {
     flexDirection: 'row',

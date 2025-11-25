@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import CustomIcon from '../components/CustomIcon';
 import { useAuthContext } from '../context/Auth/AuthContext';
+import LiftTritionIcon from '../assets/LiftTrition_SVG_Icon.svg';
 
 export default function WelcomeScreen() {
   const { signInWithApple, loading } = useAuthContext();
@@ -23,8 +24,9 @@ export default function WelcomeScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
+        <LiftTritionIcon width={200} height={200} />
         <Text style={styles.title}>LiftTrition</Text>
-        <Text style={styles.subtitle}>Log · Lift · Fuel · Progress</Text>
+        <Text style={styles.subtitle}>Simple Tracking. Real Progress</Text>
       </View>
 
       {/* Buttons */}
@@ -58,13 +60,14 @@ const styles = StyleSheet.create({
   header: {
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 60,
+    marginTop: -50,
     marginBottom: 30,
   },
   title: {
     fontSize: 62,
     fontWeight: '800',
     color: '#00B8A9',
+    marginTop: 0,
     marginBottom: 10,
     fontFamily: 'Inter_700Bold',
   },
@@ -74,14 +77,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
     opacity: 0.9,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'Inter_600Regular',
   },
   buttonContainer: {
     justifyContent: 'center',
     paddingBottom: 40,
   },
   getStartedButton: {
-    backgroundColor: '#121212',
+    backgroundColor: '#1A1A1A',
     paddingVertical: 16,
     paddingHorizontal: 32,
     borderRadius: 10,
@@ -91,10 +94,10 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0,
+    shadowOpacity: 0.8,
     shadowRadius: 3,
-    borderWidth: 0,
-    borderColor: 'grey',
+    borderWidth: 0.3,
+    borderColor: 'black',
   },
   getStartedButtonText: {
     color: 'white',

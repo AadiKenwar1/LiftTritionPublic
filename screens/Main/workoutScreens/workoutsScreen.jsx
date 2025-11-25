@@ -73,85 +73,29 @@ export default function LogScreen() {
       <PopupModal
         modalVisible={renameVisible}
         setModalVisible={setRenameVisible}
+        showButtons={true}
+        onClose={() => {
+          setRenameVisible(false);
+          setNewName("");
+        }}
+        onAdd={() => {
+          if (workout && newName.trim()) {
+            renameWorkout(workout.id, newName.trim());
+            setRenameVisible(false);
+            setNewName("");
+          }
+        }}
+        addButtonText="Rename"
+        closeButtonText="Cancel"
       >
-        <Text style={{ marginBottom: 10 }}>Enter New Name</Text>
+        <Text style={styles.renameTitle}>Rename Workout</Text>
         <TextInput
-          placeholder="New Name"
+          placeholder="Enter new workout name"
+          placeholderTextColor="#9CA3AF"
           value={newName}
           onChangeText={setNewName}
-          style={{
-            borderWidth: 1,
-            padding: 10,
-            marginBottom: 10,
-            width: "100%",
-          }}
+          style={styles.renameInput}
         />
-        <View style={{flexDirection: "row", justifyContent: "space-between"}}>
-          {/**Close Button */}
-          <TouchableOpacity 
-              style={{
-                backgroundColor: "grey",
-                flex: 1,
-                marginTop: 5,
-                marginHorizontal: 5,
-                paddingVertical: 14,
-                borderRadius: 10,
-                alignItems: "center",
-                borderColor: "black",
-                elevation: 4,
-                borderWidth: 1.3,
-                borderColor: 'black',
-                borderBottomWidth: 6,
-                borderBottomColor: 'black',
-                borderBottomLeftRadius: 12,
-                borderBottomRightRadius: 12,
-              }}
-              onPress={() => setRenameVisible(false)}
-            >
-              <Text style={{
-                color: "#fff",
-                fontWeight: "600",
-                fontSize: 16,
-                fontFamily: 'Inter_600SemiBold',
-              }}>
-                Close
-              </Text>
-          </TouchableOpacity>
-          {/**Rename Button */}
-          <TouchableOpacity 
-              style={{
-                backgroundColor: "#2D9CFF",
-                flex: 1,
-                marginTop: 5,
-                marginHorizontal: 5,
-                paddingVertical: 14,
-                borderRadius: 10,
-                alignItems: "center",
-                borderColor: "black",
-                elevation: 4,
-                borderWidth: 1.3,
-                borderColor: 'black',
-                borderBottomWidth: 6,
-                borderBottomColor: 'black',
-                borderBottomLeftRadius: 12,
-                borderBottomRightRadius: 12,
-              }}
-              onPress={() => {
-                renameWorkout(workout.id, newName);
-                setRenameVisible(false);
-                setNewName("");
-              }}
-            >
-              <Text style={{
-                color: "#fff",
-                fontWeight: "600",
-                fontSize: 16,
-                fontFamily: 'Inter_600SemiBold',
-              }}>
-                Rename
-              </Text>
-          </TouchableOpacity>
-        </View>
       </PopupModal>
     );
   }
@@ -220,5 +164,23 @@ const styles = StyleSheet.create({
     color: '#666666',
     marginTop: 24,
   },
-
+  renameTitle: {
+    marginBottom: 20,
+    textAlign: 'center',
+    color: 'white',
+    fontFamily: 'Inter_500Medium',
+    fontSize: 20,
+  },
+  renameInput: {
+    borderWidth: 0.3,
+    borderColor: 'grey',
+    borderRadius: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginBottom: 10,
+    width: '100%',
+    color: 'white',
+    backgroundColor: '#1A1A1A',
+    fontFamily: 'Inter_400Regular',
+  },
 })
