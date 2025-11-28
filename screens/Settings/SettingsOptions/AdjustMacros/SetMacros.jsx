@@ -7,7 +7,7 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import { useSettings } from '../../../../context/SettingsContext';
+import { useSettings } from '../../../../context/Settings/SettingsContext';
 import CustomHeader from '../../../../components/CustomHeader';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -73,9 +73,6 @@ export default function SetMacrosScreen() {
           <Text style={styles.errorText}>
             No macro data found. Please go back and calculate macros first.
           </Text>
-          <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
-            <Text style={styles.backButtonText}>Go Back</Text>
-          </TouchableOpacity>
         </View>
       </View>
     );
@@ -210,7 +207,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 20,
-    paddingTop: 10,
+    paddingTop: 20,
     paddingBottom: 40,
   },
   errorContainer: {
@@ -225,23 +222,6 @@ const styles = StyleSheet.create({
     color: '#8E8E93',
     textAlign: 'center',
     marginBottom: 20,
-  },
-  backButton: {
-    backgroundColor: '#2D9CFF',
-    paddingHorizontal: 30,
-    paddingVertical: 12,
-    borderRadius: 8,
-    shadowColor: 'black',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.8,
-    shadowRadius: 3,
-    borderWidth: 0.3,
-    borderColor: 'black',
-  },
-  backButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontFamily: 'Inter_600SemiBold',
   },
   headerSection: {
     alignItems: 'center',
@@ -289,7 +269,7 @@ const styles = StyleSheet.create({
   caloriesValue: {
     fontSize: 48,
     fontFamily: 'Inter_700Bold',
-    color: '#4CD964',
+    color: '#00B8A9',
     marginBottom: 5,
     fontWeight: '600',
   },
@@ -335,7 +315,7 @@ const styles = StyleSheet.create({
   macroValue: {
     fontSize: 24,
     fontFamily: 'Inter_700Bold',
-    color: '#4CD964',
+    color: '#00B8A9',
     marginBottom: 5,
     fontWeight: '600',
   },
@@ -387,7 +367,7 @@ const styles = StyleSheet.create({
   summaryValue: {
     fontSize: 16,
     fontFamily: 'Inter_600SemiBold',
-    color: '#4CD964',
+    color: '#00B8A9',
     fontWeight: '600',
   },
   buttonContainer: {
@@ -399,7 +379,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#4CD964',
+    backgroundColor: '#00B8A9',
     paddingVertical: 16,
     borderRadius: 12,
     width: '100%',
@@ -408,7 +388,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.8,
     shadowRadius: 3,
     borderWidth: 0.3,
-    borderColor: 'black',
+    borderColor: 'grey',
   },
   confirmButtonText: {
     fontSize: 16,

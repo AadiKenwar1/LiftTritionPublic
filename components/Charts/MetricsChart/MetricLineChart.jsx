@@ -9,7 +9,7 @@ import ExerciseSelector from "../../ExerciseSelector";
 import { useWorkoutContext } from "../../../context/WorkoutsV2/WorkoutContext";
 import { useNutritionContext } from "../../../context/Nutrition/NutritionContext";
 import ItemSelector from '../../ItemSelector'
-import { useSettings } from "../../../context/SettingsContext";
+import { useSettings } from "../../../context/Settings/SettingsContext";
 import { formatDateForDisplay } from "../../../utils/date";
 import getStyles from "./CSS";
 import { smoothData } from "../smoothData";
@@ -117,14 +117,15 @@ export default function MetricLineChart(props) {
   //Focused Button and Text
   const [focusedPoint, setFocusedPoint] = useState(null)
   const [focusedModalVisible, setFocusedModalVisible] = useState(false)
+  const [focusedText, setFocusedText] = useState("")
+  
   useEffect(() => {
     if (focusedPoint) {
-      setFocusedModalVisible(true)
+      const text = getFocusedText(mode, selectedData, focusedPoint, actualMetric, unit);
+      setFocusedText(text);
+      setFocusedModalVisible(true);
     }
-  }, [focusedPoint])
-  const focusedText = useMemo(() => {
-    return getFocusedText(mode, selectedData, focusedPoint, actualMetric, unit);
-  }, [mode, selectedData, focusedPoint, actualMetric, unit]);
+  }, [focusedPoint, mode, selectedData, actualMetric, unit]);
 
   //Insight Button and Text
   const [insightModalVisible, setInsightModalVisible] = useState(false)
@@ -168,11 +169,12 @@ export default function MetricLineChart(props) {
         >
           <FontAwesome name="question-circle-o" size={30} color="white" />
         </TouchableOpacity>
-        {infoVisible && <TextOnlyModal
+        <TextOnlyModal
+          visible={infoVisible}
           title="What Is This Graph?"
           text={graphInfoDesc}
           onClose={() => setInfoVisible(false)}
-        />}
+        />
 
         {/**Insight Button */}
         <TouchableOpacity
@@ -181,11 +183,12 @@ export default function MetricLineChart(props) {
           <MaterialCommunityIcons name="brain" size={30} color="#FF69B4" />
         </TouchableOpacity>
 
-        {insightModalVisible && <TextOnlyModal
+        <TextOnlyModal
+          visible={insightModalVisible}
           title="Insights"
           text={insightText}
           onClose={() => setInsightModalVisible(false)}
-        />}
+        />
 
 
         <LineChart
@@ -239,10 +242,19 @@ export default function MetricLineChart(props) {
           }}
         />
 
-        {focusedModalVisible && <TextOnlyModal title="Data Point Details" text={focusedText} onClose={() => {
-           setFocusedModalVisible(false);
-           setFocusedPoint(null);
-         }} />}
+        <TextOnlyModal 
+          visible={focusedModalVisible}
+          title="Data Point Details" 
+          text={focusedText} 
+          onClose={() => {
+            setFocusedModalVisible(false);
+            // Delay clearing focusedPoint to avoid text glitch
+            setTimeout(() => {
+              setFocusedPoint(null);
+              setFocusedText("");
+            }, 200);
+          }} 
+        />
       </View>
 
       <View style={styles.dataSelector}>

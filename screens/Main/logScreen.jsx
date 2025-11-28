@@ -1,8 +1,8 @@
 import PopupModal from "../../components/PopupModal.jsx";
-import { useSettings } from "../../context/SettingsContext.js";
+import { useSettings } from "../../context/Settings/SettingsContext.js";
 import Ionicons from '@expo/vector-icons/Ionicons'; // ✅ Correct import
 import { useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View, Pressable} from "react-native";
+import { StyleSheet, Text, TextInput, TouchableOpacity, View} from "react-native";
 import Fab from '../../components/Fab.jsx';
 import { useWorkoutContext } from '../../context/WorkoutsV2/WorkoutContext.js';
 import { useBilling } from '../../context/Billing/BillingContext.js';
@@ -11,7 +11,6 @@ import LogScreen2 from "./workoutScreens/workoutsScreen.jsx"
 import NutritionScreen from './nutritionScreens/nutritionScreen.jsx'
 import { useNavigation } from "@react-navigation/native";
 import AddNutritionPopup from './nutritionScreens/addNutritionPopup.jsx'
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRoute } from "@react-navigation/native";
 import ArchivedPopup from '../../components/ArchivedPopup.jsx';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
@@ -32,7 +31,7 @@ export default function LogScreen() {
   const barcodeData = route.params?.barcodeData;
   
   const [workoutName, setWorkoutName] = useState('');
-  const {workouts, addWorkout, resetContextState, reorderWorkouts, unarchiveWorkout, deleteWorkout, loading} = useWorkoutContext();
+  const {workouts, addWorkout, reorderWorkouts} = useWorkoutContext();
   
   const [addWorkoutVisible, setAddWorkoutVisible] = useState(false)
   function handleAddWorkout(inputName) {
@@ -74,9 +73,6 @@ export default function LogScreen() {
                 <PopupModal
                   modalVisible={addWorkoutVisible}
                   setModalVisible={setAddWorkoutVisible}
-                  creatingWorkout={true}
-                  handleAddWorkout={handleAddWorkout}
-                  workoutName={workoutName}
                 >
                   <Text style={{ marginBottom: 20, textAlign: 'center', color: 'white', fontFamily: 'Inter_500Medium', fontSize: 20 }}>
                     Enter Workout

@@ -9,7 +9,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from 'react-native';
-import { useSettings } from '../context/SettingsContext';
+import { useSettings } from '../context/Settings/SettingsContext';
 
 export default function WeightUpdateModal({ visible, onClose }) {
   // Access context

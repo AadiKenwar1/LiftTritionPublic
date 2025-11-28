@@ -1,11 +1,11 @@
 // theme/ThemeContext.js
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Alert } from 'react-native';
-import { getLocalDateKey } from '../utils/date';
-import { generateClient } from 'aws-amplify/api';
-import { getSettings, listSettings } from '../graphql/queries';
-import { createSettings, updateSettings } from '../graphql/mutations';
-import { useAuthContext } from './Auth/AuthContext';
+import { getLocalDateKey } from '../../utils/date';
+import { generateClient } from '@aws-amplify/api';
+import { getSettings, listSettings } from '../../graphql/queries';
+import { createSettings, updateSettings } from '../../graphql/mutations';
+import { useAuthContext } from '../Auth/AuthContext';
 
 const client = generateClient();
 

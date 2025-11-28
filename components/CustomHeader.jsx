@@ -2,20 +2,16 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { useSettings } from '../context/SettingsContext';
+import { useSettings } from '../context/Settings/SettingsContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import {ArrowBigLeft} from 'lucide-react-native';
 
 
 export default function CustomHeader(props) {
 
-  const {mode, setMode, toggleMode} = useSettings()
+  const {mode, setMode} = useSettings()
 
   const navigation = useNavigation();
-
-  const handleSettingsPress = () => {
-    navigation.navigate("Settings");
-  };
 
   return (
     <View style={styles.header}>
@@ -37,7 +33,7 @@ export default function CustomHeader(props) {
       {/* Title */}
       {props.title? (
         <View style={styles.titleContainer}>
-        <Text style={styles.title} numberOfLines={1}>
+        <Text style={[styles.title, {fontSize: props.fontSize || 24}]} numberOfLines={1}>
           {props.title}
         </Text>
         </View>
@@ -124,7 +120,6 @@ const styles = StyleSheet.create({
   title: {
     textAlign: "center",
     color: "white",
-    fontSize: 24,
     fontWeight: 'bold',
     fontFamily: 'Inter_700Bold',
     

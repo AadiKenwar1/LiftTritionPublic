@@ -8,7 +8,7 @@ import WeightUpdateModal from '../../../components/WeightModal';
 import EditNutritionModal from '../../../components/EditNutritionModal';
 import ViewIngredients from '../../../components/ViewIngredients';
 import DatePickerModal from '../../../components/DatePickerModal';
-import { useSettings } from '../../../context/SettingsContext';
+import { useSettings } from '../../../context/Settings/SettingsContext';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { getLocalDateKey } from '../../../utils/date';
@@ -210,12 +210,6 @@ export default function NutritionScreen({photoUri, cameraMode, barcodeData}) {
             <View style={styles.caloriesBadge}>
               <Text style={styles.caloriesText}>{item.calories} cal</Text>
             </View>
-            {/* Sync Status Indicator */}
-            {isUnsynced && (
-              <View style={styles.syncStatusIndicator}>
-                <Ionicons name="time-outline" size={16} color="#FFA500" />
-              </View>
-            )}
             <View style={styles.actionButtons}>
               <TouchableOpacity 
                 style={styles.bookmarkButton}

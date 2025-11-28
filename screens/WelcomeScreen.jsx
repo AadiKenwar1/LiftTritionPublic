@@ -1,24 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import CustomIcon from '../components/CustomIcon';
 import { useAuthContext } from '../context/Auth/AuthContext';
 import LiftTritionIcon from '../assets/LiftTrition_SVG_Icon.svg';
 
 export default function WelcomeScreen() {
   const { signInWithApple, loading } = useAuthContext();
-  const navigation = useNavigation();
-
-
-  const handleGetStarted = () => {
-    navigation.navigate('Onboarding1');
-  };
-
-  const handleAlreadyHaveAccount = () => {
-    navigation.navigate('Login');
-  };
 
   return (
     <View style={styles.container}>

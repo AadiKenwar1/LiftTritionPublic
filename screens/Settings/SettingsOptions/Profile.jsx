@@ -1,44 +1,16 @@
 import React from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { useAuthContext } from "../../../context/Auth/AuthContext";
-import { useSettings } from "../../../context/SettingsContext";
+import { useSettings } from "../../../context/Settings/SettingsContext";
 import CustomHeader from "../../../components/CustomHeader";
 import { useNutritionContext } from "../../../context/Nutrition/NutritionContext";
 import { useWorkoutContext } from "../../../context/WorkoutsV2/WorkoutContext";
 
 export default function ProfileScreen() {
-  const navigation = useNavigation();
   const { user, clearSessionAndState, deleteAccount } = useAuthContext(); // assumes user object has email
   const { birthDate, height, bodyWeight, unit, resetSettings } = useSettings();
   const { resetNutritionContext } = useNutritionContext();
   const { resetWorkoutContext } = useWorkoutContext();
-
-  const handleChangePassword = () => {
-    navigation.navigate('ChangePassword');
-  };
-
-  const handleLogout = async () => {
-    Alert.alert(
-      "Sign Out",
-      "Are you sure you want to sign out?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Sign Out",
-          style: "destructive",
-          onPress: async () => {
-            await logout();
-            resetNutritionContext();
-            resetWorkoutContext();
-            resetSettings();
-            console.log('✅ Logout successful');
-            // Navigation will be handled automatically by the auth state change
-          },
-        },
-      ]
-    );
-  };
 
   const handleDeleteAccount = async () => {
     Alert.alert(

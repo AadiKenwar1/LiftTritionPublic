@@ -1,4 +1,4 @@
-import { generateClient } from 'aws-amplify/api';
+import { generateClient } from '@aws-amplify/api';
 import { getSettings, listNutritions, listUserExercises, listWorkouts, listExercises, listExerciseLogs } from '../../graphql/queries';
 import { deleteWorkout, deleteNutrition, deleteSettings, createSettings, deleteUserExercise, deleteExercise, deleteExerciseLog } from '../../graphql/mutations';
 

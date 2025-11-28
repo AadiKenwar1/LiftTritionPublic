@@ -1,8 +1,7 @@
-import { Modal, View, Text, StyleSheet, TouchableOpacity, TextInput, Keyboard, TouchableWithoutFeedback, FlatList, Alert, ActivityIndicator} from 'react-native';
+import { Modal, View, Text, StyleSheet, TouchableOpacity, TextInput, Keyboard, TouchableWithoutFeedback, ActivityIndicator} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { askOpenAI } from '../../../utils/openAI';
-import { ScrollView } from 'react-native-gesture-handler';
 import { useNutritionContext } from '../../../context/Nutrition/NutritionContext';
 import { useBilling } from '../../../context/Billing/BillingContext.js';
 import { useNavigation } from '@react-navigation/native';
@@ -18,7 +17,7 @@ export default function AddNutritionScreen(props) {
   const [protein, setProtein] = useState(0);
   const [carbs, setCarbs] = useState(0);
   const [fats, setFats] = useState(0);
-  const {addNutrition, nutritionData} = useNutritionContext()
+  const {addNutrition} = useNutritionContext()
 
   // Loading states for individual macros
   const [loadingCals, setLoadingCals] = useState(false);

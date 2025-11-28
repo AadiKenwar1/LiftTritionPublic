@@ -9,7 +9,7 @@ import ExerciseSelector from "../../ExerciseSelector";
 import { useWorkoutContext } from "../../../context/WorkoutsV2/WorkoutContext";
 import { useNutritionContext } from "../../../context/Nutrition/NutritionContext";
 import ItemSelector from '../../ItemSelector'
-import { useSettings } from "../../../context/SettingsContext";
+import { useSettings } from "../../../context/Settings/SettingsContext";
 import getStyles from "./CSS";
 import { smoothData } from "../smoothData";
 import { insightText, generateGraphInfoDesc, getFocusedText } from "./LogChartFunctions";
@@ -108,25 +108,27 @@ export default function LogLineChart(props) {
   
   const [focusedPoint, setFocusedPoint] = useState(null)
   const [focusedModalVisible, setFocusedModalVisible] = useState(false)
+  const [focusedText, setFocusedText] = useState("")
+  
   useEffect(() => {
     if (focusedPoint) {
-      setFocusedModalVisible(true)
+      const text = getFocusedText(mode, selectedData, focusedPoint, selectedMacro);
+      setFocusedText(text);
+      setFocusedModalVisible(true);
     }
-  }, [focusedPoint])
-  const focusedText = useMemo(() => {
-    return getFocusedText(mode, selectedData, focusedPoint, selectedMacro);
-  }, [mode, selectedData, focusedPoint]);
+  }, [focusedPoint, mode, selectedData, selectedMacro]);
 
   
   return (
     <View style={styles.container}>
       <View style={{flexDirection: "row"}}></View>
-              <TouchableOpacity style={styles.changeSelected} onPress={() => setSelectModalVisible(true)}>
-          <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
-            <Text style={styles.changeSelectedText}>{ mode=== true? selectedLift : selectedMacro} Progress</Text>
-            <Ionicons name="caret-down" size={16} color="white"/>
-          </View>
+          <TouchableOpacity style={styles.changeSelected} onPress={() => setSelectModalVisible(true)}>
+            <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+              <Text style={styles.changeSelectedText}>{ mode=== true? selectedLift : selectedMacro} Progress</Text>
+              <Ionicons name="caret-down" size={16} color="white"/>
+            </View>
         </TouchableOpacity>
+        
       <PopupModal
         modalVisible={selectModalVisible}
         setModalVisible={setSelectModalVisible}
@@ -155,11 +157,12 @@ export default function LogLineChart(props) {
         >
           <FontAwesome name="question-circle-o" size={30} color="white" />
         </TouchableOpacity>
-        {infoVisible && <TextOnlyModal
+        <TextOnlyModal
+          visible={infoVisible}
           title="What Is This Graph?"
           text={graphInfoDesc}
           onClose={() => setInfoVisible(false)}
-        />}
+        />
 
         {/**Insight Button */}
         <TouchableOpacity
@@ -170,11 +173,12 @@ export default function LogLineChart(props) {
         </TouchableOpacity>
 
 
-        {insightVisible && <TextOnlyModal
+        <TextOnlyModal
+          visible={insightVisible}
           title="Insights"
           text={insight}
           onClose={() => setInsightVisible(false)}
-        />}
+        />
 
         <LineChart
           key={`${mode ? selectedLift : selectedMacro}-${selectedData}-${displayedData.length}-${displayedData[0]?.value || 0}-${displayedData[displayedData.length - 1]?.value || 0}`}
@@ -231,10 +235,19 @@ export default function LogLineChart(props) {
           
         />
 
-        {focusedModalVisible && <TextOnlyModal title="Data Point Details" text={focusedText} onClose={() => {
-           setFocusedModalVisible(false);
-           setFocusedPoint(null);
-         }} />}
+        <TextOnlyModal 
+          visible={focusedModalVisible}
+          title="Data Point Details" 
+          text={focusedText} 
+          onClose={() => {
+            setFocusedModalVisible(false);
+            // Delay clearing focusedPoint to avoid text glitch
+            setTimeout(() => {
+              setFocusedPoint(null);
+              setFocusedText("");
+            }, 200);
+          }} 
+        />
       </View>
 
       <View style={styles.dataSelector}>

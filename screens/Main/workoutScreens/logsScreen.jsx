@@ -6,34 +6,22 @@ import {
   StyleSheet,
   Alert,
   TouchableOpacity,
-  Pressable,
   ScrollView,
   Keyboard,
   TouchableWithoutFeedback,
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { useWorkoutContext } from "../../../context/WorkoutsV2/WorkoutContext";
-import { Entypo } from "@expo/vector-icons"; // Add this line
+import { Entypo } from "@expo/vector-icons";
 import CustomHeader from "../../../components/CustomHeader";
 import NotesModal from "../../../components/Notes";
 import { Ionicons } from "@expo/vector-icons";
 import Foundation from '@expo/vector-icons/Foundation';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useSettings } from "../../../context/SettingsContext";
+import { useSettings } from "../../../context/Settings/SettingsContext";
 import { LinearGradient } from 'expo-linear-gradient';
 
-
-
 export default function LogDetails() {
-  // V1 Context (keeping for reference)
-  const { 
-    workouts: workoutsV1, 
-    addLogToExercise: addLogToExerciseV1, 
-    deleteLog: deleteLogV1, 
-    addNoteToExercise: addNoteToExerciseV1, 
-    exerciseLibrary: exerciseLibraryV1 
-  } = useWorkoutContext();
-
   // V2 Context - now using for main functionality
   const {
     workouts,
@@ -43,8 +31,6 @@ export default function LogDetails() {
     deleteLog,
     getLogsForExercise,
     addNoteToExercise,
-    exerciseLibrary,
-    loading
   } = useWorkoutContext();
 
   const { setLastExercise, unit } = useSettings();
@@ -205,12 +191,11 @@ export default function LogDetails() {
             style={{ flex: 1, backgroundColor: "#242424" }}
             contentContainerStyle={{ paddingBottom: 120 }}
           >
-
           <View style={styles.container}>
             <View style={styles.inputGroup}>
               <TextInput
                 style={styles.input}
-                placeholder="Weight"
+                placeholder="Weight*"
                 placeholderTextColor="grey"
                 keyboardType="numeric"
                 value={weight}
@@ -218,7 +203,7 @@ export default function LogDetails() {
               />
               <TextInput
                 style={styles.input}
-                placeholder="Reps"
+                placeholder="Reps*"
                 placeholderTextColor="grey"
                 keyboardType="numeric"
                 value={reps}
@@ -243,6 +228,7 @@ export default function LogDetails() {
                 </LinearGradient>
               </TouchableOpacity>
             </View>
+            <Text style={styles.rpeInfo}>Not sure what RPE means? No problem, you can leave it blank.</Text>
             {displayLogs()}
           </View>
         </ScrollView>
@@ -312,6 +298,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#9CA3AF", // Grey color for unsynced
     borderColor: "#6B7280", // Darker grey border
     shadowColor: "#9CA3AF",
+    marginBottom: 12,
   },
   logText: {
     fontSize: 16,
@@ -325,7 +312,7 @@ const styles = StyleSheet.create({
   inputGroup: {
     flexDirection: "row",
     gap: 8,
-    marginVertical: 20,
+    marginVertical: 10,
   },
   input: {
     backgroundColor: "#1A1A1A",
@@ -417,5 +404,10 @@ const styles = StyleSheet.create({
     borderColor: 'grey',
     zIndex: 10, // ensure it floats above other content
   },
-  
+  rpeInfo: {
+    fontSize: 12,
+    color: "white",
+    fontWeight: "500",
+    fontFamily: 'Inter_500Medium',
+  },
 })

@@ -10,7 +10,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useAuthContext } from '../../context/Auth/AuthContext';
-import { useSettings } from '../../context/SettingsContext';
+import { useSettings } from '../../context/Settings/SettingsContext';
 
 export default function OnboardingScreen12() {
   const navigation = useNavigation();

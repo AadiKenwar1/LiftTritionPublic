@@ -1,4 +1,4 @@
-import { generateClient } from 'aws-amplify/api';
+import { generateClient } from '@aws-amplify/api';
 import { createExercise, updateExercise, deleteExercise as deleteExerciseMutation } from '../../../graphql/mutations';
 import uuid from 'react-native-uuid';
 

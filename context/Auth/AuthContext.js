@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { generateClient } from 'aws-amplify/api';
+import { generateClient } from '@aws-amplify/api';
 import { updateSettings } from '../../graphql/mutations';
 
 // Import Amplify configuration first

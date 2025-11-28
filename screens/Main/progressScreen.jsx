@@ -1,12 +1,8 @@
-import { useEffect, useState, useMemo } from 'react';
 import {
     View,
     Text,
-    FlatList,
     SafeAreaView,
     StyleSheet,
-    TouchableOpacity,
-    Pressable,
     ScrollView,
     Dimensions,
 } from 'react-native';
@@ -14,10 +10,9 @@ import LogLineChart from '../../components/Charts/LogChart/LogLineChart';
 import MetricLineChart from '../../components/Charts/MetricsChart/MetricLineChart';
 import CustomHeader from '../../components/CustomHeader';
 import ProgressWheel from '../../components/ProgressWheel';
-import { useSettings } from '../../context/SettingsContext';
+import { useSettings } from '../../context/Settings/SettingsContext';
 import { useNutritionContext } from '../../context/Nutrition/NutritionContext';
 import { useWorkoutContext } from '../../context/WorkoutsV2/WorkoutContext';
-import { useAuth } from '../../context/Auth/AuthContext';
 
 const { width: screenWidth } = Dimensions.get('window');
 export default function ProgressScreen() {

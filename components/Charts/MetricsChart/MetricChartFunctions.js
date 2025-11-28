@@ -37,13 +37,13 @@ export function generateGraphInfoDesc(mode, selectedData, selectedMetric){
         if(selectedMetric === "Volume"){ 
             if (selectedData === 10) {
             graphInfoDesc =
-                `This graph displays your total volume for each day in the last 10 lifting sessions.`;
+                `This graph displays your total volume for each day in the last 10 lifting sessions.\n\nVolume is the total amount of weight you lifted in a day (your sets × reps × weight, added up across all your exercises).\n\nClick points for details.`;
             } else if (selectedData === 20) {
             graphInfoDesc =
-                `This graph displays your total volume for each day in the last 20 lifting sessions.\n\nVolume is the total amount of weight you lifted in a day — it’s your sets × reps × weight, added up across all your exercises.\n\nData is smoothed for every two days.`;
+                `This graph displays your total volume for each day in the last 20 lifting sessions.\n\nVolume is the total amount of weight you lifted in a day (your sets × reps × weight, added up across all your exercises).\n\nData is downsampled for every two days.\n\nClick points for details.`;
             } else {
             graphInfoDesc =
-                `This graph displays your total volume for each day in the last 30 lifting sessions.\n\nData is smoothed for every three days.`;
+                `This graph displays your total volume for each day in the last 30 lifting sessions.\n\nVolume is the total amount of weight you lifted in a day (your sets × reps × weight, added up across all your exercises).\n\nData is downsampled for every three days.\n\nClick points for details.`;
             }
         }
         else{
@@ -52,10 +52,10 @@ export function generateGraphInfoDesc(mode, selectedData, selectedMetric){
                 `This graph displays your total sets for each day in the last 10 lifting sessions.`;
             } else if (selectedData === 20) {
             graphInfoDesc =
-                `This graph displays your total volume for each day in the last 20 lifting sessions.\n\nData is smoothed for every two days.`;
+                `This graph displays your total sets for each day in the last 20 lifting sessions.\n\nData is downsampled for every two days.\n\nClick points for details.`;
             } else {
             graphInfoDesc =
-                `This graph displays your total volume for each day in the last 30 lifting sessions.\n\nData is smoothed for every three days.`;
+                `This graph displays your total sets for each day in the last 30 lifting sessions.\n\nData is downsampled for every three days.\n\nClick points for details.`;
             }
         }
     } else {
@@ -63,25 +63,25 @@ export function generateGraphInfoDesc(mode, selectedData, selectedMetric){
         if (selectedMetric === "Bodyweight") {
             if (selectedData === 10) {
             graphInfoDesc =
-                `This graph displays your bodyweight for the last 10 days.\n\nIf you forget to log a day, the graph automatically fills that day with the previous day's bodyweight.`;
+                `This graph displays your bodyweight for the last 10 days.\n\nIf you forget to log a day, the graph automatically fills that day with the previous day's bodyweight.\n\nClick points for details.`;
             } else if (selectedData === 20) {
             graphInfoDesc =
-                `This graph displays your bodyweight for the last 20 days.\n\nIf you forget to log a day, the graph automatically fills that day with the previous day's bodyweight.\n\nData is smoothed for every two entries.`;
+                `This graph displays your bodyweight for the last 20 days.\n\nIf you forget to log a day, the graph automatically fills that day with the previous day's bodyweight.\n\nData is downsampled for every two entries.\n\nClick points for details.`;
             } else {
             graphInfoDesc =
-                `This graph displays your bodyweight for the last 30 days.\n\nIf you forget to log a day, the graph automatically fills that day with the previous day's bodyweight.\n\nData is smoothed for every three entries.`;
+                `This graph displays your bodyweight for the last 30 days.\n\nIf you forget to log a day, the graph automatically fills that day with the previous day's bodyweight.\n\nData is downsampled for every three entries.\n\nClick points for details.`;
             }
         } else {
             // Calories metric
             if (selectedData === 10) {
             graphInfoDesc =
-                `This graph displays your daily calorie intake for the last 10 days`;
+                `This graph displays your daily calorie intake for the last 10 days.\n\nClick points for details.`;
             } else if (selectedData === 20) {
             graphInfoDesc =
-                `This graph displays your daily calorie intake for the last 20 days.\n\nData is smoothed for every two days.`;
+                `This graph displays your daily calorie intake for the last 20 days.\n\nData is downsampled for every two days.\n\nClick points for details.`;
             } else {
             graphInfoDesc =
-                `This graph displays your daily calorie intake for the last 30 days.\n\nData is smoothed for every three days.`;
+                `This graph displays your daily calorie intake for the last 30 days.\n\nData is downsampled for every three days.\n\nClick points for details.`;
             }
         }
     }

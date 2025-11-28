@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, useMemo } from 'react';
-import { generateClient } from 'aws-amplify/api';
+import { generateClient } from '@aws-amplify/api';
 import { useAuthContext } from '../Auth/AuthContext';
-import { useSettings } from '../SettingsContext';
+import { useSettings } from '../Settings/SettingsContext';
 import exerciseList from '../Exercises/exerciseList';
 
 // Import function modules

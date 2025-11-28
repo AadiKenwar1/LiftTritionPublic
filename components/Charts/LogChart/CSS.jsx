@@ -123,14 +123,13 @@ export default function getStyles(mode){
     borderRadius: 10,
     alignItems: "center",
     marginTop: 10,
-    borderColor: "black",
-    elevation: 4,
-    borderWidth: 1.3,
-    borderColor: 'black',
-    borderBottomWidth: 6,
-    borderBottomColor: 'black',
-    borderBottomLeftRadius: 12,
-    borderBottomRightRadius: 12
+    borderColor: "grey",
+    borderWidth: 0.3,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+
   },
   closeButtonText: {
     color: "#fff",

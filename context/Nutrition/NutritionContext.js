@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import * as crud from './NutritionFunctions/crudFunctions';
-import { addNutritionFromPhoto, addNutritionFromLabel, addNutritionFromBarcode, uriToBase64 } from './NutritionFunctions/photoAnalysisFunctions';
+import * as crud from './Functions/crudFunctions';
+import { addNutritionFromPhoto, addNutritionFromLabel, addNutritionFromBarcode, uriToBase64 } from './Functions/photoAnalysisFunctions';
 import { useAuthContext } from '../Auth/AuthContext';
 
 const NutritionContext = createContext();

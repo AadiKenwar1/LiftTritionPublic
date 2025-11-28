@@ -51,7 +51,7 @@ export default function ExerciseSelector(props) {
         <View style={styles.pickerWrapper}>
           <TextInput
             style={styles.input}
-            placeholder="Type to filter..."
+            placeholder="Search an exercise..."
             placeholderTextColor="grey"
             value={searchText}
             onChangeText={setSearchText}
@@ -62,8 +62,13 @@ export default function ExerciseSelector(props) {
             keyExtractor={(item) => item}
             keyboardShouldPersistTaps="handled"
             style={styles.list}
+            showsVerticalScrollIndicator={false}
             renderItem={({ item }) => (
-              <TouchableOpacity onPress={() => handleSelect(item)}>
+              <TouchableOpacity 
+                onPress={() => handleSelect(item)}
+                style={styles.listItem}
+                activeOpacity={0.6}
+              >
                 <Text style={styles.item}>{item}</Text>
               </TouchableOpacity>
             )}
@@ -110,12 +115,11 @@ const styles = StyleSheet.create({
     color: "white",
     flexShrink: 1,
     letterSpacing: 0.2,
+    fontFamily: 'Inter_500Medium',
   },
   pickerWrapper: {
-    borderWidth: 2,
     borderRadius: 8,
     marginTop: 4,
-    borderColor: "#000",
     backgroundColor: "#1A1A1A",
     width: "100%",
     padding: 16,
@@ -128,13 +132,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    marginBottom: 12,
+    marginBottom: 5,
     fontSize: 16,
     width: "100%",
     color: "white",
     backgroundColor: "#1A1A1A",
     borderWidth: 0.3,
     borderColor: 'grey',
+    fontFamily: 'Inter_500Medium',
   },
   list: {
     width: "100%",
@@ -144,14 +149,25 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     overflow: "hidden",
   },
+  listItem: {
+    backgroundColor: "#1A1A1A",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginVertical: 2,
+    borderRadius: 8,
+    borderWidth: 0.3,
+    borderColor: 'grey',
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+    elevation: 2,
+  },
   item: {
-    paddingVertical: 8,
-    paddingHorizontal: 4,
     fontSize: 16,
     color: "white",
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
-    width: "100%",
+    fontWeight: '500',
     letterSpacing: 0.2,
+    fontFamily: 'Inter_500Medium',
   },
 })

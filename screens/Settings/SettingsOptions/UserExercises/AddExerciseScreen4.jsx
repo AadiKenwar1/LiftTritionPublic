@@ -13,6 +13,7 @@ import { useWorkoutContext } from "../../../../context/WorkoutsV2/WorkoutContext
 import { useAuthContext } from "../../../../context/Auth/AuthContext";
 import CustomHeader from "../../../../components/CustomHeader";
 import { Ionicons } from "@expo/vector-icons";
+import { BicepsFlexed, ArrowDownToLine } from 'lucide-react-native';
 
 const allMuscles = [
   "Upper Chest", "Lower Chest", "Front Deltoid", "Side Deltoid", "Rear Deltoid",
@@ -73,27 +74,8 @@ export default function AddExerciseScreen4() {
   };
 
   const handleSave = async () => {
-    // PRESERVE: Input validation and sanitization
+    // Trim the exercise name for saving
     const trimmedName = exerciseData.name.trim();
-    
-    if (!trimmedName) {
-      Alert.alert("Error", "Please enter an exercise name.");
-      return;
-    }
-
-    if (selectedMuscles.length === 0) {
-      Alert.alert("Error", "Please select at least one accessory muscle.");
-      return;
-    }
-
-    // PRESERVE: Duplicate checking logic
-    const normalizedInput = trimmedName.toLowerCase();
-    const existingNames = Object.keys(exerciseLibrary).map((name) => name.toLowerCase());
-    
-    if (existingNames.includes(normalizedInput)) {
-      Alert.alert("Duplicate Exercise", "An exercise with this name already exists.");
-      return;
-    }
 
     // PRESERVE: Fatigue factor calculation
     const fatigueFactor = estimateFatigueFactor({
@@ -129,7 +111,7 @@ export default function AddExerciseScreen4() {
 
   return (
     <>
-      <CustomHeader title="Add Exercise" showBack />
+      <CustomHeader title="Select Secondary Muscles" showBack fontSize={20} />
       <View style={styles.container}>
         <View style={styles.content}>
           <View style={styles.progressContainer}>
@@ -140,9 +122,8 @@ export default function AddExerciseScreen4() {
           </View>
 
           <View style={styles.headerContainer}>
-            <Text style={styles.headerTitle}>Select Secondary Muscles</Text>
             <Text style={styles.headerSubtitle}>
-              Which other muscles are worked by "{exerciseData.name}"? (Optional)
+              What other muscles are worked by this exercise? (Optional)
             </Text>
           </View>
 
@@ -184,11 +165,7 @@ export default function AddExerciseScreen4() {
                     styles.muscleIcon,
                     selectedMuscles.includes(item) && styles.muscleIconSelected,
                   ]}>
-                    <Ionicons 
-                      name="fitness" 
-                      size={16} 
-                      color={selectedMuscles.includes(item) ? "#fff" : "#2D9CFF"} 
-                    />
+                    <BicepsFlexed size={20} color={selectedMuscles.includes(item) ? "#fff" : "#00B8A9"} />
                   </View>
                   <Text style={[
                     styles.muscleName,
@@ -202,17 +179,10 @@ export default function AddExerciseScreen4() {
             ItemSeparatorComponent={() => <View style={styles.separator} />}
           />
 
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-              <Ionicons name="chevron-back" size={20} color="#8E8E93" />
-              <Text style={styles.backButtonText}>Back</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-              <Ionicons name="checkmark" size={20} color="#fff" />
-              <Text style={styles.saveButtonText}>Save Exercise</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+            <ArrowDownToLine size={20} color="#fff" />
+            <Text style={styles.saveButtonText}>Save Exercise</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </>
@@ -230,7 +200,7 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   progressContainer: {
-    marginBottom: 30,
+    marginBottom: 10,
   },
   progressText: {
     fontSize: 14,
@@ -249,7 +219,7 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: "100%",
-    backgroundColor: "#2D9CFF",
+    backgroundColor: "#00B8A9",
     borderRadius: 2,
   },
   headerContainer: {
@@ -275,7 +245,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    marginBottom: 20,
+    marginBottom: 10,
     borderWidth: 0.3,
     borderColor: "grey",
     shadowColor: "black",
@@ -294,6 +264,7 @@ const styles = StyleSheet.create({
   },
   muscleList: {
     flex: 1,
+    maxHeight: 410,
     marginBottom: 20,
   },
   muscleCard: {
@@ -302,18 +273,22 @@ const styles = StyleSheet.create({
     padding: 16,
     borderWidth: 0.3,
     borderColor: "grey",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.8,
     shadowRadius: 3,
   },
   muscleCardSelected: {
-    borderColor: "#2D9CFF",
+    borderColor: "#00B8A9",
     backgroundColor: "#1A1A1A",
   },
   muscleContent: {
     flexDirection: "row",
     alignItems: "center",
+    flex: 1,
   },
   checkbox: {
     width: 20,
@@ -327,13 +302,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#242424",
   },
   checkboxChecked: {
-    backgroundColor: "#2D9CFF",
-    borderColor: "#2D9CFF",
+    backgroundColor: "#00B8A9",
+    borderColor: "#00B8A9",
   },
   muscleIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: "#242424",
     alignItems: "center",
     justifyContent: "center",
@@ -342,58 +317,43 @@ const styles = StyleSheet.create({
     borderColor: 'grey',
   },
   muscleIconSelected: {
-    backgroundColor: "#2D9CFF",
-    borderColor: "#2D9CFF",
+    backgroundColor: "#00B8A9",
+    borderColor: "#00B8A9",
   },
   muscleName: {
     fontSize: 16,
     fontWeight: "600",
     color: "white",
-    flex: 1,
     fontFamily: "Inter_600SemiBold",
   },
   muscleNameSelected: {
-    color: "#2D9CFF",
+    color: "#00B8A9",
   },
   separator: {
     height: 8,
   },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  backButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-  },
-  backButtonText: {
-    fontSize: 16,
-    color: "#8E8E93",
-    marginLeft: 4,
-    fontFamily: "Inter_400Regular",
-  },
   saveButton: {
-    backgroundColor: "#2D9CFF",
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 12,
+    backgroundColor: "#00B8A9",
+    paddingVertical: 18,
+    borderRadius: 16,
     flexDirection: "row",
+    justifyContent: "center",
     alignItems: "center",
+    width: '100%',
     shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.8,
     shadowRadius: 3,
     borderWidth: 0.3,
     borderColor: 'black',
+    minHeight: 56,
   },
   saveButtonText: {
     color: "#fff",
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "700",
     marginLeft: 8,
-    fontFamily: "Inter_700Bold",
+    letterSpacing: 0.5,
+    fontFamily: 'Inter_700Bold',
   },
 });

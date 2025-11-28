@@ -1,9 +1,10 @@
 // screens/TrainingFrequencyScreen.js
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import CustomHeader from '../../../components/CustomHeader';
-import { useSettings } from '../../../context/SettingsContext';
+import { useSettings } from '../../../context/Settings/SettingsContext';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 
 const frequencyOptions = [
   { label: '0 times a week', value: 1.2 },
@@ -13,12 +14,57 @@ const frequencyOptions = [
 ];
 
 export default function TrainingFrequencyScreen() {
-  const { activityFactor, setActivityFactor } = useSettings();
+  const { 
+    activityFactor, 
+    setActivityFactor,
+    bodyWeight,
+    goalWeight,
+    age,
+    gender,
+    height,
+    goalPace,
+    unit,
+    calculateMacros,
+    setNutritionGoals
+  } = useSettings();
   const navigation = useNavigation();
   const route = useRoute();
   
   // Get the parameter to know where the route comes from
   const { comingFrom } = route.params || {};
+  
+  // Local state for selected frequency (not saved until button is pressed)
+  const [selectedFrequency, setSelectedFrequency] = useState(activityFactor);
+  
+  // Handle updating the training frequency and recalculating macros
+  const handleUpdateFrequency = () => {
+    // Update activity factor
+    setActivityFactor(selectedFrequency);
+    
+    // Recalculate macros with the new activity factor
+    if (bodyWeight && height && age) {
+      const { calResult, proteinGrams, fatGrams, carbGrams } = calculateMacros(
+        bodyWeight,
+        goalWeight || bodyWeight,
+        selectedFrequency, // Use the new selected frequency
+        age,
+        gender,
+        height,
+        goalPace,
+        unit
+      );
+      
+      // Set the new nutrition goals
+      setNutritionGoals(
+        calResult,
+        proteinGrams,
+        fatGrams,
+        carbGrams
+      );
+    }
+    
+    navigation.goBack();
+  };
 
   return (
     <View style={styles.container}>
@@ -30,44 +76,39 @@ export default function TrainingFrequencyScreen() {
           Your training frequency is used to calculate fatigue and nutrition goals.
         </Text>
 
-        {/* Show different message based on where user came from */}
-        {comingFrom !== 'AdjustMacros' && (
-          <View style={styles.suggestionBox}>
-            <Text style={styles.suggestionText}>
-              We suggest readjusting your macros in the{' '}
-              <Text 
-                style={styles.linkText}
-                onPress={() => navigation.navigate('AdjustMacros')}
-              >
-                adjust macros
-              </Text>
-              {' '}setting to ensure your nutrition goals line up. 
-            </Text>
-            <Text style={styles.suggestionText}></Text>
-            <Text style={styles.suggestionText}>However if fatigue is your main concern, you can adjust your training frequency here.</Text>
-          </View>
-        )}
+        
         
         {frequencyOptions.map((option) => (
           <TouchableOpacity
             key={option.value}
             style={[
               styles.option,
-              activityFactor === option.value && styles.selectedOption,
+              selectedFrequency === option.value && styles.selectedOption,
             ]}
-            onPress={() => setActivityFactor(option.value)}
+            onPress={() => setSelectedFrequency(option.value)}
             activeOpacity={0.8}
           >
             <Text
               style={[
                 styles.optionText,
-                activityFactor === option.value && styles.selectedOptionText,
+                selectedFrequency === option.value && styles.selectedOptionText,
               ]}
             >
               {option.label}
             </Text>
           </TouchableOpacity>
         ))}
+        
+        {/* Update Button */}
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity 
+            style={styles.updateButton} 
+            onPress={handleUpdateFrequency}
+          >
+            <Ionicons name="checkmark-outline" size={20} color="#fff" />
+            <Text style={styles.updateButtonText}>UPDATE TRAINING FREQUENCY</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -81,7 +122,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: 20,
-    paddingTop: 10,
+    paddingTop: 20,
   },
   title: {
     fontSize: 24,
@@ -122,7 +163,8 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
   option: {
-    padding: 20,
+    paddingVertical: 24,
+    paddingHorizontal: 20,
     borderRadius: 12,
     borderWidth: 0.3,
     borderColor: 'grey',
@@ -132,11 +174,13 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.8,
     shadowRadius: 3,
+    minHeight: 64,
+    justifyContent: 'center',
   },
   selectedOption: {
     backgroundColor: '#1A1A1A',
-    borderColor: '#4CD964',
-    borderWidth: 0.3,
+    borderColor: '#00B8A9',
+    borderWidth: 2,
   },
   optionText: {
     fontSize: 17,
@@ -145,7 +189,33 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   selectedOptionText: {
-    color: '#4CD964',
+    color: '#00B8A9',
     fontFamily: 'Inter_600SemiBold',
+  },
+  buttonContainer: {
+    alignItems: 'center',
+    width: '100%',
+    marginTop: 20,
+  },
+  updateButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#00B8A9',
+    paddingVertical: 16,
+    borderRadius: 12,
+    width: '100%',
+    shadowColor: 'black',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
+  },
+  updateButtonText: {
+    fontSize: 16,
+    fontFamily: 'Inter_700Bold',
+    color: '#fff',
+    marginLeft: 10,
   },
 });

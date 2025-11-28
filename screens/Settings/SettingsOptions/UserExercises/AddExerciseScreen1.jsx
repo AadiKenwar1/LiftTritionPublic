@@ -6,21 +6,36 @@ import {
   StyleSheet,
   TouchableOpacity,
   KeyboardAvoidingView,
+  Keyboard, 
+  TouchableWithoutFeedback,
   Platform,
+  Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import CustomHeader from "../../../../components/CustomHeader";
 import { Ionicons } from "@expo/vector-icons";
+import { Dumbbell } from 'lucide-react-native';
+import { useWorkoutContext } from "../../../../context/WorkoutsV2/WorkoutContext";
 
 export default function AddExerciseScreen1() {
   const navigation = useNavigation();
+  const { exerciseLibrary } = useWorkoutContext();
   const [name, setName] = useState("");
   const [isCompound, setIsCompound] = useState(false);
 
   const handleNext = () => {
     const trimmedName = name.trim();
     if (!trimmedName) {
-      alert("Please enter an exercise name.");
+      Alert.alert("Error", "Please enter an exercise name.");
+      return;
+    }
+
+    // Duplicate checking logic
+    const normalizedInput = trimmedName.toLowerCase();
+    const existingNames = Object.keys(exerciseLibrary).map((name) => name.toLowerCase());
+    
+    if (existingNames.includes(normalizedInput)) {
+      Alert.alert("Duplicate Exercise", "An exercise with this name already exists.");
       return;
     }
     
@@ -35,11 +50,13 @@ export default function AddExerciseScreen1() {
   return (
     <>
       <CustomHeader title="Add Exercise" showBack />
-      <KeyboardAvoidingView 
-        style={styles.container} 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
-        <View style={styles.content}>
+      <View style={styles.container}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.content}>
+          {/* Header Section */}
+
+
+          {/* Progress Indicator */}
           <View style={styles.progressContainer}>
             <Text style={styles.progressText}>Step 1 of 4</Text>
             <View style={styles.progressBar}>
@@ -47,46 +64,73 @@ export default function AddExerciseScreen1() {
             </View>
           </View>
 
-          {/* Exercise Name & Compound Toggle */}
+          {/* Exercise Name Card */}
           <View style={styles.inputCard}>
-            <Text style={styles.inputLabel}>Exercise Name</Text>
+            <View style={styles.cardHeader}>
+              <Ionicons name="text-outline" size={24} color="#00B8A9" />
+              <Text style={styles.inputLabel}>Exercise Name</Text>
+            </View>
+            <Text style={styles.inputDescription}>
+              Give your exercise a clear, descriptive name
+            </Text>
             <TextInput
-              placeholder="Enter exercise name"
+              placeholder="e.g., Barbell Bench Press"
               placeholderTextColor="#8E8E93"
               value={name}
               onChangeText={setName}
               style={styles.textInput}
-              autoFocus
             />
-            
-            <View style={styles.compoundToggleContainer}>
-              <TouchableOpacity
-                style={styles.compoundToggle}
-                onPress={() => setIsCompound(!isCompound)}
-                activeOpacity={0.7}
-              >
-                <View style={styles.toggleContainer}>
-                  <View style={[styles.toggleSwitch, isCompound && styles.toggleSwitchActive]}>
-                    <View style={[styles.toggleThumb, isCompound && styles.toggleThumbActive]} />
-                  </View>
-                  <View style={styles.toggleTextContainer}>
-                    <Text style={styles.toggleLabel}>Compound Exercise</Text>
-                    <Text style={styles.toggleDescription}>
-                      {isCompound ? "Multi-joint movement" : "Single-joint movement"}
-                    </Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            </View>
           </View>
 
+          {/* Compound Toggle Card */}
+          <View style={styles.toggleCard}>
+            <View style={styles.toggleCardHeader}>
+              <Ionicons name="body-outline" size={24} color="#00B8A9" />
+              <View style={styles.toggleHeaderText}>
+                <Text style={styles.toggleCardTitle}>Exercise Type</Text>
+                <Text style={styles.toggleCardDescription}>
+                  Select the movement pattern for your exercise
+                </Text>
+              </View>
+            </View>
+            
+            <TouchableOpacity
+              style={styles.compoundToggle}
+              onPress={() => setIsCompound(!isCompound)}
+              activeOpacity={0.7}
+            >
+              <View style={styles.toggleContainer}>
+                <View style={[styles.toggleSwitch, isCompound && styles.toggleSwitchActive]}>
+                  <View style={[styles.toggleThumb, isCompound && styles.toggleThumbActive]} />
+                </View>
+                <View style={styles.toggleTextContainer}>
+                  <Text style={styles.toggleLabel}>Compound Exercise</Text>
+                  <Text style={styles.toggleDescription}>
+                  Compound exercises work multiple muscle groups, while isolation exercises target a single muscle.
+                  </Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+          </View>
+
+
+
           {/* Next Button */}
-          <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
+          <TouchableOpacity 
+            style={[
+              styles.nextButton,
+              !name.trim() && styles.nextButtonDisabled
+            ]} 
+            onPress={handleNext}
+            disabled={!name.trim()}
+            activeOpacity={0.8}
+          >
             <Text style={styles.nextButtonText}>Next</Text>
             <Ionicons name="chevron-forward" size={20} color="#fff" />
           </TouchableOpacity>
+          </View>
+          </TouchableWithoutFeedback>
         </View>
-      </KeyboardAvoidingView>
     </>
   );
 }
@@ -99,37 +143,58 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingVertical: 20,
-    paddingTop: 10,
+    paddingTop: 20,
+    paddingBottom: 20,
+  },
+  headerSection: {
+    alignItems: "center",
+    marginBottom: 24,
+    paddingVertical: 16,
+  },
+  iconContainer: {
+    marginBottom: 16,
+    padding: 16,
+    backgroundColor: "#1A1A1A",
+    borderRadius: 20,
+    borderWidth: 0.3,
+    borderColor: 'grey',
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    fontFamily: "Inter_400Regular",
+    color: "#8E8E93",
+    textAlign: "center",
+    lineHeight: 22,
+    paddingHorizontal: 20,
   },
   progressContainer: {
-    marginBottom: 30,
+    marginBottom: 32,
   },
   progressText: {
     fontSize: 14,
     color: "#8E8E93",
-    marginBottom: 8,
+    marginBottom: 10,
     textAlign: "center",
     fontFamily: "Inter_400Regular",
   },
   progressBar: {
-    height: 4,
+    height: 6,
     backgroundColor: "#1A1A1A",
-    borderRadius: 2,
+    borderRadius: 3,
     overflow: "hidden",
     borderWidth: 0.3,
     borderColor: 'grey',
   },
   progressFill: {
     height: "100%",
-    backgroundColor: "#2D9CFF",
-    borderRadius: 2,
+    backgroundColor: "#00B8A9",
+    borderRadius: 3,
   },
   inputCard: {
     backgroundColor: '#1A1A1A',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 0,
+    borderRadius: 20,
+    padding: 24,
+    marginBottom: 20,
     shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.8,
@@ -137,31 +202,75 @@ const styles = StyleSheet.create({
     borderWidth: 0.3,
     borderColor: 'grey',
   },
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
   inputLabel: {
-    fontSize: 16,
+    fontSize: 18,
     color: 'white',
-    marginBottom: 12,
+    marginLeft: 12,
     fontWeight: '600',
     fontFamily: 'Inter_600SemiBold',
+  },
+  inputDescription: {
+    fontSize: 14,
+    color: "#8E8E93",
+    marginBottom: 16,
+    fontFamily: 'Inter_400Regular',
+    lineHeight: 20,
   },
   textInput: {
     borderWidth: 0.3,
     borderColor: "grey",
     borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 16,
     fontSize: 16,
     color: "white",
     backgroundColor: "#242424",
     fontFamily: 'Inter_400Regular',
+    minHeight: 52,
   },
-  compoundToggleContainer: {
-    marginTop: 16,
+  toggleCard: {
+    backgroundColor: '#1A1A1A',
+    borderRadius: 20,
+    padding: 24,
+    marginBottom: 20,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
+  },
+  toggleCardHeader: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 20,
+  },
+  toggleHeaderText: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  toggleCardTitle: {
+    fontSize: 18,
+    color: 'white',
+    fontWeight: '600',
+    fontFamily: 'Inter_600SemiBold',
+    marginBottom: 4,
+  },
+  toggleCardDescription: {
+    fontSize: 14,
+    color: "#8E8E93",
+    fontFamily: 'Inter_400Regular',
+    lineHeight: 20,
   },
   compoundToggle: {
     backgroundColor: "#242424",
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 16,
+    padding: 20,
     borderWidth: 0.3,
     borderColor: "grey",
   },
@@ -170,9 +279,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   toggleSwitch: {
-    width: 50,
-    height: 28,
-    borderRadius: 14,
+    width: 52,
+    height: 30,
+    borderRadius: 15,
     backgroundColor: "#1A1A1A",
     marginRight: 16,
     justifyContent: "center",
@@ -181,12 +290,12 @@ const styles = StyleSheet.create({
     borderColor: 'grey',
   },
   toggleSwitchActive: {
-    backgroundColor: "#2D9CFF",
+    backgroundColor: "#00B8A9",
   },
   toggleThumb: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     backgroundColor: "#fff",
     position: "absolute",
     left: 2,
@@ -203,32 +312,53 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   toggleLabel: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: "600",
     color: "white",
-    marginBottom: 4,
+    marginBottom: 6,
     fontFamily: 'Inter_600SemiBold',
   },
   toggleDescription: {
     fontSize: 14,
     color: "#8E8E93",
-    lineHeight: 18,
+    lineHeight: 20,
     fontFamily: 'Inter_400Regular',
   },
+  infoCard: {
+    flexDirection: "row",
+    backgroundColor: "#1A1A1A",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 24,
+    borderWidth: 0.3,
+    borderColor: 'grey',
+  },
+  infoText: {
+    flex: 1,
+    fontSize: 14,
+    color: "#8E8E93",
+    marginLeft: 12,
+    fontFamily: 'Inter_400Regular',
+    lineHeight: 20,
+  },
   nextButton: {
-    backgroundColor: "#2D9CFF",
-    paddingVertical: 16,
-    borderRadius: 12,
+    backgroundColor: "#00B8A9",
+    paddingVertical: 18,
+    borderRadius: 16,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 15,
     shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.8,
     shadowRadius: 3,
     borderWidth: 0.3,
     borderColor: 'black',
+    minHeight: 56,
+  },
+  nextButtonDisabled: {
+    backgroundColor: "#1A1A1A",
+    opacity: 0.5,
   },
   nextButtonText: {
     color: "#fff",

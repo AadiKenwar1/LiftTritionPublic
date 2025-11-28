@@ -24,7 +24,9 @@ function Log(props) {
         </LinearGradient>
       </Pressable>
       <TouchableOpacity style={styles.textArea} onPress={props.function}>
+        <View style={styles.textContainer}>
         <Text
+
           style={[
             styles.logText, 
             {fontFamily: props.bold ? "Inter_600SemiBold" : "Inter_400Regular"},
@@ -35,6 +37,7 @@ function Log(props) {
             ? props.currItem || "Unnamed Workout"
             : props.currItem?.name || "Unnamed Workout"}
         </Text>
+        </View>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={props.onMenuPress} style={styles.menuButton}>
@@ -91,6 +94,9 @@ const styles = StyleSheet.create({
   },
   textArea: {
     flex: 1,
+  },
+  textContainer: {
+    height: 50,
     justifyContent: "center",
   },
   logText: {
@@ -111,6 +117,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  
 });
 
 

@@ -2,8 +2,6 @@ import { useState } from "react";
 import {
   View,
   Text,
-  Pressable,
-  Button,
   StyleSheet,
   TextInput,
   TouchableOpacity,
@@ -177,7 +175,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    marginBottom: 10,
+    marginBottom: 0,
     width: '100%',
     color: 'white',
     backgroundColor: '#1A1A1A',

@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  FlatList,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import CustomHeader from "../../../../components/CustomHeader";
@@ -56,49 +55,47 @@ export default function AddExerciseScreen2() {
 
           <View style={styles.headerContainer}>
             <Text style={styles.headerSubtitle}>
-              What equipment will you use for "{exerciseData.name}"?
+              What equipment will this exercise use?
             </Text>
           </View>
 
-          <FlatList
-            data={equipmentTypes}
-            keyExtractor={(item) => item.id}
-            style={styles.equipmentList}
-            showsVerticalScrollIndicator={false}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={[
-                  styles.equipmentCard,
-                  selectedEquipment === item.id && styles.equipmentCardSelected,
-                ]}
-                onPress={() => setSelectedEquipment(item.id)}
-                activeOpacity={0.7}
-              >
-                <View style={styles.equipmentContent}>
-                  <View style={[
-                    styles.equipmentIcon,
-                    selectedEquipment === item.id && styles.equipmentIconSelected,
-                  ]}>
-                    <Ionicons 
-                      name={item.icon} 
-                      size={24} 
-                      color={selectedEquipment === item.id ? "#fff" : "#2D9CFF"} 
-                    />
+          <View style={styles.equipmentList}>
+            {equipmentTypes.map((item, index) => (
+              <View key={item.id}>
+                <TouchableOpacity
+                  style={[
+                    styles.equipmentCard,
+                    selectedEquipment === item.id && styles.equipmentCardSelected,
+                  ]}
+                  onPress={() => setSelectedEquipment(item.id)}
+                  activeOpacity={0.7}
+                >
+                  <View style={styles.equipmentContent}>
+                    <View style={[
+                      styles.equipmentIcon,
+                      selectedEquipment === item.id && styles.equipmentIconSelected,
+                    ]}>
+                      <Ionicons 
+                        name={item.icon} 
+                        size={24} 
+                        color={selectedEquipment === item.id ? "#fff" : "#00B8A9"} 
+                      />
+                    </View>
+                    <Text style={[
+                      styles.equipmentName,
+                      selectedEquipment === item.id && styles.equipmentNameSelected,
+                    ]}>
+                      {item.name}
+                    </Text>
                   </View>
-                  <Text style={[
-                    styles.equipmentName,
-                    selectedEquipment === item.id && styles.equipmentNameSelected,
-                  ]}>
-                    {item.name}
-                  </Text>
-                </View>
-                {selectedEquipment === item.id && (
-                  <Ionicons name="checkmark-circle" size={24} color="#2D9CFF" />
-                )}
-              </TouchableOpacity>
-            )}
-            ItemSeparatorComponent={() => <View style={styles.separator} />}
-          />
+                  {selectedEquipment === item.id && (
+                    <Ionicons name="checkmark-circle" size={24} color="#00B8A9" />
+                  )}
+                </TouchableOpacity>
+                {index < equipmentTypes.length - 1 && <View style={styles.separator} />}
+              </View>
+            ))}
+          </View>
 
           <View style={styles.buttonContainer}>
 
@@ -131,7 +128,7 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingHorizontal: 20,
     paddingVertical: 20,
-    paddingTop: 10,
+    paddingTop: 20,
   },
   progressContainer: {
     marginBottom: 15,
@@ -153,7 +150,7 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: "100%",
-    backgroundColor: "#2D9CFF",
+    backgroundColor: "#00B8A9",
     borderRadius: 2,
   },
   headerContainer: {
@@ -167,13 +164,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   equipmentList: {
-    flex: 1,
     marginBottom: 20,
   },
   equipmentCard: {
     backgroundColor: "#1A1A1A",
     borderRadius: 16,
-    padding: 20,
+    padding:18,
     borderWidth: 0.3,
     borderColor: "grey",
     flexDirection: "row",
@@ -185,7 +181,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
   },
   equipmentCardSelected: {
-    borderColor: "#2D9CFF",
+    borderColor: "#00B8A9",
     backgroundColor: "#1A1A1A",
   },
   equipmentContent: {
@@ -205,8 +201,8 @@ const styles = StyleSheet.create({
     borderColor: 'grey',
   },
   equipmentIconSelected: {
-    backgroundColor: "#2D9CFF",
-    borderColor: "#2D9CFF",
+    backgroundColor: "#00B8A9",
+    borderColor: "#00B8A9",
   },
   equipmentName: {
     fontSize: 18,
@@ -215,7 +211,7 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_600SemiBold",
   },
   equipmentNameSelected: {
-    color: "#2D9CFF",
+    color: "#00B8A9",
   },
   separator: {
     height: 12,
@@ -225,12 +221,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  backButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-  },
   backButtonText: {
     fontSize: 16,
     color: "#8E8E93",
@@ -238,28 +228,31 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_400Regular",
   },
   nextButton: {
-    backgroundColor: "#2D9CFF",
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 12,
+    backgroundColor: "#00B8A9",
+    paddingVertical: 18,
+    borderRadius: 16,
     flexDirection: "row",
+    justifyContent: "center",
     alignItems: "center",
+    width: '100%',
     shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.8,
     shadowRadius: 3,
     borderWidth: 0.3,
     borderColor: 'black',
+    minHeight: 56,
   },
   nextButtonDisabled: {
     backgroundColor: "#1A1A1A",
-    borderColor: "grey",
+    opacity: 0.5,
   },
   nextButtonText: {
     color: "#fff",
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "700",
     marginRight: 8,
-    fontFamily: "Inter_700Bold",
+    letterSpacing: 0.5,
+    fontFamily: 'Inter_700Bold',
   },
 });

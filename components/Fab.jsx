@@ -7,7 +7,7 @@ import {
   Pressable,
 } from 'react-native';
 import { Entypo } from '@expo/vector-icons';
-import { useSettings } from '../context/SettingsContext';
+import { useSettings } from '../context/Settings/SettingsContext';
 import { LinearGradient } from 'expo-linear-gradient';
 
 function FloatingActionMenu (props){

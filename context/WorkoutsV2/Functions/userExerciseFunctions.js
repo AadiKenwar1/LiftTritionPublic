@@ -1,4 +1,4 @@
-import { generateClient } from 'aws-amplify/api';
+import { generateClient } from '@aws-amplify/api';
 import { 
   createUserExercise, 
   updateUserExercise as updateUserExerciseMutation, 

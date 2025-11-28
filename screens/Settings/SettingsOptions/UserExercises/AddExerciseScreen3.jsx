@@ -10,6 +10,8 @@ import {
 import { useNavigation, useRoute } from "@react-navigation/native";
 import CustomHeader from "../../../../components/CustomHeader";
 import { Ionicons } from "@expo/vector-icons";
+import { BicepsFlexed} from 'lucide-react-native';
+
 
 const allMuscles = [
   "Upper Chest", "Lower Chest", "Front Deltoid", "Side Deltoid", "Rear Deltoid",
@@ -50,7 +52,7 @@ export default function AddExerciseScreen3() {
 
   return (
     <>
-      <CustomHeader title="Add Exercise" showBack />
+      <CustomHeader title="Select Primary Muscle" showBack />
       <View style={styles.container}>
         <View style={styles.content}>
           <View style={styles.progressContainer}>
@@ -61,9 +63,8 @@ export default function AddExerciseScreen3() {
           </View>
 
           <View style={styles.headerContainer}>
-            <Text style={styles.headerTitle}>Select Primary Muscle</Text>
             <Text style={styles.headerSubtitle}>
-              What is the main muscle group for "{exerciseData.name}"?
+              What is the main muscle group for this exercise?
             </Text>
           </View>
 
@@ -97,11 +98,7 @@ export default function AddExerciseScreen3() {
                     styles.muscleIcon,
                     selectedMuscle === item && styles.muscleIconSelected,
                   ]}>
-                    <Ionicons 
-                      name="fitness" 
-                      size={20} 
-                      color={selectedMuscle === item ? "#fff" : "#2D9CFF"} 
-                    />
+                    <BicepsFlexed size={20} color={selectedMuscle === item ? "#fff" : "#00B8A9"} />
                   </View>
                   <Text style={[
                     styles.muscleName,
@@ -111,31 +108,24 @@ export default function AddExerciseScreen3() {
                   </Text>
                 </View>
                 {selectedMuscle === item && (
-                  <Ionicons name="checkmark-circle" size={24} color="#2D9CFF" />
+                  <Ionicons name="checkmark-circle" size={24} color="#00B8A9" />
                 )}
               </TouchableOpacity>
             )}
             ItemSeparatorComponent={() => <View style={styles.separator} />}
           />
 
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-              <Ionicons name="chevron-back" size={20} color="#8E8E93" />
-              <Text style={styles.backButtonText}>Back</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={[
-                styles.nextButton,
-                !selectedMuscle && styles.nextButtonDisabled
-              ]} 
-              onPress={handleNext}
-              disabled={!selectedMuscle}
-            >
-              <Text style={styles.nextButtonText}>Next</Text>
-              <Ionicons name="chevron-forward" size={20} color="#fff" />
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity 
+            style={[
+              styles.nextButton,
+              !selectedMuscle && styles.nextButtonDisabled
+            ]} 
+            onPress={handleNext}
+            disabled={!selectedMuscle}
+          >
+            <Text style={styles.nextButtonText}>Next</Text>
+            <Ionicons name="chevron-forward" size={20} color="#fff" />
+          </TouchableOpacity>
         </View>
       </View>
     </>
@@ -153,7 +143,7 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   progressContainer: {
-    marginBottom: 30,
+    marginBottom: 10,
   },
   progressText: {
     fontSize: 14,
@@ -172,7 +162,7 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: "100%",
-    backgroundColor: "#2D9CFF",
+    backgroundColor: "#00B8A9",
     borderRadius: 2,
   },
   headerContainer: {
@@ -198,7 +188,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    marginBottom: 20,
+    marginBottom: 10,
     borderWidth: 0.3,
     borderColor: "grey",
     shadowColor: "black",
@@ -217,6 +207,7 @@ const styles = StyleSheet.create({
   },
   muscleList: {
     flex: 1,
+    maxHeight: 410,
     marginBottom: 20,
   },
   muscleCard: {
@@ -254,8 +245,8 @@ const styles = StyleSheet.create({
     borderColor: 'grey',
   },
   muscleIconSelected: {
-    backgroundColor: "#2D9CFF",
-    borderColor: "#2D9CFF",
+    backgroundColor: "#00B8A9",
+    borderColor: "#00B8A9",
   },
   muscleName: {
     fontSize: 16,
@@ -264,52 +255,39 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_600SemiBold",
   },
   muscleNameSelected: {
-    color: "#2D9CFF",
+    color: "#00B8A9",
   },
   separator: {
     height: 8,
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  backButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-  },
-  backButtonText: {
-    fontSize: 16,
-    color: "#8E8E93",
-    marginLeft: 4,
-    fontFamily: "Inter_400Regular",
-  },
+  },  
+
   nextButton: {
-    backgroundColor: "#2D9CFF",
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 12,
+    backgroundColor: "#00B8A9",
+    paddingVertical: 18,
+    borderRadius: 16,
     flexDirection: "row",
+    justifyContent: "center",
     alignItems: "center",
+    width: '100%',
     shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.8,
     shadowRadius: 3,
     borderWidth: 0.3,
     borderColor: 'black',
+    minHeight: 56,
   },
   nextButtonDisabled: {
     backgroundColor: "#1A1A1A",
-    borderColor: "grey",
+    opacity: 0.5,
   },
   nextButtonText: {
     color: "#fff",
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "700",
     marginRight: 8,
-    fontFamily: "Inter_700Bold",
+    letterSpacing: 0.5,
+    fontFamily: 'Inter_700Bold',
   },
 });
 

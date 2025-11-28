@@ -22,7 +22,7 @@ import "../context/Auth/amplifyConfig";
 
 // Context Providers
 import { AuthProvider, useAuthContext } from "../context/Auth/AuthContext";
-import { SettingsProvider, useSettings } from "../context/SettingsContext";
+import { SettingsProvider, useSettings } from "../context/Settings/SettingsContext";
 import { WorkoutProvider, useWorkoutContext } from "../context/WorkoutsV2/WorkoutContext";
 import { NutritionProvider, useNutritionContext } from "../context/Nutrition/NutritionContext";
 import { BillingProvider } from "../context/Billing/BillingContext";
@@ -140,7 +140,7 @@ function AuthenticatedApp() {
 
   // Only render the navigator after authLoading is false
   if (authLoading) {
-    return <LoadingScreen message="Loading..." />;
+    return <LoadingScreen />;
   }
 
   return (
@@ -159,7 +159,7 @@ function AuthenticatedApp() {
         ) : 
         (settingsLoading || workoutLoading || nutritionLoading) ? (
           // Loading screen while contexts are loading
-          <Stack.Screen name="Loading" component={LoadingScreen} initialParams={{ message: "Loading..." }} />
+          <Stack.Screen name="Loading" component={LoadingScreen} />
         ): 
         onboardingCompleted ? (
           // Main app screens when authenticated and onboarding completed

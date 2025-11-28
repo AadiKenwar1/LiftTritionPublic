@@ -51,13 +51,13 @@ export function generateGraphInfoDesc(mode, selectedData){
     let graphInfoDesc = "";
     if (selectedData === 10) {
         graphInfoDesc =
-          "This graph displays your " + (mode === true? "estimated one rep max for your last 10 lifting sessions.\n\nFor each day you perform the selected exercise, we take your strongest set and use it to calculate your one rep max." : "selected macronutrient intake for the last 10 days.");
+          "This graph displays your " + (mode === true? "estimated one rep max for your last 10 lifting sessions.\n\nFor each day you perform the selected exercise, we take your strongest set and use it to calculate your one rep max." : "selected macronutrient intake for the last 10 days.") + "\n\nClick points for details.";
       } else if (selectedData === 20) {
         graphInfoDesc =
-          "This graph displays your " + (mode === true? "estimated 1 rep max for your last 20 lifting sessions.\n\nFor each day you perform the selected exercise, we take your strongest set and use it to calculate your one rep max." : "selected macronutrient intake for the last 20 days.") + "\n\nData is smoothed for every two lifting sessions.";
+          "This graph displays your " + (mode === true? "estimated 1 rep max for your last 20 lifting sessions.\n\nFor each day you perform the selected exercise, we take your strongest set and use it to calculate your one rep max." : "selected macronutrient intake for the last 20 days.") + "\n\nData is downsampled for every two lifting sessions." + "\n\nClick points for details.";
       } else {
         graphInfoDesc =
-          "This graph displays your " + (mode === true? "estimated 1 rep max for your last 30 lifting sessions.\n\nFor each day you perform the selected exercise, we take your strongest set and use it to calculate your one rep max." : "selected macronutrient intake for the last 30 days.") + "\n\nData is smoothed for every three lifting sessions.";
+          "This graph displays your " + (mode === true? "estimated 1 rep max for your last 30 lifting sessions.\n\nFor each day you perform the selected exercise, we take your strongest set and use it to calculate your one rep max." : "selected macronutrient intake for the last 30 days.") + "\n\nData is downsampled for every three lifting sessions." + "\n\nClick points for details.";
       }
     return graphInfoDesc;
 }

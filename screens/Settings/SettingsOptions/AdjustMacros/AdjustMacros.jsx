@@ -9,7 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
-import { useSettings } from '../../../../context/SettingsContext';
+import { useSettings } from '../../../../context/Settings/SettingsContext';
 import CustomHeader from '../../../../components/CustomHeader';
 import { useNavigation } from '@react-navigation/native';
 
@@ -35,15 +35,15 @@ export default function AdjustMacrosScreen() {
   const navigation = useNavigation();
 
   // Local state for form values - these only get applied when "Set Macros" is clicked
-  const [localBodyWeight, setLocalBodyWeight] = useState(bodyWeight);
-  const [localGoalWeight, setLocalGoalWeight] = useState(goalWeight);
+  const [localBodyWeight, setLocalBodyWeight] = useState(bodyWeight > 0 ? bodyWeight : null);
+  const [localGoalWeight, setLocalGoalWeight] = useState(goalWeight > 0 ? goalWeight : null);
   const [localGoalPace, setLocalGoalPace] = useState(goalPace);
   const [localActivityFactor, setLocalActivityFactor] = useState(activityFactor);
 
   // Sync local state with context values when they change
   useEffect(() => {
-    setLocalBodyWeight(bodyWeight);
-    setLocalGoalWeight(goalWeight);
+    setLocalBodyWeight(bodyWeight > 0 ? bodyWeight : null);
+    setLocalGoalWeight(goalWeight > 0 ? goalWeight : null);
     setLocalGoalPace(goalPace);
     setLocalActivityFactor(activityFactor);
   }, [bodyWeight, goalWeight, goalPace, activityFactor]);
@@ -53,15 +53,20 @@ export default function AdjustMacrosScreen() {
 
   // Auto-set goal weight to current weight when in maintain mode
   useEffect(() => {
-    if (goalType === 'maintain') {
+    if (goalType === 'maintain' && localBodyWeight) {
       setLocalGoalWeight(localBodyWeight);
     }
   }, [goalType, localBodyWeight]);
 
   // Helper function to check if goal and target weight are valid
   const isGoalValid = () => {
-    const currentBodyWeight = parseFloat(localBodyWeight) || 0;
-    const currentGoalWeight = parseFloat(localGoalWeight) || currentBodyWeight;
+    const currentBodyWeight = localBodyWeight || 0;
+    const currentGoalWeight = localGoalWeight || currentBodyWeight;
+    
+    // If either weight is missing, not valid
+    if (!currentBodyWeight || !currentGoalWeight) {
+      return false;
+    }
     
     if (goalType === 'gain') {
       return currentGoalWeight > currentBodyWeight;
@@ -74,8 +79,8 @@ export default function AdjustMacrosScreen() {
         // Calculate macros and navigate to SetMacros screen
   const handleCalculate = () => {
     // Parse form values
-    const currentBodyWeight = parseFloat(localBodyWeight) || 0;
-    const currentGoalWeight = parseFloat(localGoalWeight) || currentBodyWeight;
+    const currentBodyWeight = localBodyWeight || 0;
+    const currentGoalWeight = localGoalWeight || currentBodyWeight;
     const currentActivityFactor = localActivityFactor;
     const currentGoalPace = localGoalPace;
     
@@ -137,8 +142,10 @@ export default function AdjustMacrosScreen() {
   return (
     <>
       <CustomHeader title='Adjust Macros' showBack />
-      <View
-        style={styles.container}
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
       >
         {/* Goal Type Selection */}
         <View style={styles.card}>
@@ -174,8 +181,11 @@ export default function AdjustMacrosScreen() {
           <TextInput
             style={styles.input}
             keyboardType='numeric'
-            value={localBodyWeight?.toString() ?? ''}
-            onChangeText={(val) => setLocalBodyWeight(parseFloat(val) || 0)}
+            value={localBodyWeight && localBodyWeight > 0 ? localBodyWeight.toString() : ''}
+            onChangeText={(val) => {
+              const num = parseFloat(val);
+              setLocalBodyWeight(isNaN(num) || num === 0 ? null : num);
+            }}
             placeholder={`Enter current weight in ${unit ? 'lbs' : 'kg'}`}
             placeholderTextColor='#8E8E93'
           />
@@ -193,8 +203,11 @@ export default function AdjustMacrosScreen() {
                 !isGoalValid() && styles.inputError
               ]}
               keyboardType='numeric'
-              value={localGoalWeight?.toString() ?? ''}
-              onChangeText={(val) => setLocalGoalWeight(parseFloat(val) || 0)}
+              value={localGoalWeight && localGoalWeight > 0 ? localGoalWeight.toString() : ''}
+              onChangeText={(val) => {
+                const num = parseFloat(val);
+                setLocalGoalWeight(isNaN(num) || num === 0 ? null : num);
+              }}
               placeholder={`Enter target weight in ${unit ? 'lbs' : 'kg'}`}
               placeholderTextColor='#8E8E93'
             />
@@ -271,17 +284,21 @@ export default function AdjustMacrosScreen() {
             Calculate Macros
           </Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     </>
   );
 }
 
 const styles = StyleSheet.create({
+  scrollView: {
+    flex: 1,
+    backgroundColor: '#242424',
+  },
   container: {
     padding: 20,
-    paddingTop: 10,
+    paddingTop: 20,
     backgroundColor: '#242424',
-    flex: 1,
+    paddingBottom: 40,
   },
   card: {
     backgroundColor: '#1A1A1A',
@@ -333,8 +350,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   optionButtonActive: {
-    backgroundColor: '#4CD964',
-    borderColor: '#4CD964',
+    backgroundColor: '#242424',
+    borderColor: '#00B8A9',
+    borderWidth: 1,
   },
   optionText: {
     color: 'white',
@@ -342,7 +360,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   optionTextActive: {
-    color: '#fff',
+    color: '#00B8A9',
   },
   input: {
     borderWidth: 0.3,
@@ -392,7 +410,7 @@ const styles = StyleSheet.create({
   },
   calculateButton: {
     marginTop: 0,
-    backgroundColor: '#4CD964',
+    backgroundColor: '#00B8A9',
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
@@ -402,7 +420,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.8,
     shadowRadius: 3,
     borderWidth: 0.3,
-    borderColor: 'black',
+    borderColor: 'grey',
   },
   calculateButtonDisabled: {
     backgroundColor: '#1A1A1A',

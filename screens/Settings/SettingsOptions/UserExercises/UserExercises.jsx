@@ -10,10 +10,12 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { useWorkoutContext } from "../../../../context/WorkoutsV2/WorkoutContext";
 import { useAuthContext } from "../../../../context/Auth/AuthContext";
-import { generateClient } from 'aws-amplify/api';
+import { generateClient } from '@aws-amplify/api';
 import { deleteUserExercise } from "../../../../graphql/mutations";
 import CustomHeader from "../../../../components/CustomHeader";
 import { Entypo, Ionicons } from "@expo/vector-icons";
+import { Dumbbell } from 'lucide-react-native';
+
 
 export default function UserExercises() {
   const navigation = useNavigation();
@@ -37,7 +39,7 @@ export default function UserExercises() {
               
               if (exerciseToDelete && exerciseToDelete.id) {
                 // Use V2 deleteUserExercise function
-                await deleteUserExerciseV2(exerciseToDelete.id, exerciseName);
+                await deleteUserExercise(exerciseToDelete.id, exerciseName);
                 console.log('🚀 Deleted user exercise with V2 context:', exerciseName);
               }
               
@@ -64,7 +66,9 @@ export default function UserExercises() {
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Ionicons name="barbell-outline" size={64} color="#8E8E93" />
+              <View style={styles.rotatedIcon}>
+                <Dumbbell size={64} color="#8E8E93"/>
+              </View>
               <Text style={styles.emptyText}>No exercises added yet</Text>
               <Text style={styles.emptySubText}>
                 Start building your custom workout library
@@ -135,7 +139,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: "#2D9CFF",
+    backgroundColor: "#00B8A9",
     alignItems: "center",
     justifyContent: "center",
     elevation: 8,
@@ -150,6 +154,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 80,
     paddingHorizontal: 20,
+  },
+  rotatedIcon: {
+    transform: [{ rotate: '45deg' }],
   },
   emptyText: {
     fontSize: 20,

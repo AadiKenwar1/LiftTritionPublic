@@ -2,16 +2,13 @@ import { useState } from "react";
 import {
   View,
   Text,
-  Pressable,
   StyleSheet,
   Alert,
   TouchableOpacity,
 } from "react-native";
-import { useRoute } from "@react-navigation/native";
-import uuid from "react-native-uuid";
+import { useRoute, useNavigation } from "@react-navigation/native";
 import { useWorkoutContext } from "../../../context/WorkoutsV2/WorkoutContext";
 import DraggableLogList from "../../../components/DraggableLogList";
-import { useNavigation } from "@react-navigation/native";
 import ExerciseSelector from "../../../components/ExerciseSelector";
 import PopupModal from "../../../components/PopupModal";
 import { Ionicons } from "@expo/vector-icons";
@@ -20,31 +17,17 @@ import NotesModal from "../../../components/Notes";
 import ArchivedPopup from '../../../components/ArchivedPopup'
 import Foundation from '@expo/vector-icons/Foundation';
 import Fab from "../../../components/Fab"
-import ItemSelector from "../../../components/ItemSelector";
 
 export default function WorkoutDetails() {
-  // V1 Context (keeping for reference)
-  const {
-    workouts: workoutsV1,
-    addExerciseToWorkout: addExerciseToWorkoutV1,
-    reorderExercises: reorderExercisesV1,
-    deleteExercise: deleteExerciseV1,
-    addNoteToWorkout: addNoteToWorkoutV1,
-    archiveExercise: archiveExerciseV1
-  } = useWorkoutContext();
-
   // V2 Context - now using for main functionality
   const {
     workouts,
-    exercises,
     addExercise,
     reorderExercises,
     deleteExercise,
     archiveExercise,
     getExercisesForWorkout,
     addNoteToWorkout,
-    exerciseLibrary,
-    loading
   } = useWorkoutContext();
 
 

@@ -9,14 +9,14 @@ import {
 } from "react-native";
 import DraggableFlatList from "react-native-draggable-flatlist";
 import Log from "./Log";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useWorkoutContext } from "../context/WorkoutsV2/WorkoutContext";
 import { Alert } from "react-native";
 
 
 export default function ArchivedPopup(props) {
 
-  const {unarchiveWorkout, unarchiveExercise, deleteWorkout, renameWorkout} = useWorkoutContext()
+  const {unarchiveWorkout, unarchiveExercise, deleteWorkout, deleteExercise, renameWorkout} = useWorkoutContext()
   const [renameVisible, setRenameVisible] = useState(false);
   const [selectedWorkout, setSelectedWorkout] = useState(null);
   const [newName, setNewName] = useState("");
@@ -29,14 +29,22 @@ export default function ArchivedPopup(props) {
           {
             text: "Unarchive",
             onPress: () => {
-              props.isWorkout? unarchiveWorkout(workout.id) : unarchiveExercise(workout.id, exercise.id)
+              if (props.isWorkout) {
+                unarchiveWorkout(workout.id);
+              } else {
+                unarchiveExercise(exercise.id);
+              }
             },
           },
           {
             text: "Delete",
             style: "destructive",
             onPress: () => {
-              deleteWorkout(workout.id);
+              if (props.isWorkout) {
+                deleteWorkout(workout.id);
+              } else {
+                deleteExercise(exercise.id);
+              }
             },
           },
           {
@@ -51,6 +59,12 @@ export default function ArchivedPopup(props) {
 
 
   const [listKey, setListKey] = useState(0);
+  
+  // Refresh list when data changes (e.g., after deletion)
+  useEffect(() => {
+    setListKey((prev) => prev + 1);
+  }, [props.data.length]);
+
   return (
     <Modal
       animationType="slide"
