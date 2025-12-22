@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
 
 export default function EditNutritionModal({
@@ -32,87 +34,93 @@ export default function EditNutritionModal({
       animationType="slide"
       onRequestClose={onClose}
     >
-      <View style={styles.modalOverlay}>
-        <View style={styles.editModalContainer}>
-          <View style={styles.editModalHeader}>
-            <Text style={styles.editModalTitle}>Edit Nutrition Entry</Text>
-            <TouchableOpacity onPress={onClose}>
-              <Text style={styles.closeButton}>✕</Text>
-            </TouchableOpacity>
-          </View>
-          
-          <ScrollView style={styles.editModalContent}>
-            <View style={styles.editInputGroup}>
-              <Text style={styles.editLabel}>Food Name</Text>
-              <TextInput
-                style={styles.editInput}
-                value={editName}
-                onChangeText={setEditName}
-                placeholder="Enter food name"
-              />
-            </View>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.modalOverlay}>
+          <TouchableWithoutFeedback onPress={() => {}}>
+            <View style={styles.editModalContainer}>
+              <View style={styles.editModalHeader}>
+                <Text style={styles.editModalTitle}>Edit Nutrition Entry</Text>
+              </View>
+              
+              <ScrollView style={styles.editModalContent} showsVerticalScrollIndicator={false}>
+                <View style={styles.editInputGroup}>
+                  <Text style={styles.editLabel}>Food Name</Text>
+                  <TextInput
+                    style={styles.editInput}
+                    value={editName}
+                    onChangeText={setEditName}
+                    placeholder="Enter food name"
+                    placeholderTextColor="#9CA3AF"
+                  />
+                </View>
 
-            <View style={styles.editInputGroup}>
-              <Text style={styles.editLabel}>Calories</Text>
-              <TextInput
-                style={styles.editInput}
-                value={editCalories}
-                onChangeText={setEditCalories}
-                placeholder="0"
-                keyboardType="numeric"
-              />
-            </View>
+                <View style={styles.editInputGroup}>
+                  <Text style={styles.editLabel}>Calories</Text>
+                  <TextInput
+                    style={styles.editInput}
+                    value={editCalories}
+                    onChangeText={setEditCalories}
+                    placeholder="0"
+                    placeholderTextColor="#9CA3AF"
+                    keyboardType="numeric"
+                  />
+                </View>
 
-            <View style={styles.editInputGroup}>
-              <Text style={styles.editLabel}>Protein (g)</Text>
-              <TextInput
-                style={styles.editInput}
-                value={editProtein}
-                onChangeText={setEditProtein}
-                placeholder="0"
-                keyboardType="numeric"
-              />
-            </View>
+                <View style={styles.editInputGroup}>
+                  <Text style={styles.editLabel}>Protein (g)</Text>
+                  <TextInput
+                    style={styles.editInput}
+                    value={editProtein}
+                    onChangeText={setEditProtein}
+                    placeholder="0"
+                    placeholderTextColor="#9CA3AF"
+                    keyboardType="numeric"
+                  />
+                </View>
 
-            <View style={styles.editInputGroup}>
-              <Text style={styles.editLabel}>Carbs (g)</Text>
-              <TextInput
-                style={styles.editInput}
-                value={editCarbs}
-                onChangeText={setEditCarbs}
-                placeholder="0"
-                keyboardType="numeric"
-              />
-            </View>
+                <View style={styles.editInputGroup}>
+                  <Text style={styles.editLabel}>Carbs (g)</Text>
+                  <TextInput
+                    style={styles.editInput}
+                    value={editCarbs}
+                    onChangeText={setEditCarbs}
+                    placeholder="0"
+                    placeholderTextColor="#9CA3AF"
+                    keyboardType="numeric"
+                  />
+                </View>
 
-            <View style={styles.editInputGroup}>
-              <Text style={styles.editLabel}>Fats (g)</Text>
-              <TextInput
-                style={styles.editInput}
-                value={editFats}
-                onChangeText={setEditFats}
-                placeholder="0"
-                keyboardType="numeric"
-              />
-            </View>
-          </ScrollView>
+                <View style={styles.editInputGroup}>
+                  <Text style={styles.editLabel}>Fats (g)</Text>
+                  <TextInput
+                    style={styles.editInput}
+                    value={editFats}
+                    onChangeText={setEditFats}
+                    placeholder="0"
+                    placeholderTextColor="#9CA3AF"
+                    keyboardType="numeric"
+                  />
+                </View>
+              </ScrollView>
 
-          <View style={styles.editModalFooter}>
-            <TouchableOpacity 
-              style={styles.cancelButton} 
-              onPress={onClose}
-            >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.saveButton} 
-              onPress={onSave}
-            >
-              <Text style={styles.saveButtonText}>Save Changes</Text>
-            </TouchableOpacity>
-          </View>
+              <View style={styles.editModalFooter}>
+                <TouchableOpacity 
+                  style={styles.cancelButton} 
+                  onPress={onClose}
+                >
+                  <Text style={styles.buttonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.saveButton} 
+                  onPress={onSave}
+                >
+                  <Text style={styles.buttonText}>Save Changes</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
         </View>
-      </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 }
@@ -120,34 +128,34 @@ export default function EditNutritionModal({
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0,0,0,0.8)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   editModalContainer: {
-    width: '90%',
+    width: '95%',
     maxHeight: '80%',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#242424',
     borderRadius: 16,
     padding: 20,
     elevation: 10,
+    marginBottom: 50,
+    borderWidth: 1,
+    borderColor: 'grey',
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
   },
   editModalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 20,
   },
   editModalTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1A1A1A',
-    fontFamily: 'Inter_700Bold',
-  },
-  closeButton: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#8E8E93',
+    fontWeight: '700',
+    color: 'white',
+    fontFamily: 'Inter_700Bold',
   },
   editModalContent: {
     maxHeight: 400,
@@ -158,49 +166,65 @@ const styles = StyleSheet.create({
   editLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1A1A1A',
+    color: 'white',
     marginBottom: 8,
     fontFamily: 'Inter_600SemiBold',
   },
   editInput: {
-    borderWidth: 1,
-    borderColor: '#E1E8ED',
+    borderWidth: 0.3,
+    borderColor: 'grey',
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#1A1A1A',
     fontFamily: 'Inter_400Regular',
+    color: 'white',
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
   },
   editModalFooter: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginTop: 20,
-    gap: 12,
+    gap: 5,
   },
   cancelButton: {
-    flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#888888',
+    width: "50%",
     borderRadius: 10,
     padding: 16,
+    flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E1E8ED',
-  },
-  cancelButtonText: {
-    color: '#8E8E93',
-    fontSize: 16,
-    fontWeight: '600',
-    fontFamily: 'Inter_600SemiBold',
+    justifyContent: 'center',
+    marginBottom: 10,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
   saveButton: {
-    flex: 1,
     backgroundColor: '#4CD964',
+    width: "50%",
     borderRadius: 10,
     padding: 16,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 3,
+    borderWidth: 0.3,
+    borderColor: 'grey',
   },
-  saveButtonText: {
-    color: '#FFFFFF',
+  buttonText: {
+    color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
     fontFamily: 'Inter_600SemiBold',

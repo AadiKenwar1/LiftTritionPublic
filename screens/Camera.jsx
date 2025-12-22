@@ -1,4 +1,4 @@
-import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useRef, useState, useEffect} from 'react';
 import {
     StyleSheet,
@@ -59,11 +59,13 @@ export default function CameraScreen() {
     const [currentFrame, setCurrentFrame] = useState('WIDE');
     const navigation = useNavigation();
     const cameraRef = useRef(null);
+    const cameraKeyRef = useRef(0); // Track camera remounts for barcode mode transitions
 
     const isFocused = useIsFocused();
     const [isCameraReady, setIsCameraReady] = useState(false);
     const [scannedBarcode, setScannedBarcode] = useState(null);
     const [isScanning, setIsScanning] = useState(false);
+    const [isTransitioning, setIsTransitioning] = useState(false);
 
     useEffect(() => {
         if (!isFocused) {
@@ -73,6 +75,7 @@ export default function CameraScreen() {
 
     const handleCameraReady = () => {
         setIsCameraReady(true);
+        setIsTransitioning(false);
     };
 
     if (!permission) return <View />;
@@ -103,6 +106,17 @@ export default function CameraScreen() {
     };
 
     const selectFrame = (frameType) => {
+        // If switching to/from barcode mode, force camera remount for clean state
+        const wasBarcode = currentFrame === 'BARCODE';
+        const willBeBarcode = frameType === 'BARCODE';
+        
+        if (wasBarcode !== willBeBarcode) {
+            // Force camera remount when switching to/from barcode mode
+            setIsTransitioning(true);
+            setIsCameraReady(false);
+            cameraKeyRef.current += 1;
+        }
+        
         setCurrentFrame(frameType);
         if (frameType === 'BARCODE') {
             setIsScanning(true);
@@ -114,6 +128,10 @@ export default function CameraScreen() {
     };
 
     const handleBarCodeScanned = ({ type, data }) => {
+        if (currentFrame !== 'BARCODE' || !isScanning) {
+            return;
+        }
+        
         setIsScanning(false);
         setScannedBarcode(data);
         Alert.alert(
@@ -247,13 +265,36 @@ export default function CameraScreen() {
     return (
         <View style={styles.container}>
             {isFocused && (
+                <>
                     <CameraView
+                        key={`camera-${cameraKeyRef.current}`}
                         style={styles.camera}
                         facing={facing}
                         flash={flash}
                         ref={cameraRef}
                         onCameraReady={handleCameraReady}
                         onBarcodeScanned={currentFrame === 'BARCODE' && isScanning ? handleBarCodeScanned : undefined}
+                        barcodeScannerSettings={
+                            currentFrame === 'BARCODE' && isScanning
+                                ? {
+                                      barcodeTypes: [
+                                          'ean13',
+                                          'ean8',
+                                          'upc_a',
+                                          'upc_e',
+                                          'code128',
+                                          'code39',
+                                          'code93',
+                                          'codabar',
+                                          'itf14',
+                                          'aztec',
+                                          'datamatrix',
+                                          'pdf417',
+                                          'qr',
+                                      ],
+                                  }
+                                : null
+                        }
                     >
                         {/* Top controls */}
                         <View style={styles.topControls}>
@@ -429,6 +470,11 @@ export default function CameraScreen() {
                             <View style={styles.placeholder} />
                         </View>
                     </CameraView>
+                    {/* Black overlay during transition to prevent white flash */}
+                    {isTransitioning && (
+                        <View style={styles.transitionOverlay} />
+                    )}
+                </>
             )}
         </View>
     );
@@ -438,6 +484,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
+        backgroundColor: '#000000',
     },
     message: {
         textAlign: 'center',
@@ -673,5 +720,14 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingVertical: 10,
         borderRadius: 10,
+    },
+    transitionOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: '#000000',
+        zIndex: 9999,
     },
 });

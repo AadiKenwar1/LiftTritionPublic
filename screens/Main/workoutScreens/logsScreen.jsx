@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -117,12 +117,6 @@ export default function LogDetails() {
                         "Log Options",
                         `Reps: ${entry.reps}, Weight: ${entry.weight}`,
                         [
-                          {
-                            text: "Change Reps",
-                          },
-                          {
-                            text: "Change Sets",
-                          },
                           {
                             text: "Delete",
                             style: "destructive",

@@ -1,3 +1,4 @@
+import React from 'react';
 import PopupModal from "../../components/PopupModal.jsx";
 import { useSettings } from "../../context/Settings/SettingsContext.js";
 import Ionicons from '@expo/vector-icons/Ionicons'; // ✅ Correct import

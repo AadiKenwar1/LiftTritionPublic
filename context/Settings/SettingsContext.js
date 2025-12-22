@@ -3,7 +3,6 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Alert } from 'react-native';
 import { getLocalDateKey } from '../../utils/date';
 import { generateClient } from '@aws-amplify/api';
-import { getSettings, listSettings } from '../../graphql/queries';
 import { createSettings, updateSettings } from '../../graphql/mutations';
 import { useAuthContext } from '../Auth/AuthContext';
 
@@ -125,9 +124,13 @@ export const SettingsProvider = ({ children }) => {
                 lastWeight = weightMap.get(dateKey);
             }
             
+            // Format label to short format (MM/DD) to match other charts
+            const [year, month, day] = dateKey.split("-");
+            const shortLabel = `${month}/${day}`;
+            
             // Add this date with the current lastWeight (either logged or carried forward)
             result.push({
-                label: dateKey,
+                label: shortLabel,  // Use short format instead of full dateKey
                 value: lastWeight
             });
             

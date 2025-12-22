@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { generateClient } from '@aws-amplify/api';
 import { useAuthContext } from '../Auth/AuthContext';
 import { useSettings } from '../Settings/SettingsContext';
@@ -83,6 +83,23 @@ export function WorkoutProvider({ children }) {
       newWorkoutMap.set(workout.id, workout);
     });
     setWorkoutMap(newWorkoutMap);
+    
+    // Print all workouts
+    if (workouts.length > 0) {
+      console.log('💪 ALL WORKOUTS:');
+      console.log('📊 Total Workouts:', workouts.length);
+      const workoutsWithDetails = workouts.map(workout => ({
+        id: workout.id,
+        name: workout.name,
+        order: workout.order,
+        archived: workout.archived || false,
+        note: workout.note || '',
+        synced: workout.synced,
+        createdAt: workout.createdAt,
+        updatedAt: workout.updatedAt,
+      }));
+      console.log('💪 Workouts with Details:', JSON.stringify(workoutsWithDetails, null, 2));
+    }
   }, [workouts]);
 
   useEffect(() => {
@@ -102,7 +119,28 @@ export function WorkoutProvider({ children }) {
     
     setExerciseMap(newExerciseMap);
     setLogsByExercise(newLogsByExercise);
-  }, [exercises, logs]);
+    
+    // Print all logs with exercise and workout names
+    if (logs.length > 0) {
+      console.log('📋 ALL LOGS:');
+      console.log('📊 Total Logs:', logs.length);
+      const logsWithDetails = logs.map(log => {
+        const exercise = exercises.find(e => e.id === log.exerciseId);
+        const workout = workouts.find(w => w.id === log.workoutId);
+        return {
+          id: log.id,
+          date: log.date,
+          weight: log.weight,
+          reps: log.reps,
+          rpe: log.rpe,
+          exerciseName: exercise?.name || 'Unknown',
+          workoutName: workout?.name || 'Unknown',
+          synced: log.synced,
+        };
+      });
+      console.log('📋 Logs with Details:', JSON.stringify(logsWithDetails, null, 2));
+    }
+  }, [exercises, logs, workouts]);
 
 
   // Load workout data from AuthContext user object (following Settings/Nutrition pattern)
@@ -250,9 +288,17 @@ export function WorkoutProvider({ children }) {
     return logs.filter(log => log.date === date);
   };
 
-  // Chart functions for V2 structure
-  const volumeChart = () => getVolumeChartV2(logs);
-  const setChart = () => getSetsChartV2(logs);
+  // Chart functions for V2 structure - memoized for performance
+  const volumeChartData = useMemo(() => {
+    return getVolumeChartV2(logs);
+  }, [logs.length]); // Recalculate when log count changes
+
+  const setChartData = useMemo(() => {
+    return getSetsChartV2(logs);
+  }, [logs.length]);
+
+  const volumeChart = () => volumeChartData; // Return memoized data
+  const setChart = () => setChartData;
   const getLiftLogs = (exerciseName) => getLiftLogsV2(exerciseName, exercises, logs);
   const formatForChart = (logData) => formatForChartV2(logData);
   const logsByDateObj = getLogsByDateV2(logs);

@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_400Regular',
   },
   dateDisplayContainer: {
-    backgroundColor: '#1A1A1A',
+    backgroundColor: '#4CD964',
     borderRadius: 12,
     paddingVertical: 16,
     paddingHorizontal: 20,

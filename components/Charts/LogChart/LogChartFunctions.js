@@ -1,3 +1,5 @@
+import { formatDateForDisplay } from "../../../utils/date";
+
 export function insightText(mode, data, selectedLift, selectedMacro){
     let insight = "";
     let deltaPercent = 0;
@@ -68,10 +70,13 @@ export function getFocusedText(mode, selectedData, focusedPoint, selectedMacro){
         focusedText = "No data point selected";
     }
     else if (selectedData === 10) {
+        // Format single date label for consistent display
+        const formattedDate = formatDateForDisplay(focusedPoint.label);
         focusedText =
-          "On " + focusedPoint.label + " " + (mode === true? "you had an estimated 1 rep max of " + focusedPoint.value + "." : "your " + selectedMacro + " intake was " + focusedPoint.value + ".");
+          "On " + formattedDate + " " + (mode === true? "you had an estimated 1 rep max of " + focusedPoint.value + "." : "your " + selectedMacro + " intake was " + focusedPoint.value + ".");
     } 
     else {
+        // For range labels (from smoothData), the label is already formatted like "11/18 - 11/20"
         focusedText =
           "Between " + focusedPoint.label + " " + (mode === true? "you had an average estimated 1 rep max of " + focusedPoint.value + "." : "your average " + selectedMacro + " intake was " + focusedPoint.value + ".");
     }

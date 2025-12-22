@@ -1,3 +1,4 @@
+import React from 'react';
 import { Modal, View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 
 export default function FullLiftLog(props) {

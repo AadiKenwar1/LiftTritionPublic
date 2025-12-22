@@ -1,5 +1,6 @@
 import { generateClient } from '@aws-amplify/api';
-import { createExercise, updateExercise, deleteExercise as deleteExerciseMutation } from '../../../graphql/mutations';
+import { createExercise, updateExercise, deleteExercise as deleteExerciseMutation, deleteExerciseLog } from '../../../graphql/mutations';
+import { listExerciseLogs } from '../../../graphql/queries';
 import uuid from 'react-native-uuid';
 
 const client = generateClient();
@@ -76,6 +77,26 @@ export async function deleteExercise(exerciseId, setExercises, setLogs) {
   setLogs(prev => prev.filter(log => log.exerciseId !== exerciseId));
 
   try {
+    // Step 1: Find and delete all logs for this exercise
+    const logsResult = await client.graphql({
+      query: listExerciseLogs,
+      variables: { 
+        filter: { exerciseId: { eq: exerciseId } }
+      }
+    });
+    
+    const logsToDelete = logsResult.data.listExerciseLogs.items || [];
+    if (logsToDelete.length > 0) {
+      const deleteLogPromises = logsToDelete.map(log =>
+        client.graphql({
+          query: deleteExerciseLog,
+          variables: { input: { id: log.id } }
+        })
+      );
+      await Promise.all(deleteLogPromises);
+    }
+
+    // Step 2: Delete the exercise itself
     await client.graphql({
       query: deleteExerciseMutation,
       variables: { input: { id: exerciseId } }

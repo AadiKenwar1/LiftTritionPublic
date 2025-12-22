@@ -1,3 +1,4 @@
+import React from 'react';
 import { Modal, View, Text, StyleSheet, TouchableOpacity, FlatList, Alert, Pressable } from 'react-native';
 import { Ionicons, Entypo } from '@expo/vector-icons';
 import { useNutritionContext } from '../../../context/Nutrition/NutritionContext';
@@ -318,11 +319,11 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     justifyContent: 'center',
     marginTop: 20,
-    marginBottom: 20,
+    marginBottom: 0,
     shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
-    shadowRadius: 3,
+    shadowRadius: 0.8,
     borderWidth: 0.3,
     borderColor: 'grey',
   },

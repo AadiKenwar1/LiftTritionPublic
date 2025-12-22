@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Modal,
   View,
@@ -41,7 +42,7 @@ export default function ArchivedPopup(props) {
             style: "destructive",
             onPress: () => {
               if (props.isWorkout) {
-                deleteWorkout(workout.id);
+              deleteWorkout(workout.id);
               } else {
                 deleteExercise(exercise.id);
               }

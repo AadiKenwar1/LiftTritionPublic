@@ -1,137 +1,144 @@
 // utils/foodCache.js
-//
-// FatSecret API integration for food search and nutrition details.
-//
-// Caching: This file uses an in-memory cache (foodSearchCache) to store search results for each query string.
-// The cache key is the lowercased, trimmed query. Each entry stores the data and a timestamp.
-// When a search is performed, the cache is checked first. If the cached data is less than TTL (15 minutes) old, it is returned.
-// Otherwise, a new API request is made and the result is cached.
+// FatSecret API integration for food search and nutrition details
 
 import Constants from 'expo-constants';
 
-// Get FatSecret credentials with fallback pattern
+// Configuration
 const CLIENT_ID = process.env.FATSECRET_CLIENT_ID || 
                   Constants.expoConfig?.extra?.FATSECRET_CLIENT_ID;
-
 const CLIENT_SECRET = process.env.FATSECRET_CLIENT_SECRET || 
                       Constants.expoConfig?.extra?.FATSECRET_CLIENT_SECRET;
-
 const BASE_URL = 'https://platform.fatsecret.com/rest/server.api';
 const TOKEN_URL = 'https://oauth.fatsecret.com/connect/token';
 
-const foodSearchCache = {}; // { [query: string]: { data: any, timestamp: number } }
+// Caching - Temporal Locality (1 week)
+const foodSearchCache = {}; // Recently searched queries
+const productDetailsCache = {}; // Recently accessed product details
 const tokenCache = { accessToken: null, expiresAt: 0 };
-const TTL = 15 * 60 * 1000; // Cache Time-To-Live: 15 minutes
+const CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // 1 week (temporal locality)
 
-// Simple base64 encoder for React Native (btoa is not available)
+// Base64 encode (correct implementation)
 function base64Encode(str) {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-  let output = '';
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  let result = '';
   let i = 0;
+  
   while (i < str.length) {
     const a = str.charCodeAt(i++);
     const b = i < str.length ? str.charCodeAt(i++) : 0;
     const c = i < str.length ? str.charCodeAt(i++) : 0;
+    
     const bitmap = (a << 16) | (b << 8) | c;
-    output += chars.charAt((bitmap >> 18) & 63);
-    output += chars.charAt((bitmap >> 12) & 63);
-    output += i - 2 < str.length ? chars.charAt((bitmap >> 6) & 63) : '=';
-    output += i - 1 < str.length ? chars.charAt(bitmap & 63) : '=';
+    
+    result += chars.charAt((bitmap >> 18) & 63);
+    result += chars.charAt((bitmap >> 12) & 63);
+    
+    // Fix: Check if we actually read 2 or 3 chars, not the i value
+    if (b !== 0 && c !== 0) {
+      // Read 3 chars, no padding needed
+      result += chars.charAt((bitmap >> 6) & 63);
+      result += chars.charAt(bitmap & 63);
+    } else if (b !== 0) {
+      // Read 2 chars, need 1 padding
+      result += chars.charAt((bitmap >> 6) & 63);
+      result += '=';
+    } else {
+      // Read 1 char, need 2 padding
+      result += '=';
+      result += '=';
+    }
   }
-  return output;
+  
+  return result;
 }
 
-// Get OAuth 2.0 access token from FatSecret
+// Get OAuth 2.0 access token
 async function getAccessToken() {
-  // Check if cached token is still valid (refresh 10 minutes before expiry)
-  if (tokenCache.accessToken && Date.now() < tokenCache.expiresAt - (10 * 60 * 1000)) {
+  // Return cached token if still valid
+  if (tokenCache.accessToken && Date.now() < tokenCache.expiresAt) {
     return tokenCache.accessToken;
   }
 
-  try {
-    // Verify credentials are loaded
-    if (!CLIENT_ID || !CLIENT_SECRET) {
-      throw new Error('FatSecret credentials not found. Please check your environment variables.');
-    }
-
-    // Create Basic Auth header (base64 encode CLIENT_ID:CLIENT_SECRET)
-    const credentials = base64Encode(`${CLIENT_ID}:${CLIENT_SECRET}`);
-    
-    const response = await fetch(TOKEN_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${credentials}`,
-      },
-      body: 'grant_type=client_credentials&scope=basic',
-    });
-
-    // Get the response text first to see what the error is
-    const responseText = await response.text();
-    
-    if (!response.ok) {
-      let errorMessage = `Token request failed: ${response.status}`;
-      try {
-        const errorData = JSON.parse(responseText);
-        errorMessage += ` - ${errorData.error || errorData.error_description || responseText}`;
-      } catch (e) {
-        errorMessage += ` - ${responseText}`;
-      }
-      console.error('FatSecret token error details:', errorMessage);
-      throw new Error(errorMessage);
-    }
-
-    const data = JSON.parse(responseText);
-    
-    if (data.access_token) {
-      // Cache token (use expires_in from response if available, otherwise default to 50 minutes)
-      tokenCache.accessToken = data.access_token;
-      const expiresIn = data.expires_in ? data.expires_in * 1000 : (50 * 60 * 1000);
-      tokenCache.expiresAt = Date.now() + expiresIn;
-      return data.access_token;
-    }
-    throw new Error('No access token in response');
-  } catch (err) {
-    console.error('FatSecret token error:', err);
-    throw err;
+  if (!CLIENT_ID || !CLIENT_SECRET) {
+    throw new Error('FatSecret credentials not found');
   }
+
+  const credentials = base64Encode(`${CLIENT_ID}:${CLIENT_SECRET}`);
+  
+  // Minimal debug: verify encoding ends with = (correct padding)
+  console.log('🔍 Base64 check:', credentials.endsWith('=') ? '✅ Correct padding' : '❌ Wrong padding');
+  console.log('🔍 CLIENT_ID:', CLIENT_ID);
+  console.log('🔍 CLIENT_SECRET preview:', CLIENT_SECRET.substring(0, 8) + '...');
+  
+  const response = await fetch(TOKEN_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Authorization': `Basic ${credentials}`,
+    },
+    body: 'grant_type=client_credentials&scope=basic',
+  });
+
+  const responseText = await response.text();
+  
+  if (!response.ok) {
+    console.error('❌ Token request failed:', response.status, responseText);
+    const error = JSON.parse(responseText).error || 'Unknown error';
+    throw new Error(`Token request failed: ${response.status} - ${error}`);
+  }
+
+  const data = JSON.parse(responseText);
+  
+  if (!data.access_token) {
+    throw new Error('No access token in response');
+  }
+
+  // Cache token (refresh 10 min before expiry)
+  tokenCache.accessToken = data.access_token;
+  tokenCache.expiresAt = Date.now() + ((data.expires_in || 3600) - 600) * 1000;
+  
+  console.log('✅ Token obtained successfully');
+  return data.access_token;
 }
 
-// Retrieve cached search results for a query if still fresh
-function getCached(query) {
-  const key = query.trim().toLowerCase();
-  const entry = foodSearchCache[key];
-  if (!entry) return null;
-  const isFresh = Date.now() - entry.timestamp < TTL;
-  return isFresh ? entry.data : null;
+// Smart search: score results by word matches
+function scoreResults(foods, searchWords) {
+  return foods.map(food => {
+    const foodName = food.food_name || food.food_description || '';
+    const brandName = food.brand_name || '';
+    const text = `${foodName} ${brandName}`.toLowerCase();
+    
+    const matchCount = searchWords.reduce((count, word) =>
+      text.includes(word) ? count + 1 : count, 0
+    );
+    
+    return {
+      description: foodName,
+      brandName: brandName,
+      fdcId: food.food_id || foodName,
+      isBranded: !!brandName,
+      matchCount,
+    };
+  }).sort((a, b) => {
+    if (b.matchCount !== a.matchCount) return b.matchCount - a.matchCount;
+    return a.description.localeCompare(b.description);
+  });
 }
 
-// Store search results in the cache for a query
-function setCache(query, data) {
-  const key = query.trim().toLowerCase();
-  foodSearchCache[key] = {
-    data,
-    timestamp: Date.now(),
-  };
-}
-
-// Search for foods using FatSecret API, rank/filter by word match count
+// Search for foods
 export async function getFoodSearchResults(query) {
   const trimmed = query.trim().toLowerCase();
   if (!trimmed) return [];
 
-  // Preprocess: split query into words
-  const searchWords = trimmed.split(/\s+/).filter(Boolean);
-
-  // Check cache first
-  const cached = getCached(trimmed);
-  if (cached) return cached;
+  // Check cache
+  const cacheKey = trimmed;
+  const cached = foodSearchCache[cacheKey];
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.data;
+  }
 
   try {
-    // Get access token
     const accessToken = await getAccessToken();
-
-    // FatSecret uses method parameter in query string
     const params = new URLSearchParams({
       method: 'foods.search',
       search_expression: trimmed,
@@ -140,73 +147,57 @@ export async function getFoodSearchResults(query) {
     });
 
     const res = await fetch(`${BASE_URL}?${params.toString()}`, {
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-      },
+      headers: { 'Authorization': `Bearer ${accessToken}` },
     });
 
     if (!res.ok) {
-      throw new Error(`Search request failed: ${res.status}`);
+      throw new Error(`Search failed: ${res.status}`);
     }
 
     const data = await res.json();
     const foods = data.foods?.food || [];
+    const searchWords = trimmed.split(/\s+/).filter(Boolean);
+    
+    // Score and sort results (smart searching)
+    const results = scoreResults(foods, searchWords)
+      .filter(item => item.description)
+      .slice(0, 20);
 
-    // For each result, count how many search words match food_name or brand_name
-    const scored = foods.map(food => {
-      const foodName = food.food_name || food.food_description || '';
-      const brandName = food.brand_name || '';
-      const haystack = `${foodName} ${brandName}`.toLowerCase();
-      const matchCount = searchWords.reduce((count, word) =>
-        haystack.includes(word) ? count + 1 : count, 0
-      );
-      return {
-        description: foodName,
-        brandName: brandName,
-        fdcId: food.food_id || foodName,
-        isBranded: !!brandName,
-        matchCount,
-      };
-    });
-
-    // Sort by match count (descending), then alphabetically as tiebreaker
-    scored.sort((a, b) => {
-      if (b.matchCount !== a.matchCount) return b.matchCount - a.matchCount;
-      return a.description.localeCompare(b.description);
-    });
-
-    // Take top 20 best matches
-    const results = scored.slice(0, 20);
-    setCache(trimmed, results);
+    // Cache results
+    foodSearchCache[cacheKey] = { data: results, timestamp: Date.now() };
+    
     return results;
   } catch (err) {
-    console.error('FatSecret search error:', err);
+    console.error('FatSecret search error:', err.message);
     return [];
   }
 }
 
-// Get detailed nutrition info for a food item using FatSecret API
-// Accepts the full item object from search results
+// Get detailed nutrition info
 export async function getFoodDetails(item) {
-  try {
-    // Get access token
-    const accessToken = await getAccessToken();
+  const barcode = item.fdcId;
+  if (!barcode) return null;
 
-    // FatSecret uses food_id to get details
+  // TEMPORAL LOCALITY: Check cache first (recently accessed items)
+  const cached = productDetailsCache[barcode];
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.data;
+  }
+
+  try {
+    const accessToken = await getAccessToken();
     const params = new URLSearchParams({
       method: 'food.get.v3',
-      food_id: item.fdcId,
+      food_id: barcode,
       format: 'json',
     });
 
     const res = await fetch(`${BASE_URL}?${params.toString()}`, {
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-      },
+      headers: { 'Authorization': `Bearer ${accessToken}` },
     });
 
     if (!res.ok) {
-      throw new Error(`Details request failed: ${res.status}`);
+      throw new Error(`Details failed: ${res.status}`);
     }
 
     const data = await res.json();
@@ -214,15 +205,11 @@ export async function getFoodDetails(item) {
 
     if (!food) return null;
 
-    // Extract nutrition data from FatSecret response
-    // FatSecret returns servings as an array
-    const servings = food.servings?.serving || [];
-    const serving = servings[0] || {}; // Use first serving
+    const serving = food.servings?.serving?.[0] || {};
 
-    // Map FatSecret response to expected structure
-    const result = {
+    const details = {
       name: food.food_name || food.food_description || item.description,
-      fdcId: item.fdcId,
+      fdcId: barcode,
       calories: parseFloat(serving.calories || 0),
       protein: parseFloat(serving.protein || 0),
       carbs: parseFloat(serving.carbohydrate || 0),
@@ -231,12 +218,13 @@ export async function getFoodDetails(item) {
                    `${serving.metric_serving_amount || '1'} ${serving.metric_serving_unit || 'serving'}`,
       brandName: food.brand_name || item.brandName || '',
     };
-    return result;
+
+    // TEMPORAL LOCALITY: Cache the details (recently accessed items)
+    productDetailsCache[barcode] = { data: details, timestamp: Date.now() };
+    
+    return details;
   } catch (err) {
-    console.error('FatSecret details error:', err);
+    console.error('FatSecret details error:', err.message);
     return null;
   }
 }
-
-
-

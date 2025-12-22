@@ -1,5 +1,6 @@
 import { generateClient } from '@aws-amplify/api';
-import { createWorkout, updateWorkout, deleteWorkout as deleteWorkoutMutation } from '../../../graphql/mutations';
+import { createWorkout, updateWorkout, deleteWorkout as deleteWorkoutMutation, deleteExercise as deleteExerciseMutation, deleteExerciseLog } from '../../../graphql/mutations';
+import { listExercises, listExerciseLogs } from '../../../graphql/queries';
 import uuid from 'react-native-uuid';
 
 const client = generateClient();
@@ -74,6 +75,45 @@ export async function deleteWorkout(workoutId, setWorkouts, setExercises, setLog
   setLogs(prev => prev.filter(log => log.workoutId !== workoutId));
 
   try {
+    // Step 1: Find and delete all logs for this workout
+    const logsResult = await client.graphql({
+      query: listExerciseLogs,
+      variables: { 
+        filter: { workoutId: { eq: workoutId } }
+      }
+    });
+    
+    const logsToDelete = logsResult.data.listExerciseLogs.items || [];
+    if (logsToDelete.length > 0) {
+      const deleteLogPromises = logsToDelete.map(log =>
+        client.graphql({
+          query: deleteExerciseLog,
+          variables: { input: { id: log.id } }
+        })
+      );
+      await Promise.all(deleteLogPromises);
+    }
+
+    // Step 2: Find and delete all exercises for this workout
+    const exercisesResult = await client.graphql({
+      query: listExercises,
+      variables: { 
+        filter: { workoutId: { eq: workoutId } }
+      }
+    });
+    
+    const exercisesToDelete = exercisesResult.data.listExercises.items || [];
+    if (exercisesToDelete.length > 0) {
+      const deleteExercisePromises = exercisesToDelete.map(exercise =>
+        client.graphql({
+          query: deleteExerciseMutation,
+          variables: { input: { id: exercise.id } }
+        })
+      );
+      await Promise.all(deleteExercisePromises);
+    }
+
+    // Step 3: Delete the workout itself
     await client.graphql({
       query: deleteWorkoutMutation,
       variables: { input: { id: workoutId } }

@@ -257,9 +257,9 @@ export default function AdjustMacrosScreen() {
               step={0.1}
               value={localGoalPace}
               onValueChange={setLocalGoalPace}
-              minimumTrackTintColor='#2D9CFF'
-              maximumTrackTintColor='#1A1A1A'
-              thumbTintColor='#2D9CFF'
+              minimumTrackTintColor='#00B8A9'
+              maximumTrackTintColor='grey'
+              thumbTintColor='#00B8A9'
             />
             <View style={styles.sliderLabels}>
               <Text style={styles.sliderLabel}>0.2</Text>

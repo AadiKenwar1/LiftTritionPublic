@@ -1,3 +1,4 @@
+import React from 'react';
 import { Modal, View, Text, StyleSheet, TouchableOpacity, TextInput, Keyboard, TouchableWithoutFeedback, FlatList, Alert, ActivityIndicator} from 'react-native';
 import { Ionicons, Entypo } from '@expo/vector-icons';
 import { useState } from 'react';
@@ -59,7 +60,7 @@ export default function SearchFoodDBPopup(props) {
     <>
       <View style={styles.headerContainer}>
         <Text style={styles.headerTitle}>Search Food Database</Text>
-        <Text style={styles.headerSubtitle}>Search and add foods from the USDA database</Text>
+        <Text style={styles.headerSubtitle}>Search and add branded foods</Text>
       </View>
       
       {/* Macro Summary */}
@@ -99,15 +100,13 @@ export default function SearchFoodDBPopup(props) {
   )
 
   return (
-    <>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={props.visible}
-        onRequestClose={props.onClose}
-      >
-        
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={props.visible}
+      onRequestClose={props.onClose}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.overlay}>
           <View style={styles.modalContainer}>
             <View style={styles.content}>
@@ -123,20 +122,19 @@ export default function SearchFoodDBPopup(props) {
             
             {/* Close Button */}
             <View flexDirection="row" gap={5} alignItems="center" justifyContent='center' marginTop={0} marginBottom={0}>
-        <TouchableOpacity style={styles.closeButton} onPress={() => { handleReset(); props.onClose(); }}>
-          <Text style={styles.buttonText}>Close</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
-          <Ionicons name="add" size={18} color="#ffffff" />
-          <Text style={styles.buttonText}>Add Foods</Text>
-        </TouchableOpacity>
-      </View>
+              <TouchableOpacity style={styles.closeButton} onPress={() => { handleReset(); props.onClose(); }}>
+                <Text style={styles.buttonText}>Close</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
+                <Ionicons name="add" size={18} color="#ffffff" />
+                <Text style={styles.buttonText}>Add Foods</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-        </TouchableWithoutFeedback>
-      </Modal>
+      </TouchableWithoutFeedback>
 
-      {/* Added Foods Popup */}
+      {/* Added Foods Popup - Rendered inside main modal to appear on top */}
       <PopupModal
         modalVisible={showAddedFoodsPopup}
         setModalVisible={setShowAddedFoodsPopup}
@@ -175,7 +173,7 @@ export default function SearchFoodDBPopup(props) {
           </TouchableOpacity>
         </View>
       </PopupModal>
-    </>
+    </Modal>
   );
 }
 
@@ -303,14 +301,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginTop: 15,
     alignItems: 'center',
-    borderWidth: 1.3,
-    borderColor: 'black',
-    borderBottomWidth: 4,
-    borderBottomColor: 'black',
-    shadowColor: '#000',
+    borderWidth: 0.3,
+    borderColor: 'grey',
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
+    shadowOpacity: 0.5,
+    shadowRadius: 3,
     elevation: 2,
   },
   closeAddedFoodsButtonText: {
@@ -379,7 +375,7 @@ const styles = StyleSheet.create({
     shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
-    shadowRadius: 3,
+    shadowRadius: 0.8,
     borderWidth: 0.3,
     borderColor: 'grey',
   },
@@ -395,7 +391,7 @@ const styles = StyleSheet.create({
     shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
-    shadowRadius: 3,
+    shadowRadius: 0.8,
     borderWidth: 0.3,
     borderColor: 'grey',
   },

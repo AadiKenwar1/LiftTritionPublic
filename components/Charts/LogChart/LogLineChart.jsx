@@ -1,11 +1,9 @@
-import { useMemo, useState, useEffect} from "react";
-import { View, StyleSheet, Alert, Pressable, Text} from "react-native";
+import React, { useMemo, useState, useEffect} from "react";
+import { View, Pressable, Text} from "react-native";
 import { LineChart } from "react-native-gifted-charts";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity, Dimensions} from "react-native";
-import InfoModal from "../../InfoModal";
 import PopupModal from "../../PopupModal";
-import ExerciseSelector from "../../ExerciseSelector";
 import { useWorkoutContext } from "../../../context/WorkoutsV2/WorkoutContext";
 import { useNutritionContext } from "../../../context/Nutrition/NutritionContext";
 import ItemSelector from '../../ItemSelector'
@@ -13,7 +11,7 @@ import { useSettings } from "../../../context/Settings/SettingsContext";
 import getStyles from "./CSS";
 import { smoothData } from "../smoothData";
 import { insightText, generateGraphInfoDesc, getFocusedText } from "./LogChartFunctions";
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { calculateYAxisLabelWidth } from '../../../utils/chartUtils';
 import TextOnlyModal from "../TextOnlyModal";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
@@ -28,7 +26,7 @@ export default function LogLineChart(props) {
   const styles = getStyles(mode)
 
   // Context - using for main functionality
-  const {getLiftLogs, formatForChart, workouts, getExerciseNames, loading} = useWorkoutContext()
+  const {getLiftLogs, formatForChart, logs, getExerciseNames, loading} = useWorkoutContext()
   const {getMacroForLast30Days, nutritionData} = useNutritionContext()
 
   const [selectedLift, setSelectedLift] = useState(lastExercise || "Barbell Bench Press")
@@ -44,17 +42,20 @@ export default function LogLineChart(props) {
       const logs = getLiftLogs(selectedLift);
       console.log('📊 V2 logs found:', logs.length);
       setLogData(logs);
-    }, [selectedLift, workouts, lastExercise]);
+    }, [selectedLift, logs, lastExercise]);
 
-  const dependency = mode === true? logData : [nutritionData]
   const chartData = useMemo(() => {
-    return (mode === true? formatForChart(logData) : getMacroForLast30Days(selectedMacro.charAt(0).toLowerCase() + selectedMacro.slice(1)))
-  }, [dependency, selectedMacro, selectedLift]);
+    if (mode === true) {
+      return formatForChart(logData);
+    } else {
+      return getMacroForLast30Days(selectedMacro.charAt(0).toLowerCase() + selectedMacro.slice(1));
+    }
+  }, [mode, selectedMacro, selectedLift, logData.length, nutritionData?.length]);
 
 
   const slicedData = useMemo(() => {
-    return chartData.slice(0,selectedData)
-  }, [chartData])
+    return chartData.slice(-selectedData) // Get LAST N items (most recent)
+  }, [chartData, selectedData])
   
 
   //Lift data chart data
@@ -79,6 +80,9 @@ export default function LogLineChart(props) {
     return Math.min(...displayedData.map((item) => item.value));
   }, [displayedData]);
 
+  const yAxisLabelWidth = useMemo(() => {
+    return 40 + calculateYAxisLabelWidth(displayedData);
+  }, [displayedData]);
 
   const weightGoalType = useMemo(() => {
     if (bodyWeight === goalWeight) {
@@ -204,12 +208,12 @@ export default function LogLineChart(props) {
           xAxisLabelTextStyle={{ opacity: 0 }}
           xAxisLabelsVerticalShift={5}
           xAxisColor={"white"}
-          noOfSections={4}
+          noOfSections={5}
           yAxisOffset={Math.floor(minValue * 0.6)}
           showYAxisIndices
           yAxisIndicesColor="white"
           yAxisIndicesWidth={8}
-          yAxisLabelWidth={40}
+          yAxisLabelWidth={yAxisLabelWidth}
           yAxisThickness={2}
           xAxisThickness={2}
           rulesColor="rgba(255, 255, 255, 0.1)"
@@ -219,7 +223,6 @@ export default function LogLineChart(props) {
           dataPointsRadius={6} // outer circle size
           dataPointsWidth={3} // inner filled dot (leave smaller)
           dataPointsShape="circle"
-          yAxisLabelContainerStyle={{ marginTop: 1 }}
           // 🔥 Enable focus
           focusEnabled
           showTextOnFocus
@@ -232,6 +235,7 @@ export default function LogLineChart(props) {
             const actualDataPoint = displayedData[index];
             setFocusedPoint(actualDataPoint)
           }}
+          
           
         />
 

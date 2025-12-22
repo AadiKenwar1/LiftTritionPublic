@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import * as crud from './Functions/crudFunctions';
 import { addNutritionFromPhoto, addNutritionFromLabel, addNutritionFromBarcode, uriToBase64 } from './Functions/photoAnalysisFunctions';
 import { useAuthContext } from '../Auth/AuthContext';

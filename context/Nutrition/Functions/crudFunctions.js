@@ -107,14 +107,12 @@ export function getMacroForLast30Days(nutritionData, macroType = "calories") {
     }
     // Always generate the key in local time
     const dateKey = getLocalDateKey(date);
-    const [year, month, day] = dateKey.split("-");
-    const label = `${month}/${day}`;
     // Sum macros for this local date
     const total = nutritionData
       .filter(entry => entry.date === dateKey)
       .reduce((sum, entry) => sum + (entry[macroType] || 0), 0);
     result.push({
-      label: label,
+      label: dateKey,  // Use full YYYY-MM-DD format (same as logs)
       value: total,
     });
   }

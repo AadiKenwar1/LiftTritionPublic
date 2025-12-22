@@ -26,7 +26,9 @@ function Log(props) {
       <TouchableOpacity style={styles.textArea} onPress={props.function}>
         <View style={styles.textContainer}>
         <Text
-
+          numberOfLines={3}  // ✅ Required for adjustsFontSizeToFit
+          adjustsFontSizeToFit={true}
+          minimumFontScale={0.7}
           style={[
             styles.logText, 
             {fontFamily: props.bold ? "Inter_600SemiBold" : "Inter_400Regular"},

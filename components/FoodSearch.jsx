@@ -5,18 +5,16 @@ import {
   TextInput,
   FlatList,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   StyleSheet,
   ActivityIndicator,
   Alert,
-  Keyboard,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { getFoodSearchResults, getFoodDetails } from '../utils/foodCache';
 
 let debounceTimer;
 
-// FoodSearch component provides a search bar and results list for searching foods using Nutritionix API
+// FoodSearch component provides a search bar and results list for searching foods using Open Food Facts API
 export default function FoodSearch(props) {
   // State for search query, results, loading indicators, and added foods
   const [query, setQuery] = useState('');
@@ -67,11 +65,6 @@ export default function FoodSearch(props) {
     }
   }
 
-  // Dismiss keyboard when tapping outside
-  function handleOutsideTap() {
-    Keyboard.dismiss();
-  }
-
   // Clear the search bar and results
   function handleClearSearch() {
     setQuery('');
@@ -79,72 +72,70 @@ export default function FoodSearch(props) {
   }
 
   return (
-    <TouchableWithoutFeedback onPress={handleOutsideTap}>
-      <View style={styles.container}>
-        {/* Results list and search bar */}
-        <View style={{backgroundColor: "#242424", marginBottom:15 }}>
-          <FlatList
-            data={query ? results : []}
-            ListHeaderComponent={
-                <>
-                    {props.header}
-                    <View style={styles.inputContainer}>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="e.g: McDonalds Cheeseburger"
-                            placeholderTextColor="#9CA3AF"
-                            value={query}
-                            onChangeText={setQuery}
-                        />
-                        {query.length > 0 && (
-                            <TouchableOpacity
-                                style={styles.clearButton}
-                                onPress={handleClearSearch}
-                            >
-                                <Ionicons name="close-circle" size={20} color="#9CA3AF" />
-                            </TouchableOpacity>
-                        )}
-                    </View>
-                    {loading && <ActivityIndicator size="small" color="#D94CC4" style={{ marginBottom: 10 }} />}
-                </>
-            }
-            ItemSeparatorComponent={() => (
-                <View style={{ height: 4, backgroundColor: 'transparent' }} />
-            )}
-            // Use a unique key for each item (id + index)
-            keyExtractor={(item, index) => {
-              const id = item.fdcId || item.tag_id || item.nix_item_id || item.food_name || 'item';
-              return `${id}-${index}`;
-            }}
-            // Render each food search result
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.item}
-                onPress={() => handleSelect(item)}
-              >
-                <Text style={styles.itemText}>{item.description}</Text>
-                {item.brandName && (
-                  <Text style={styles.brand}>{item.brandName}</Text>
-                )}
-              </TouchableOpacity>
-            )}
-            ListEmptyComponent={
-              query && !loading ? (
-                <Text style={{ color: '#9CA3AF', textAlign: 'center', marginTop: 20, marginBottom: 20, fontFamily: 'Inter_400Regular' }}>
-                  No results found
-                </Text>
-              ) : null
-            }
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-          />
-        </View>
-        {/* Show loading indicator when fetching details */}
-        {fetchingDetails && (
-          <ActivityIndicator size="small" color="#D94CC4" style={{ marginTop: 10 }} />
-        )}
+    <View style={styles.container}>
+      {/* Results list and search bar */}
+      <View style={{backgroundColor: "#242424", marginBottom:15 }}>
+        <FlatList
+          data={query ? results : []}
+          ListHeaderComponent={
+              <>
+                  {props.header}
+                  <View style={styles.inputContainer}>
+                      <TextInput
+                          style={styles.input}
+                          placeholder="e.g: McDonalds Cheeseburger"
+                          placeholderTextColor="#9CA3AF"
+                          value={query}
+                          onChangeText={setQuery}
+                      />
+                      {query.length > 0 && (
+                          <TouchableOpacity
+                              style={styles.clearButton}
+                              onPress={handleClearSearch}
+                          >
+                              <Ionicons name="close-circle" size={20} color="#9CA3AF" />
+                          </TouchableOpacity>
+                      )}
+                  </View>
+                  {loading && <ActivityIndicator size="small" color="#D94CC4" style={{ marginBottom: 10 }} />}
+              </>
+          }
+          ItemSeparatorComponent={() => (
+              <View style={{ height: 4, backgroundColor: 'transparent' }} />
+          )}
+          // Use a unique key for each item (id + index)
+          keyExtractor={(item, index) => {
+            const id = item.fdcId || item.tag_id || item.nix_item_id || item.food_name || 'item';
+            return `${id}-${index}`;
+          }}
+          // Render each food search result
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.item}
+              onPress={() => handleSelect(item)}
+            >
+              <Text style={styles.itemText}>{item.description}</Text>
+              {item.brandName && (
+                <Text style={styles.brand}>{item.brandName}</Text>
+              )}
+            </TouchableOpacity>
+          )}
+          ListEmptyComponent={
+            query && !loading ? (
+              <Text style={{ color: '#9CA3AF', textAlign: 'center', marginTop: 20, marginBottom: 20, fontFamily: 'Inter_400Regular' }}>
+                No results found
+              </Text>
+            ) : null
+          }
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        />
       </View>
-    </TouchableWithoutFeedback>
+      {/* Show loading indicator when fetching details */}
+      {fetchingDetails && (
+        <ActivityIndicator size="small" color="#D94CC4" style={{ marginTop: 10 }} />
+      )}
+    </View>
   );
 }
 

@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     borderWidth: 1,
     borderColor: 'grey',
-    marginBottom: 50,
+    marginBottom: 90,
   },
   modalHeader: {
     paddingHorizontal: 24,

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { View, StyleSheet, Animated, Text } from "react-native";
 import Svg, { Circle, Defs, LinearGradient, Stop } from "react-native-svg";
 import { useSettings } from "../context/Settings/SettingsContext";
@@ -35,7 +35,9 @@ export default function ProgressWheel({
     { offset: "100%", color: "#81C784" }
   ];
 
-  const gradientStops = mode ? workoutStops : nutritionStops;
+  const gradientStops = useMemo(() => {
+    return mode ? workoutStops : nutritionStops;
+  }, [mode]);
 
   // Animated values
   const animatedValue = useRef(new Animated.Value(0)).current;

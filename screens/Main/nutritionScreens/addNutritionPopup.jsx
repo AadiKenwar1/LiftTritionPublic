@@ -1,3 +1,4 @@
+import React from 'react';
 import { Modal, View, Text, StyleSheet, TouchableOpacity, TextInput, Keyboard, TouchableWithoutFeedback, ActivityIndicator} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
@@ -564,7 +565,7 @@ const styles = StyleSheet.create({
     shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
-    shadowRadius: 3,
+    shadowRadius: 0.8,
     borderWidth: 0.3,
     borderColor: 'grey',
   },
@@ -580,7 +581,7 @@ const styles = StyleSheet.create({
     shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
-    shadowRadius: 3,
+    shadowRadius: 0.8,
     borderWidth: 0.3,
     borderColor: 'grey',
   },

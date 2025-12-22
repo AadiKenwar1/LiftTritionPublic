@@ -1,5 +1,5 @@
 import "react-native-reanimated"; // top of file
-import { useState } from "react";
+import React, { useState } from "react";
 import { View } from "react-native";
 import DraggableFlatList from "react-native-draggable-flatlist";
 import Log from "./Log";

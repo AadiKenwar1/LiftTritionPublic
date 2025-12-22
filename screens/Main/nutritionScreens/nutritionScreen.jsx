@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react';
+import React, {useState, useEffect, useMemo} from 'react';
 import { View, Text, StyleSheet, Dimensions, ScrollView, FlatList, TouchableOpacity, Modal, TextInput, Alert, Pressable} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import FoodSearch from '../../../components/FoodSearch';
@@ -175,14 +175,17 @@ export default function NutritionScreen({photoUri, cameraMode, barcodeData}) {
     const isToday = date.toDateString() === today.toDateString();
     
     if (isToday) {
-      return "Today's Nutrition";
+      return "Today's Nutrition ";
     } else {
       const options = { month: 'long', day: 'numeric', year: 'numeric' };
-      return `${date.toLocaleDateString('en-US', options)}`;
+      return `${date.toLocaleDateString('en-US', options)} `;
     }
   };
 
-
+  // Memoize sorted logs to avoid re-sorting on every render
+  const sortedLogs = useMemo(() => {
+    return [...todaysLogs].sort((a, b) => b.time - a.time);
+  }, [todaysLogs]);
 
   function renderItem({item}){
     const isUnsynced = item?.synced === false;
@@ -325,22 +328,23 @@ export default function NutritionScreen({photoUri, cameraMode, barcodeData}) {
                   <View style={styles.headerLine} />
                   <View flexDirection="row" alignItems="center" gap={0} paddingHorizontal={2.25}>
                     <Text style={styles.header}>{formatDateForDisplay(selectedDate)}</Text>
-                    <Ionicons name="calendar-outline" size={28} color="white" />
+                    <Ionicons name="calendar-outline" size={25} color="white" />
                   </View>
                   <View style={styles.headerLine} />
                 </View>
+                {currentlyAnalyzing && (
+                  <View style={styles.analyzingContainer}>
+                    <Text style={styles.analyzingText}>Analyzing photo and adding nutrition entry...</Text>
+                  </View>
+                )}
               </View>
             </Pressable>
             {/* Show analyzing message when context indicates analysis is in progress */}
             {/* This will persist across mode switches since it's managed by the context */}
-            {currentlyAnalyzing && (
-              <View style={styles.analyzingContainer}>
-                <Text style={styles.analyzingText}>Analyzing photo and adding nutrition entry...</Text>
-              </View>
-            )}
+            
           </View>
         }
-        data={todaysLogs.slice().sort((a, b) => b.time - a.time)}
+        data={sortedLogs}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         contentContainerStyle={styles.listContent}
@@ -537,9 +541,10 @@ const styles = StyleSheet.create({
   analyzingContainer: {
     padding: 20,
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#1A1A1A',
     borderRadius: 16,
-    marginBottom: 20,
+    borderColor: 'grey',
+    borderWidth: 0.3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -547,7 +552,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   analyzingText: {
-    color: '#1A1A1A',
+    color: 'white',
     fontSize: 16,
     fontWeight: '500',
     fontFamily: 'Inter_400Regular',

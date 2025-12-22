@@ -1,21 +1,16 @@
-import { useMemo, useState, useEffect} from "react";
-import { View, StyleSheet, Alert, Pressable, Text} from "react-native";
+import React, { useMemo, useState, useEffect} from "react";
+import { View, Pressable, Text} from "react-native";
 import { LineChart } from "react-native-gifted-charts";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity, Dimensions} from "react-native";
-import InfoModal from "../../InfoModal";
-import PopupModal from "../../PopupModal";
-import ExerciseSelector from "../../ExerciseSelector";
 import { useWorkoutContext } from "../../../context/WorkoutsV2/WorkoutContext";
 import { useNutritionContext } from "../../../context/Nutrition/NutritionContext";
-import ItemSelector from '../../ItemSelector'
 import { useSettings } from "../../../context/Settings/SettingsContext";
-import { formatDateForDisplay } from "../../../utils/date";
+import { calculateYAxisLabelWidth } from '../../../utils/chartUtils';
 import getStyles from "./CSS";
 import { smoothData } from "../smoothData";
 import { getFocusedText, generateGraphInfoDesc } from "./MetricChartFunctions";
 import TextOnlyModal from "../TextOnlyModal";
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { generateInsightText } from "./MetricChartFunctions";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
@@ -29,7 +24,7 @@ export default function MetricLineChart(props) {
   const styles = getStyles(mode)
 
   // Context - using for main functionality
-  const {setChart, volumeChart, logsByDateObj, loading} = useWorkoutContext()
+  const {setChart, volumeChart, logs, loading} = useWorkoutContext()
   const {getMacroForLast30Days, nutritionData} = useNutritionContext()
 
   // FIXED: Simplified state to prevent visual glitch - use button positions instead of metric names
@@ -43,13 +38,17 @@ export default function MetricLineChart(props) {
 
   useEffect(() => {
     console.log('🚀 Updating charts with V2 context');
-    console.log('📊 V2 logs count:', logsByDateObj ? Object.keys(logsByDateObj).length : 0);
+    console.log('📊 V2 logs count:', logs ? logs.length : 0);
     setVolumeChartData(volumeChart())
     setSetChartData(setChart())
-  }, [logsByDateObj]);
+  }, [logs]);
 
   useEffect(() => {
+    console.log('📊 Raw weightProgress array:', weightProgress);
+    console.log('📊 weightProgress length:', weightProgress?.length || 0);
     const formattedData = formatWeightChart();
+    console.log('📊 Formatted weight chart data:', formattedData);
+    console.log('📊 Formatted data length:', formattedData?.length || 0);
     // Always use formatted data to show gaps filled to today
     setWeightProgressData(formattedData);
   }, [weightProgress])
@@ -73,7 +72,12 @@ export default function MetricLineChart(props) {
   }, [mode, selectedButton, volumeChartData, setChartData, weightProgressData, calorieProgressData]);
 
   const slicedData = useMemo(() => {
-    return chartData.slice(0, selectedData)
+    console.log('📊 Chart data before slice:', chartData);
+    console.log('📊 Chart data length:', chartData?.length || 0);
+    console.log('📊 Selected data count:', selectedData);
+    const sliced = chartData.slice(-selectedData); // Get LAST N items (most recent)
+    console.log('📊 Sliced data (LAST', selectedData, 'items - most recent):', sliced);
+    return sliced;
   }, [chartData, selectedData])
   
   //Metric data chart data
@@ -98,6 +102,9 @@ export default function MetricLineChart(props) {
     return Math.min(...displayedData.map((item) => item.value));
   }, [displayedData]);
 
+  const yAxisLabelWidth = useMemo(() => {
+    return 40 + calculateYAxisLabelWidth(displayedData);
+  }, [displayedData]);
 
   //Info Button and Text
   const [infoVisible, setInfoVisible] = useState(false);
@@ -198,14 +205,15 @@ export default function MetricLineChart(props) {
           width={screenWidth-32}
           showFractionalValues={false}
           curved
+          areaChart
           isAnimated={true}
-          animationDuration={800}
+          animationDuration={500}
+          yAxisOffset={Math.floor(minValue * 0.6)}
           spacing={20}
           initialSpacing={20}
           endSpacing={40}
           color={mode === true ? "#2D9CFF" : '#4CD964'}
           thickness={2}
-          areaChart
           startFillColor={mode === true ? "#2D9CFF" : '#4CD964'}
           endFillColor={mode === true ? "#2D9CFF" : '#4CD964'}
           startOpacity={0.3}
@@ -215,12 +223,11 @@ export default function MetricLineChart(props) {
           yAxisColor={"white"}
           xAxisLabelsVerticalShift={5}
           xAxisColor={"white"}
-          noOfSections={4}
-          yAxisOffset={Math.floor(minValue * 0.6)}
+          noOfSections={5}
           showYAxisIndices
           yAxisIndicesColor="white"
-          yAxisIndicesWidth={8}
-          yAxisLabelWidth={40}
+          yAxisIndicesWidth={6}
+          yAxisLabelWidth={yAxisLabelWidth}
           yAxisThickness={2}
           xAxisThickness={2}
           rulesColor="rgba(255, 255, 255, 0.1)"
@@ -230,7 +237,6 @@ export default function MetricLineChart(props) {
           dataPointsRadius={6} // outer circle size
           dataPointsWidth={3} // inner filled dot (leave smaller)
           dataPointsShape="circle"
-          yAxisLabelContainerStyle={{ marginTop: 1 }}
           focusEnabled
           showTextOnFocus
           showDataPointLabelOnFocus
@@ -240,6 +246,8 @@ export default function MetricLineChart(props) {
             const actualDataPoint = displayedData[index];
             setFocusedPoint(actualDataPoint)
           }}
+          
+          
         />
 
         <TextOnlyModal 
@@ -317,4 +325,5 @@ export default function MetricLineChart(props) {
     </View>
   );
 }
+
 
