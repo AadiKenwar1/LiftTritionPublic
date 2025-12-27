@@ -11,7 +11,7 @@ import {
 import DraggableFlatList from "react-native-draggable-flatlist";
 import Log from "./Log";
 import { useState, useEffect } from "react";
-import { useWorkoutContext } from "../context/WorkoutsV2/WorkoutContext";
+import { useWorkoutContext } from "../../context/WorkoutsV2/WorkoutContext";
 import { Alert } from "react-native";
 
 

@@ -1,26 +1,30 @@
-import { getLocalDateKey } from '../../../utils/date';
 import { format1RMForChart } from './oneRepMax';
 
+/*Function List:
+ * getVolumeChartV2
+ * getSetsChartV2
+ * getLiftLogsV2
+ * formatForChartV2
+ * getLogsByDateV2
+ */
+
+
 /**
- * Get volume chart data for V2 flat structure
+ * Get volume chart data
  * Groups logs by date and calculates total volume (weight * reps) per day
  * @param {Array} logs - Array of ExerciseLog objects
- * @returns {Array} Chart data with {label: date, value: totalVolume}
+ * @returns {Array} Array of logs for the specified exercise in chart format, sorted by date: [{label: date, value: totalVolume}]
  */
 export function getVolumeChartV2(logs) {
   const volumeByDate = {};
-  
-  logs.forEach(log => {
+  logs.filter(log => !log.deleted).forEach(log => {
     const date = log.date;
     const volume = log.weight * log.reps;
-    
     if (!volumeByDate[date]) {
       volumeByDate[date] = 0;
     }
     volumeByDate[date] += volume;
   });
-  
-  // Convert to chart format and sort by date
   return Object.entries(volumeByDate)
     .map(([date, volume]) => ({
       label: date,
@@ -30,15 +34,14 @@ export function getVolumeChartV2(logs) {
 }
 
 /**
- * Get sets chart data for V2 flat structure
+ * Get sets chart data
  * Groups logs by date and counts total sets per day
  * @param {Array} logs - Array of ExerciseLog objects
- * @returns {Array} Chart data with {label: date, value: totalSets}
+ * @returns {Array} Array of logs for the specified exercise in chart format, sorted by date: [{label: date, value: totalSets}]
  */
 export function getSetsChartV2(logs) {
   const setsByDate = {};
-  
-  logs.forEach(log => {
+  logs.filter(log => !log.deleted).forEach(log => {
     const date = log.date;
     
     if (!setsByDate[date]) {
@@ -46,8 +49,6 @@ export function getSetsChartV2(logs) {
     }
     setsByDate[date] += 1; // Each log entry is one set
   });
-  
-  // Convert to chart format and sort by date
   return Object.entries(setsByDate)
     .map(([date, sets]) => ({
       label: date,
@@ -57,28 +58,25 @@ export function getSetsChartV2(logs) {
 }
 
 /**
- * Get lift logs for a specific exercise in V2 flat structure
+ * Get lift logs for a specific exercise
  * @param {string} exerciseName - Name of the exercise
  * @param {Array} exercises - Array of Exercise objects
  * @param {Array} logs - Array of ExerciseLog objects
- * @returns {Array} Array of logs for the specified exercise
+ * @returns {Array} Array of logs for the specified exercise in chart format, sorted by date: [{label: date, value: totalVolume}]
  */
 export function getLiftLogsV2(exerciseName, exercises, logs) {
-  // Find exercise by name
   const exercise = exercises.find(ex => ex.name === exerciseName);
   if (!exercise) {
     return [];
   }
-  
-  // Get all logs for this exercise
-  return logs.filter(log => log.exerciseId === exercise.id);
+  return logs.filter(log => log.exerciseId === exercise.id && !log.deleted);
 }
 
 /**
- * Format log data for chart display in V2 structure
+ * Format log data for chart display
  * Now calculates estimated 1RM for each lifting session
  * @param {Array} logData - Array of ExerciseLog objects
- * @returns {Array} Chart data with {label: date, value: estimated1RM}
+ * @returns {Array} Array of logs for the specified exercise in chart format, sorted by date: [{label: date, value: estimated1RM}]
  */
 export function formatForChartV2(logData) {
   // Use the OneRepMax helper to calculate 1RM for each session
@@ -86,14 +84,14 @@ export function formatForChartV2(logData) {
 }
 
 /**
- * Get logs grouped by date for V2 structure (equivalent to logsByDateObj)
+ * Get logs grouped by date
  * @param {Array} logs - Array of ExerciseLog objects
- * @returns {Object} Object with date keys and log arrays as values
+ * @returns {Object} Object with date keys and log arrays as values: {date: [log1, log2, log3]}
  */
 export function getLogsByDateV2(logs) {
   const logsByDate = {};
   
-  logs.forEach(log => {
+  logs.filter(log => !log.deleted).forEach(log => {
     const date = log.date;
     
     if (!logsByDate[date]) {
@@ -103,14 +101,4 @@ export function getLogsByDateV2(logs) {
   });
   
   return logsByDate;
-}
-
-/**
- * Get all unique exercise names from V2 exercises
- * @param {Array} exercises - Array of Exercise objects
- * @returns {Array} Array of unique exercise names
- */
-export function getExerciseNamesV2(exercises) {
-  const uniqueNames = [...new Set(exercises.map(ex => ex.name))];
-  return uniqueNames.sort();
 }

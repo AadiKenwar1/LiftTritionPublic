@@ -1,34 +1,66 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as crud from './Functions/crudFunctions';
 import { addNutritionFromPhoto, addNutritionFromLabel, addNutritionFromBarcode, uriToBase64 } from './Functions/photoAnalysisFunctions';
 import { useAuthContext } from '../Auth/AuthContext';
+import { STORAGE_KEYS } from '../storageKeys';
+
+const STORAGE_KEY = STORAGE_KEYS.nutrition;
 
 const NutritionContext = createContext();
 
 export function NutritionProvider({ children }) {
   const { user } = useAuthContext();
-  // Get nutrition data from AuthContext user object
-  const nutritionDataFromAuth = user?.nutrition || [];
-  const [nutritionData, setNutritionData] = useState(nutritionDataFromAuth);
+  const [nutritionData, setNutritionData] = useState([]);
   const [processedPhotoUris, setProcessedPhotoUris] = useState(new Set());
   const [currentlyAnalyzing, setCurrentlyAnalyzing] = useState(null);
   const [loaded, setLoaded] = useState(false);
+
+  // Load from AsyncStorage on mount AND when user changes (reloads after sign-in)
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const data = await AsyncStorage.getItem(STORAGE_KEY);
+        setNutritionData(data ? JSON.parse(data) : []);
+        setLoaded(true);
+      } catch (error) {
+        console.error('Error loading nutrition data from AsyncStorage:', error);
+        setNutritionData([]);
+        setLoaded(true);
+      }
+    };
+    
+    if (user) {
+      loadData(); // Reload when user signs in
+    } else {
+      setNutritionData([]);
+      setLoaded(false);
+    }
+  }, [user]);
+
+  // Save to AsyncStorage whenever nutritionData changes (after initial load)
+  useEffect(() => {
+    if (loaded && user) {
+      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(nutritionData));
+    }
+  }, [nutritionData, loaded, user]);
+
+  // Clear state when user signs out
+  useEffect(() => {
+    if (!user) {
+      setNutritionData([]);
+      setProcessedPhotoUris(new Set());
+      setCurrentlyAnalyzing(null);
+    }
+  }, [user]);
 
   // Console log nutrition data source
   useEffect(() => {
     console.log('🍎 Nutrition Data Source Check:');
     console.log('📊 Total nutrition logs:', nutritionData.length);
-    console.log('🗄️ Data source: Database (via AuthContext)');
+    console.log('🗄️ Data source: AsyncStorage (local)');
     console.log('📋 Nutrition logs:', nutritionData.map(item => `${item.name} - ${item.date}`));
   }, [nutritionData]);
-
-  // Update local state when AuthContext user changes
-  useEffect(() => {
-    if (user?.nutrition) {
-      setNutritionData(user.nutrition);
-      setLoaded(true);
-    }
-  }, [user?.nutrition]);
 
   // Wrappers for photo/label/barcode analysis (unchanged, but use addNutrition)
   const addNutritionFromPhotoWrapper = async (uri) => {
@@ -66,17 +98,9 @@ export function NutritionProvider({ children }) {
   };
 
   // Utility functions for getting logs/macros (use CRUD functions)
-  const getTodaysLogs = () => crud.getTodaysLogs(nutritionData);
   const getLogsForDate = (date) => crud.getLogsForDate(nutritionData, date);
-  const getTodaysMacro = (macroType) => crud.getTodaysMacro(nutritionData, macroType);
   const getMacroForDate = (macroType, date) => crud.getMacroForDate(nutritionData, macroType, date);
   const getMacroForLast30Days = (macroType = "calories") => crud.getMacroForLast30Days(nutritionData, macroType);
-
-  function resetNutritionContext() {
-    setNutritionData([]);
-    setProcessedPhotoUris(new Set());
-    setCurrentlyAnalyzing(null);
-  }
 
   return (
     <NutritionContext.Provider 
@@ -84,15 +108,11 @@ export function NutritionProvider({ children }) {
         nutritionData,
         setNutritionData, 
         addNutrition: (name, protein, carbs, fats, calories, isPhoto = false, ingredients = []) =>
-          user && user.userId
-            ? crud.addNutrition(nutritionData, setNutritionData, user.userId, name, protein, carbs, fats, calories, isPhoto, ingredients)
-            : null,
-        deleteNutrition: (id) => (user && user.userId ? crud.deleteNutrition(nutritionData, setNutritionData, id, user.userId) : null),
-        editNutrition: (id, name, protein, carbs, fats, calories, saved) => (user && user.userId ? crud.editNutrition(nutritionData, setNutritionData, id, name, protein, carbs, fats, calories, user.userId, saved) : null),
-        updateIngredientsAndMacros: (id, ingredients, totalMacros) => (user && user.userId ? crud.updateIngredientsAndMacros(nutritionData, setNutritionData, id, ingredients, totalMacros, user.userId) : null),
-        getTodaysMacro,
+          crud.addNutrition(nutritionData, setNutritionData, user.userId, name, protein, carbs, fats, calories, isPhoto, ingredients),
+        deleteNutrition: (id) => crud.deleteNutrition(nutritionData, setNutritionData, id, user.userId),
+        editNutrition: (id, name, protein, carbs, fats, calories, saved) => crud.editNutrition(nutritionData, setNutritionData, id, name, protein, carbs, fats, calories, user.userId, saved),
+        updateIngredientsAndMacros: (id, ingredients, totalMacros) => crud.updateIngredientsAndMacros(nutritionData, setNutritionData, id, ingredients, totalMacros, user.userId),
         getMacroForDate,
-        getTodaysLogs,
         getLogsForDate,
         getMacroForLast30Days,
         uriToBase64,
@@ -100,7 +120,6 @@ export function NutritionProvider({ children }) {
         addNutritionFromLabel: addNutritionFromLabelWrapper,
         addNutritionFromBarcode: addNutritionFromBarcodeWrapper,
         currentlyAnalyzing,
-        resetNutritionContext,
         loaded
       }}>
       {children}

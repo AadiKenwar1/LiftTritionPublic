@@ -1,0 +1,136 @@
+# WorkoutsV2 Context
+
+This folder contains the workout management system using a flat data structure (V2). All data is stored in arrays with relationships maintained through IDs, enabling efficient querying and updates.
+
+## Usage
+import { useWorkoutContext } from './context/WorkoutsV2/WorkoutContext';
+
+function MyComponent() {
+  const { workouts, addWorkout, getExercisesForWorkout } = useWorkoutContext();
+}
+
+## Data Structure
+
+All data uses a flat structure with relationships maintained through IDs:
+
+- **Workouts** → referenced by `workoutId` in exercises and logs
+- **Exercises** → referenced by `exerciseId` in logs
+- **Logs** → contain both `workoutId` and `exerciseId` for efficient querying
+
+## Persistence
+
+All data is automatically:
+- Loaded from AsyncStorage on mount and when user signs in
+- Saved to AsyncStorage whenever state changes (after initial load)
+- Cleared when user signs out
+
+## Function Files
+
+- **`workoutFunctions.js`** - CRUD operations for workouts
+- **`exerciseFunctions.js`** - CRUD operations for exercises
+- **`logFunctions.js`** - CRUD operations for exercise logs
+- **`chartFunctions.js`** - Functions for generating chart data from logs
+- **`fatigueFunctions.js`** - Fatigue calculation and feedback functions
+- **`userExerciseFunctions.js`** - CRUD operations for custom user exercises
+- **`oneRepMax.js`** - Helper functions for calculating estimated 1RM using the Epley formula
+
+### State Variables
+
+- **`workouts`** (Array) - Flat array of all workout objects. Each workout contains `id`, `name`, `order`, `archived`, `note`, `userId`, etc. Workouts are automatically loaded from AsyncStorage and synced on changes.
+
+- **`exercises`** (Array) - Flat array of all exercise objects across all workouts. Each exercise contains attributes `id`, `workoutId`, `name`, `order`, `archived`, `note`, `userMax`, etc. Exercises are linked to workouts via `workoutId`.
+
+- **`logs`** (Array) - Flat array of all exercise log entries. Each log contains `id`, `exerciseId`, `workoutId`, `date`, `weight`, `reps`, `rpe`, etc. Logs are linked to exercises via `exerciseId` and workouts via `workoutId`.
+
+- **`userExercises`** (Array) - Array of custom exercises created by the user beyond the default exercise library. Each contains `id`, `name`, `isCompound`, `fatigueFactor`, `mainMuscle`, `accessoryMuscles`, etc.
+
+- **`exerciseLibrary`** (Object) - Global exercise definitions dictionary keyed by exercise name. Contains default exercises plus merged user exercises. Used for fatigue calculations and exercise metadata.
+
+- **`loaded`** (Boolean) - Flag indicating whether data has been loaded from AsyncStorage. Useful for showing loading states before data is available.
+
+- **`logsByExercise`** (Map) - Lookup map for O(1) access to logs grouped by exercise ID. Key is `exerciseId`, value is array of logs. Automatically updated when logs change.
+
+### State Setters
+
+- **`setWorkouts`** (Function) - Direct state setter for workouts array. Exposed for sync manager to update workouts during database synchronization.
+
+- **`setExercises`** (Function) - Direct state setter for exercises array. Exposed for sync manager to update exercises during database synchronization.
+
+- **`setLogs`** (Function) - Direct state setter for logs array. Exposed for sync manager to update logs during database synchronization.
+
+- **`setExerciseLibrary`** (Function) - State setter for exercise library. Allows manual updates to the global exercise definitions.
+
+- **`setUserExercises`** (Function) - State setter for user exercises array. Allows manual updates to custom exercises.
+
+### Workout Functions
+
+- **`addWorkout(name)`** - Creates a new workout with the given name. Automatically assigns the highest order value so it appears first in the list.
+
+- **`deleteWorkout(workoutId)`** - Soft deletes a workout and all its exercises and logs by setting `deleted: true`. Does not remove data from storage.
+
+- **`renameWorkout(workoutId, newName)`** - Updates the name of a workout. Marks the workout as unsynced for database sync.
+
+- **`reorderWorkouts(newOrder)`** - Reorders workouts by accepting an array of workout objects in the desired order. Updates the `order` field for each workout (higher order = appears first).
+
+- **`archiveWorkout(workoutId)`** - Archives a workout by setting `archived: true`. Archived workouts are hidden from main views but can be restored.
+
+- **`unarchiveWorkout(workoutId)`** - Restores an archived workout by setting `archived: false`.
+
+- **`addNoteToWorkout(workoutId, note)`** - Adds or updates a note for a workout. Notes are stored in the workout's `note` field.
+
+### Exercise Functions
+
+- **`addExercise(workoutId, exerciseName)`** - Adds an exercise to a workout using an exercise name from the exercise library. Creates a new exercise with the highest order for that workout.
+
+- **`deleteExercise(exerciseId)`** - Soft deletes an exercise and all its logs by setting `deleted: true`. Does not remove data from storage.
+
+- **`renameExercise(exerciseId, newName)`** - Updates the name of an exercise. Marks the exercise as unsynced for database sync.
+
+- **`reorderExercises(workoutId, newOrder)`** - Reorders exercises within a workout by accepting an array of exercise objects in the desired order. Updates the `order` field (higher order = appears first).
+
+- **`archiveExercise(exerciseId)`** - Archives an exercise by setting `archived: true`. Archived exercises are hidden from main views but can be restored.
+
+- **`unarchiveExercise(exerciseId)`** - Restores an archived exercise by setting `archived: false`.
+
+- **`addNoteToExercise(exerciseId, note)`** - Adds or updates a note for an exercise. Notes are stored in the exercise's `note` field.
+
+### Log Functions
+
+- **`addLog(exerciseId, logData)`** - Creates a new log entry for an exercise. `logData` should contain `workoutId`, `weight`, `reps`, `rpe`, and optionally `date`. If no date is provided, uses today's date.
+
+- **`deleteLog(logId)`** - Soft deletes a log entry by setting `deleted: true`. Does not remove data from storage.
+
+### User Exercise Functions
+
+- **`addUserExercise(exerciseData)`** - Creates a custom exercise beyond the default library. `exerciseData` should contain `name`, `isCompound`, `fatigueFactor`, `mainMuscle`, `accessoryMuscles`, etc. Automatically adds it to the exercise library for immediate use.
+
+- **`updateUserExercise(exerciseId, updateData)`** - Updates a custom exercise with new data. If the name changes, updates the exercise library accordingly.
+
+- **`deleteUserExercise(exerciseId, exerciseName)`** - Soft deletes a custom exercise and removes it from the exercise library.
+
+### Helper Functions
+
+- **`getExercisesForWorkout(workoutId)`** - Returns all exercises for a specific workout, filtered and sorted by order (highest order first). Excludes deleted and archived exercises.
+
+- **`getLogsForExercise(exerciseId)`** - Returns all logs for a specific exercise using the `logsByExercise` map for O(1) lookup. Returns an empty array if no logs exist.
+
+- **`getLogsForDate(date)`** - Returns all logs for a specific date string. Filters out deleted logs.
+
+### Chart Functions
+
+- **`volumeChart`** (Array) - Memoized array of chart data for total volume over time. Each item has `{label: date, value: totalVolume}` format, sorted by date. Volume is calculated as `weight * reps` summed per day.
+
+- **`setChart`** (Array) - Memoized array of chart data for total sets over time. Each item has `{label: date, value: totalSets}` format, sorted by date. Counts the number of sets (log entries) per day.
+
+- **`getLiftLogs(exerciseName)`** - Returns all logs for a specific exercise by name. Finds the exercise by name, then returns all logs for that exercise's ID.
+
+- **`formatForChart(logData)`** - Formats log data for chart display by calculating estimated 1RM (one-rep max) for each session. Returns array with `{label: date, value: estimated1RM}` format, showing the highest 1RM per date.
+
+- **`logsByDateObj`** (Object) - Object with date keys and arrays of logs as values. Format: `{date: [log1, log2, ...]}`. Useful for grouping logs by date for display.
+
+### Fatigue Functions
+
+- **`getFatigueForLastXDays(numDays)`** - Calculates fatigue percentage for the last X days based on training volume, RPE, exercise type, and activity factor. Returns a percentage (0-100+) indicating accumulated fatigue. Uses a daily budget system and frequency multipliers based on training frequency.
+
+- **`fatigueFeedback(fatigueTodayPercent)`** - Returns a user-friendly feedback message based on today's fatigue percentage. Provides encouragement and recovery advice based on training intensity levels.
+

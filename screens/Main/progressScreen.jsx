@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-    View,
-    Text,
-    SafeAreaView,
-    StyleSheet,
-    ScrollView,
-    Dimensions,
-} from 'react-native';
+import {View, Text, SafeAreaView, StyleSheet, ScrollView, Dimensions} from 'react-native';
 import LogLineChart from '../../components/Charts/LogChart/LogLineChart';
 import MetricLineChart from '../../components/Charts/MetricsChart/MetricLineChart';
 import CustomHeader from '../../components/CustomHeader';
@@ -15,12 +8,16 @@ import { useSettings } from '../../context/Settings/SettingsContext';
 import { useNutritionContext } from '../../context/Nutrition/NutritionContext';
 import { useWorkoutContext } from '../../context/WorkoutsV2/WorkoutContext';
 
+
 const { width: screenWidth } = Dimensions.get('window');
 export default function ProgressScreen() {
     const {mode, calorieGoal, proteinGoal, carbsGoal, fatsGoal} = useSettings()
-    const {getTodaysMacro} = useNutritionContext()
+    const {getMacroForDate} = useNutritionContext()
     // Context - using for main functionality
-    const {getFatigueForLastXDays, loading} = useWorkoutContext()
+    const {getFatigueForLastXDays, fatigueFeedback} = useWorkoutContext()
+    
+    // Today's date using the same pattern as getLocalDateKey()
+    const today = new Date()
     
     // Calculate V2 fatigue percentages
     const fatigueTodayPercent = getFatigueForLastXDays(1);
@@ -28,35 +25,16 @@ export default function ProgressScreen() {
     const fatigueLast6DaysPercent = getFatigueForLastXDays(6);
     const fatigueLast9DaysPercent = getFatigueForLastXDays(9);
 
-    const todaysCalories = getTodaysMacro("calories");
+    const todaysCalories = getMacroForDate("calories", today);
     const calPercent = (todaysCalories / calorieGoal) * 100;
-    const todaysProtein = getTodaysMacro('protein')
+    const todaysProtein = getMacroForDate('protein', today)
     const proteinPercent = (todaysProtein / proteinGoal) * 100
-    const todaysCarbs = getTodaysMacro('carbs')
+    const todaysCarbs = getMacroForDate('carbs', today)
     const carbsPercent = (todaysCarbs / carbsGoal) * 100
-    const todaysFats = getTodaysMacro('fats')
+    const todaysFats = getMacroForDate('fats', today)
     const fatsPercent = (todaysFats / fatsGoal) * 100
 
-    function fatigueFeedback(){
-        if (fatigueTodayPercent > 75){
-            return "You trained hard today, nice work! Make sure to get enough rest and recovery."
-        }
-        else if (fatigueTodayPercent > 50){
-            return "Solid work today! Some rest and recovery and you'll be back in no time."
-        }
-        else if (fatigueTodayPercent > 25){
-            return "Good work today! You had a light training session."
-        }
-        else if (fatigueTodayPercent > 0){
-            return "Very light training session so far. Great if your goal is recovery or light training."
-        }
-        else{
-            return "No training today. Seems like the focus is on rest and recovery."
-        }
-
-    }
-
-    //console.log("todays fatigue " + fatigueTodayPercent)
+    const fatigueFeedbackText = fatigueFeedback(fatigueTodayPercent)
 
     return (
         <>
@@ -69,7 +47,7 @@ export default function ProgressScreen() {
                         <Text style={{fontSize:18, fontFamily:'Inter_700Bold', fontWeight: 'bold', textAlign:'center', flexShrink: 1, color: 'white'}} numberOfLines={2} adjustsFontSizeToFit>{mode === true? "Todays Fatigue" : "Todays Calories:"}</Text>
                         {mode === false && <Text style={{fontSize:18, fontFamily:'Inter_700Bold', fontStyle:'italic', textAlign:'center', fontWeight: '600', flexShrink: 1, color: 'white'}} numberOfLines={2} adjustsFontSizeToFit> {todaysCalories}/{calorieGoal}</Text>}
                         {mode === false && <Text style={{fontSize:12, fontFamily:'Inter_400Regular', textAlign:'center', fontWeight: '500', flexShrink: 1, color: 'white'}} numberOfLines={5} adjustsFontSizeToFit>You have {calorieGoal - todaysCalories} calories to go!</Text>}
-                        {mode === true && <Text style={{fontSize:12, fontFamily:'Inter_400Regular', textAlign:'center', fontWeight: '500', flexShrink: 1, color: 'white'}} numberOfLines={5} adjustsFontSizeToFit>{fatigueFeedback()}</Text>}
+                        {mode === true && <Text style={{fontSize:12, fontFamily:'Inter_400Regular', textAlign:'center', fontWeight: '500', flexShrink: 1, color: 'white'}} numberOfLines={5} adjustsFontSizeToFit>{fatigueFeedbackText}</Text>}
                     </View>
                 </View>
 

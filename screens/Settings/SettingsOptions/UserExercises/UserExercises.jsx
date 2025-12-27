@@ -60,7 +60,7 @@ export default function UserExercises() {
 
       <View style={styles.container}>
         <FlatList
-          data={userExercises}
+          data={userExercises.filter(item => !item.deleted)}
           keyExtractor={(item, index) => item.name || index.toString()}
           contentContainerStyle={styles.listContainer}
           showsVerticalScrollIndicator={false}

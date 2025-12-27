@@ -1,175 +1,113 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
-import { generateClient } from '@aws-amplify/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuthContext } from '../Auth/AuthContext';
 import { useSettings } from '../Settings/SettingsContext';
 import exerciseList from '../Exercises/exerciseList';
-
+import { STORAGE_KEYS } from '../storageKeys';
 // Import function modules
-import {
-  addWorkout,
-  deleteWorkout,
-  renameWorkout,
-  reorderWorkouts,
-  archiveWorkout,
-  unarchiveWorkout,
-  addNoteToWorkout,
-} from './Functions/workoutFunctions';
-
-import {
-  addExercise,
-  deleteExercise,
-  renameExercise,
-  reorderExercises,
-  archiveExercise,
-  unarchiveExercise,
-  addNoteToExercise,
-} from './Functions/exerciseFunctions';
-
-import {
-  addLog,
-  deleteLog,
-} from './Functions/logFunctions';
-
-import {
-  getVolumeChartV2,
-  getSetsChartV2,
-  getLiftLogsV2,
-  formatForChartV2,
-  getLogsByDateV2,
-  getExerciseNamesV2,
-} from './Functions/chartFunctions';
-
-import {
-  getFatigueForLastXDaysV2,
-} from './Functions/fatigueFunctions';
-
-import {
-  addUserExercise,
-  updateUserExercise,
-  deleteUserExercise,
-  getUserExercise,
-  getUserExerciseByName,
-} from './Functions/userExerciseFunctions';
+import {addWorkout, deleteWorkout, renameWorkout, reorderWorkouts, archiveWorkout, unarchiveWorkout, addNoteToWorkout} from './Functions/workoutFunctions';
+import {addExercise, deleteExercise, renameExercise, reorderExercises, archiveExercise, unarchiveExercise, addNoteToExercise} from './Functions/exerciseFunctions';
+import {addLog, deleteLog} from './Functions/logFunctions';
+import {getVolumeChartV2, getSetsChartV2, getLiftLogsV2, formatForChartV2, getLogsByDateV2} from './Functions/chartFunctions';
+import {getFatigueForLastXDaysV2, fatigueFeedback} from './Functions/fatigueFunctions';
+import {addUserExercise, updateUserExercise, deleteUserExercise} from './Functions/userExerciseFunctions';
 
 
-const client = generateClient();
 const WorkoutContext = createContext();
-
 export function WorkoutProvider({ children }) {
   const { user } = useAuthContext();
   const { activityFactor } = useSettings();
   
-  // Flat state structure - no nesting!
+  // Flat state structures for workouts, exercises, logs, and user exercises
   const [workouts, setWorkouts] = useState([]);
   const [exercises, setExercises] = useState([]);
   const [logs, setLogs] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [userExercises, setUserExercises] = useState([]);
 
   // Exercise library for global exercise definitions
   const [exerciseLibrary, setExerciseLibrary] = useState(exerciseList);
-  
-  // User exercises (custom exercises beyond the library)
-  const [userExercises, setUserExercises] = useState([]);
 
-  // Create lookup maps for O(1) access
-  const [workoutMap, setWorkoutMap] = useState(new Map());
-  const [exerciseMap, setExerciseMap] = useState(new Map());
+  //Fast access logs by date in format {date: [logs]}
+  const logsByDateObj = getLogsByDateV2(logs);
+
+  // Loaded flag to track if data has been loaded from AsyncStorage
+  const [loaded, setLoaded] = useState(false);
+
+  // Create lookup map for O(1) access to logs by exercise
   const [logsByExercise, setLogsByExercise] = useState(new Map());
 
-  // Update lookup maps when data changes
+  // Update logsByExercise map when logs change
   useEffect(() => {
-    const newWorkoutMap = new Map();
-    workouts.forEach(workout => {
-      newWorkoutMap.set(workout.id, workout);
-    });
-    setWorkoutMap(newWorkoutMap);
-    
-    // Print all workouts
-    if (workouts.length > 0) {
-      console.log('💪 ALL WORKOUTS:');
-      console.log('📊 Total Workouts:', workouts.length);
-      const workoutsWithDetails = workouts.map(workout => ({
-        id: workout.id,
-        name: workout.name,
-        order: workout.order,
-        archived: workout.archived || false,
-        note: workout.note || '',
-        synced: workout.synced,
-        createdAt: workout.createdAt,
-        updatedAt: workout.updatedAt,
-      }));
-      console.log('💪 Workouts with Details:', JSON.stringify(workoutsWithDetails, null, 2));
-    }
-  }, [workouts]);
-
-  useEffect(() => {
-    const newExerciseMap = new Map();
     const newLogsByExercise = new Map();
-    
-    exercises.forEach(exercise => {
-      newExerciseMap.set(exercise.id, exercise);
-    });
-    
     logs.forEach(log => {
+      if (log.deleted) return;
       if (!newLogsByExercise.has(log.exerciseId)) {
         newLogsByExercise.set(log.exerciseId, []);
       }
       newLogsByExercise.get(log.exerciseId).push(log);
     });
     
-    setExerciseMap(newExerciseMap);
     setLogsByExercise(newLogsByExercise);
-    
-    // Print all logs with exercise and workout names
-    if (logs.length > 0) {
-      console.log('📋 ALL LOGS:');
-      console.log('📊 Total Logs:', logs.length);
-      const logsWithDetails = logs.map(log => {
-        const exercise = exercises.find(e => e.id === log.exerciseId);
-        const workout = workouts.find(w => w.id === log.workoutId);
-        return {
-          id: log.id,
-          date: log.date,
-          weight: log.weight,
-          reps: log.reps,
-          rpe: log.rpe,
-          exerciseName: exercise?.name || 'Unknown',
-          workoutName: workout?.name || 'Unknown',
-          synced: log.synced,
-        };
-      });
-      console.log('📋 Logs with Details:', JSON.stringify(logsWithDetails, null, 2));
-    }
-  }, [exercises, logs, workouts]);
+  }, [logs]);
 
-
-  // Load workout data from AuthContext user object (following Settings/Nutrition pattern)
+  // Load from AsyncStorage on mount AND when user changes (reloads after sign-in)
   useEffect(() => {
-    if (user?.workouts && user?.exercises && user?.exerciseLogs) {
-      console.log('🔄 Loading workout data from AuthContext user object');
-      console.log('📊 Workout data counts:', {
-        workouts: user.workouts.length,
-        exercises: user.exercises.length,
-        logs: user.exerciseLogs.length,
-        userExercises: user.userExercises?.length || 0
-      });
-      
-      
-      setWorkouts(user.workouts || []);
-      setExercises(user.exercises || []);
-      setLogs(user.exerciseLogs || []);
-      setUserExercises(user.userExercises || []);
-      setLoading(false);
-    } else if (user?.userId) {
-      // User exists but no workout data yet
-      console.log('📝 User exists but no workout data found yet');
+    const loadData = async () => {
+      try {
+        const data = await AsyncStorage.multiGet([
+          STORAGE_KEYS.workouts,
+          STORAGE_KEYS.exercises,
+          STORAGE_KEYS.exerciseLogs,
+          STORAGE_KEYS.userExercises,
+        ]);
+        setWorkouts(data[0][1] ? JSON.parse(data[0][1]) : []);
+        setExercises(data[1][1] ? JSON.parse(data[1][1]) : []);
+        setLogs(data[2][1] ? JSON.parse(data[2][1]) : []);
+        setUserExercises(data[3][1] ? JSON.parse(data[3][1]) : []);
+        setLoaded(true);
+      } catch (error) {
+        console.error('Error loading workout data from AsyncStorage:', error);
+        setWorkouts([]);
+        setExercises([]);
+        setLogs([]);
+        setUserExercises([]);
+        setLoaded(true);
+      }
+    }
+    
+    if (user) {
+        loadData(); 
+      } else {
       setWorkouts([]);
       setExercises([]);
       setLogs([]);
       setUserExercises([]);
-      setLoading(false);
+      setLoaded(false);
     }
-  }, [user?.workouts, user?.exercises, user?.exerciseLogs, user?.userId]);
+  }, [user]);
+
+  // Save to AsyncStorage whenever state changes (after initial load)
+  useEffect(() => {
+    if (loaded && user) {
+      AsyncStorage.multiSet([
+        [STORAGE_KEYS.workouts, JSON.stringify(workouts)],
+        [STORAGE_KEYS.exercises, JSON.stringify(exercises)],
+        [STORAGE_KEYS.exerciseLogs, JSON.stringify(logs)],
+        [STORAGE_KEYS.userExercises, JSON.stringify(userExercises)],
+      ]);
+    }
+  }, [workouts, exercises, logs, userExercises, loaded, user]);
+
+  // Clear state when user signs out
+  useEffect(() => {
+    if (!user) {
+      setWorkouts([]);
+      setExercises([]);
+      setLogs([]);
+      setUserExercises([]);
+      setLogsByExercise(new Map());
+    }
+  }, [user]);
 
   // Merge userExercises into exerciseLibrary when userExercises changes
   useEffect(() => {
@@ -185,7 +123,8 @@ export function WorkoutProvider({ children }) {
     }
   }, [userExercises]);
 
-  // Workout Functions
+  /**WRAPPER FUNCTIONS */
+
   const handleAddWorkout = (name) => {
     return addWorkout(name, user.userId, setWorkouts);
   };
@@ -214,7 +153,6 @@ export function WorkoutProvider({ children }) {
     return addNoteToWorkout(workoutId, note, setWorkouts);
   };
 
-  // Exercise Functions
   const handleAddExercise = (workoutId, exerciseName) => {
     return addExercise(workoutId, exerciseName, user.userId, setExercises);
   };
@@ -243,7 +181,6 @@ export function WorkoutProvider({ children }) {
     return addNoteToExercise(exerciseId, note, setExercises);
   };
 
-  // Log Functions
   const handleAddLog = (exerciseId, logData) => {
     return addLog(exerciseId, logData, user.userId, setLogs);
   };
@@ -252,7 +189,6 @@ export function WorkoutProvider({ children }) {
     return deleteLog(logId, setLogs);
   };
 
-  // User Exercise Functions
   const handleAddUserExercise = (exerciseData) => {
     return addUserExercise(exerciseData, user.userId, setUserExercises, setExerciseLibrary);
   };
@@ -265,15 +201,6 @@ export function WorkoutProvider({ children }) {
     return deleteUserExercise(exerciseId, exerciseName, setUserExercises, setExerciseLibrary);
   };
 
-  const handleGetUserExercise = (exerciseId) => {
-    return getUserExercise(exerciseId, userExercises);
-  };
-
-  const handleGetUserExerciseByName = (exerciseName) => {
-    return getUserExerciseByName(exerciseName, userExercises);
-  };
-
-  // Helper functions for getting related data
   const getExercisesForWorkout = (workoutId) => {
     return exercises
       .filter(exercise => exercise.workoutId === workoutId)
@@ -285,62 +212,39 @@ export function WorkoutProvider({ children }) {
   };
 
   const getLogsForDate = (date) => {
-    return logs.filter(log => log.date === date);
+    return logs.filter(log => log.date === date && !log.deleted);
   };
 
-  // Chart functions for V2 structure - memoized for performance
-  const volumeChartData = useMemo(() => {
+  const volumeChart = useMemo(() => {
     return getVolumeChartV2(logs);
-  }, [logs.length]); // Recalculate when log count changes
+  }, [logs]); 
 
-  const setChartData = useMemo(() => {
+  const setChart = useMemo(() => {
     return getSetsChartV2(logs);
-  }, [logs.length]);
+  }, [logs]);
 
-  const volumeChart = () => volumeChartData; // Return memoized data
-  const setChart = () => setChartData;
   const getLiftLogs = (exerciseName) => getLiftLogsV2(exerciseName, exercises, logs);
-  const formatForChart = (logData) => formatForChartV2(logData);
-  const logsByDateObj = getLogsByDateV2(logs);
-  const getExerciseNames = () => getExerciseNamesV2(exercises);
 
-  // Fatigue functions for V2 structure
+  const formatForChart = (logData) => formatForChartV2(logData);
+
   const getFatigueForLastXDays = (numDays) => {
     return getFatigueForLastXDaysV2(numDays, logs, exercises, exerciseLibrary, activityFactor);
   };
 
-  // Reset function
-  const resetWorkoutContext = () => {
-    setWorkouts([]);
-    setExercises([]);
-    setLogs([]);
-    setUserExercises([]);
-    setWorkoutMap(new Map());
-    setExerciseMap(new Map());
-    setLogsByExercise(new Map());
-  };
-
+  //Sorry about naming, I didnt want to have to refactor everything
   const value = {
-    // State
     workouts,
     exercises,
     logs,
-    loading,
-    
-    // Exercise library
+    loaded,
     exerciseLibrary,
     setExerciseLibrary,
-    
-    // User exercises
     userExercises,
     setUserExercises,
-    
-    // Lookup maps
-    workoutMap,
-    exerciseMap,
+    setWorkouts,
+    setExercises,
+    setLogs,
     logsByExercise,
-    
-    // Workout functions
     addWorkout: handleAddWorkout,
     deleteWorkout: handleDeleteWorkout,
     renameWorkout: handleRenameWorkout,
@@ -348,8 +252,6 @@ export function WorkoutProvider({ children }) {
     archiveWorkout: handleArchiveWorkout,
     unarchiveWorkout: handleUnarchiveWorkout,
     addNoteToWorkout: handleAddNoteToWorkout,
-    
-    // Exercise functions
     addExercise: handleAddExercise,
     deleteExercise: handleDeleteExercise,
     renameExercise: handleRenameExercise,
@@ -357,34 +259,21 @@ export function WorkoutProvider({ children }) {
     archiveExercise: handleArchiveExercise,
     unarchiveExercise: handleUnarchiveExercise,
     addNoteToExercise: handleAddNoteToExercise,
-    
-    // Log functions
     addLog: handleAddLog,
     deleteLog: handleDeleteLog,
-    
-    // User exercise functions
     addUserExercise: handleAddUserExercise,
     updateUserExercise: handleUpdateUserExercise,
     deleteUserExercise: handleDeleteUserExercise,
-    getUserExercise: handleGetUserExercise,
-    getUserExerciseByName: handleGetUserExerciseByName,
-    
-    // Helper functions
     getExercisesForWorkout,
     getLogsForExercise,
     getLogsForDate,
-    resetWorkoutContext,
-    
-    // Chart functions
     volumeChart,
     setChart,
     getLiftLogs,
     formatForChart,
     logsByDateObj,
-    getExerciseNames,
-    
-    // Fatigue functions
     getFatigueForLastXDays,
+    fatigueFeedback,
   };
 
   return (

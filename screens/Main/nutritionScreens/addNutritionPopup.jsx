@@ -1,30 +1,50 @@
 import React from 'react';
 import { Modal, View, Text, StyleSheet, TouchableOpacity, TextInput, Keyboard, TouchableWithoutFeedback, ActivityIndicator} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useState, useEffect} from 'react';
 import { askOpenAI } from '../../../utils/openAI';
 import { useNutritionContext } from '../../../context/Nutrition/NutritionContext';
 import { useBilling } from '../../../context/Billing/BillingContext.js';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
+import NetInfo from '@react-native-community/netinfo';
+import { Alert } from 'react-native';
 
 export default function AddNutritionScreen(props) {
 
+  //addNutrition and has Premium to check if AI macro generation is available
+  const {addNutrition} = useNutritionContext()
   const { hasPremium } = useBilling();
+  //Navigation to navigate to subscription screen
   const navigation = useNavigation();
-  const [mode, setMode] = useState(0) // 0 = manual
+  //User meal input
   const [mainInput, setMainInput] = useState('');
+  //Macros state
   const [cals, setCals] = useState(0)
   const [protein, setProtein] = useState(0);
   const [carbs, setCarbs] = useState(0);
   const [fats, setFats] = useState(0);
-  const {addNutrition} = useNutritionContext()
-
   // Loading states for individual macros
   const [loadingCals, setLoadingCals] = useState(false);
   const [loadingProtein, setLoadingProtein] = useState(false);
   const [loadingCarbs, setLoadingCarbs] = useState(false);
   const [loadingFats, setLoadingFats] = useState(false);
+
+  //WiFi Status
+  const [isConnected, setIsConnected] = useState(true);
+  useEffect(() => {
+    // Get initial state
+    NetInfo.fetch().then(state => {
+      setIsConnected(state.isConnected);
+    });
+
+    // Set up listener for network state changes
+    const unsubscribe = NetInfo.addEventListener(state => {
+      setIsConnected(state.isConnected);
+    });
+    
+    return () => unsubscribe();
+  }, []);
 
 
 
@@ -48,8 +68,7 @@ export default function AddNutritionScreen(props) {
 
   async function handleGenerateSpecificMacro(macroType) {
     if (!mainInput.trim()) return;
-
-    // Set loading state for specific macro
+    // Set loading state to true for macro type being generating
     switch(macroType) {
       case 'calories':
         setLoadingCals(true);
@@ -67,8 +86,7 @@ export default function AddNutritionScreen(props) {
 
     try {
       const generatedValue = await handleGenerateMacros(macroType);
-      
-      // Update the specific macro value
+      // Update the specific macro value based on the generation
       switch(macroType) {
         case 'calories':
           setCals((prev) => parseInt(prev,10) + parseInt(generatedValue, 10));
@@ -84,7 +102,7 @@ export default function AddNutritionScreen(props) {
           break;
       }
     } finally {
-      // Clear loading state
+      // Set loading state to false to indicate generation is complete
       switch(macroType) {
         case 'calories':
           setLoadingCals(false);
@@ -102,18 +120,7 @@ export default function AddNutritionScreen(props) {
     }
   }
 
-
-  async function handleAIGenerate(){
-    const generatedCals = await handleGenerateMacros('calories')
-    const generatedProtein = await handleGenerateMacros('protein')
-    const generatedCarbs = await handleGenerateMacros('carbs')
-    const generatedFats = await handleGenerateMacros('fats')
-    setCals(generatedCals)
-    setProtein(generatedProtein)
-    setCarbs(generatedCarbs)
-    setFats(generatedFats)
-  }
-
+  //Function to reset the macros and user meal input
   function handleReset(){
     setCals(0)
     setProtein(0)
@@ -122,11 +129,9 @@ export default function AddNutritionScreen(props) {
     setMainInput('')
   }
 
-
-
+  //Function to add the macros to nutrtion data
   function handleAdd(){
-    const name = mainInput ;
-
+    const name = mainInput 
     addNutrition(
       name,
       parseInt(protein, 10) || 0,
@@ -134,34 +139,37 @@ export default function AddNutritionScreen(props) {
       parseInt(fats, 10) || 0,
       parseInt(cals, 10) || 0
     );
-
-    setMainInput('');
-    setCals(0);
-    setProtein(0);
-    setCarbs(0);
-    setFats(0);
+    handleReset();
   }
 
-  function handleNotPremium(){
-    navigation.navigate('Subscription');
-    props.onClose();
+  //Function to handle if user doesnt have premium or is not connected to internet
+  function handleNotPremiumOrConnected(connected){
+    if (!connected) {
+      Alert.alert('No internet connection', 'Please connect to the internet to use this feature.');
+    }
+    else{
+      navigation.navigate('Subscription');
+      props.onClose();
+    }
   }
 
 
   function content(){
+    //Header containing the title and subtitle
     const header = (
       <View style={styles.headerContainer}>
         <Text style={styles.headerTitle}>Manual Nutrition Entry</Text>
         <Text style={styles.headerSubtitle}>Enter your meal details manually or use AI to help generate macros</Text>
       </View>
     )
-
+    //Footer containing the macro inputs, AI buttons, reset button, and close button
     const footer = (
       <>
       {/* Macro Inputs */}
       <View style={styles.macroInputsContainer}>
         <View style={styles.inputRow}>
 
+          {/* Calories Input */}
           <Text style={styles.label}>Calories</Text>
           <View style={styles.inputContainer}>
             <TextInput
@@ -180,10 +188,9 @@ export default function AddNutritionScreen(props) {
               />
             )}
           </View>
-          {mode === 0 &&
           <TouchableOpacity 
-            style={[styles.aiButton, (loadingCals || !hasPremium) && styles.aiButtonDisabled]} 
-            onPress={() => hasPremium ? handleGenerateSpecificMacro('calories') : handleNotPremium()}
+            style={[styles.aiButton, (loadingCals || !hasPremium || !isConnected ) && styles.aiButtonDisabled]} 
+            onPress={() => (hasPremium && isConnected) ? handleGenerateSpecificMacro('calories') : handleNotPremiumOrConnected(isConnected)}
             disabled={loadingCals}
           >
             <LinearGradient
@@ -195,9 +202,9 @@ export default function AddNutritionScreen(props) {
               <Ionicons name="sparkles-sharp" size={18} color="#ffffff" />
             </LinearGradient>
           </TouchableOpacity>
-          }
         </View>
 
+        {/* Protein Input */}
         <View style={styles.inputRow}>
           <Text style={styles.label}>Protein</Text>
           <View style={styles.inputContainer}>
@@ -217,10 +224,9 @@ export default function AddNutritionScreen(props) {
               />
             )}
           </View>
-          {mode === 0 &&
           <TouchableOpacity 
-            style={[styles.aiButton, (loadingProtein || !hasPremium) && styles.aiButtonDisabled]} 
-            onPress={() => hasPremium ? handleGenerateSpecificMacro('protein') : handleNotPremium()}
+            style={[styles.aiButton, (loadingProtein || !hasPremium || !isConnected) && styles.aiButtonDisabled]} 
+            onPress={() => (hasPremium && isConnected) ? handleGenerateSpecificMacro('protein') : handleNotPremiumOrConnected(isConnected)}
             disabled={loadingProtein}
           >
             <LinearGradient
@@ -232,9 +238,9 @@ export default function AddNutritionScreen(props) {
               <Ionicons name="sparkles-sharp" size={18} color="#ffffff" />
             </LinearGradient>
           </TouchableOpacity>
-          }
         </View>
         
+        {/* Carbs Input */}
         <View style={styles.inputRow}>
           <Text style={styles.label}>Carbs</Text>
           <View style={styles.inputContainer}>
@@ -254,10 +260,9 @@ export default function AddNutritionScreen(props) {
               />
             )}
           </View>
-          {mode === 0 &&
           <TouchableOpacity 
-            style={[styles.aiButton, (loadingCarbs || !hasPremium) && styles.aiButtonDisabled]} 
-            onPress={() => hasPremium ? handleGenerateSpecificMacro('carbs') : handleNotPremium()}
+            style={[styles.aiButton, (loadingCarbs || !hasPremium || !isConnected) && styles.aiButtonDisabled]} 
+            onPress={() => (hasPremium && isConnected) ? handleGenerateSpecificMacro('carbs') : handleNotPremiumOrConnected(isConnected)}
             disabled={loadingCarbs}
           >
             <LinearGradient
@@ -269,9 +274,9 @@ export default function AddNutritionScreen(props) {
               <Ionicons name="sparkles-sharp" size={18} color="#ffffff" />
             </LinearGradient>
           </TouchableOpacity>
-          }
         </View>
         
+        {/* Fats Input */}
         <View style={styles.inputRow}>
           <Text style={styles.label}>Fats</Text>
           <View style={styles.inputContainer}>
@@ -291,10 +296,9 @@ export default function AddNutritionScreen(props) {
               />
             )}
           </View>
-          {mode === 0 &&
           <TouchableOpacity 
-            style={[styles.aiButton, (loadingFats || !hasPremium) && styles.aiButtonDisabled]} 
-            onPress={() => hasPremium ? handleGenerateSpecificMacro('fats') : handleNotPremium()}
+            style={[styles.aiButton, (loadingFats || !hasPremium || !isConnected) && styles.aiButtonDisabled]} 
+            onPress={() => (hasPremium && isConnected) ? handleGenerateSpecificMacro('fats') : handleNotPremiumOrConnected(isConnected)}
             disabled={loadingFats}
           >
             <LinearGradient
@@ -306,12 +310,9 @@ export default function AddNutritionScreen(props) {
               <Ionicons name="sparkles-sharp" size={18} color="#ffffff" />
             </LinearGradient>
           </TouchableOpacity>
-          }
         </View>
       </View>
-
-
-
+      {/* Close and Add Macros Buttons */}
       <View flexDirection="row" gap={5} alignItems="center" justifyContent='center'>
         <TouchableOpacity style={styles.closeButton} onPress={() => { handleReset(); props.onClose(); }}>
           <Text style={styles.buttonText}>Close</Text>
@@ -323,7 +324,7 @@ export default function AddNutritionScreen(props) {
       </View>
       </>
     )
-
+    //Return header + text input for user meal input + footer
     return (
       <>
         {header}
@@ -342,7 +343,7 @@ export default function AddNutritionScreen(props) {
     )
   }
 
-
+  //Return modal displaying the content
   return (
     <Modal
       animationType="slide"
@@ -354,11 +355,7 @@ export default function AddNutritionScreen(props) {
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
           <View style={styles.content}>
-            
-            {mode === 0 ? <View>{content()}</View> : content()}
-            
-
-            
+            <View>{content()}</View>
           </View>
         </View>
       </View>

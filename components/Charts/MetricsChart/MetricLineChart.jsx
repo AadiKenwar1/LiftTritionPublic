@@ -24,7 +24,7 @@ export default function MetricLineChart(props) {
   const styles = getStyles(mode)
 
   // Context - using for main functionality
-  const {setChart, volumeChart, logs, loading} = useWorkoutContext()
+  const {setChart, volumeChart, logs, loaded} = useWorkoutContext()
   const {getMacroForLast30Days, nutritionData} = useNutritionContext()
 
   // FIXED: Simplified state to prevent visual glitch - use button positions instead of metric names
@@ -39,9 +39,9 @@ export default function MetricLineChart(props) {
   useEffect(() => {
     console.log('🚀 Updating charts with V2 context');
     console.log('📊 V2 logs count:', logs ? logs.length : 0);
-    setVolumeChartData(volumeChart())
-    setSetChartData(setChart())
-  }, [logs]);
+    setVolumeChartData(volumeChart)
+    setSetChartData(setChart)
+  }, [logs, volumeChart, setChart]);
 
   useEffect(() => {
     console.log('📊 Raw weightProgress array:', weightProgress);

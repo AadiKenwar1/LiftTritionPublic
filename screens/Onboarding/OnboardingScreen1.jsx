@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import WiFiStatusBanner from '../../components/WiFiStatusBanner';
 
 export default function OnboardingScreen1() {
   const navigation = useNavigation();
@@ -13,6 +14,7 @@ export default function OnboardingScreen1() {
 
   return (
     <View style={styles.container}>
+      <WiFiStatusBanner />
       <View style={styles.content}>
         <Text style={styles.title}>LiftTrition</Text>
         

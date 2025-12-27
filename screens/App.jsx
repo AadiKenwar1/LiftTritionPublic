@@ -25,7 +25,8 @@ import { AuthProvider, useAuthContext } from "../context/Auth/AuthContext";
 import { SettingsProvider, useSettings } from "../context/Settings/SettingsContext";
 import { WorkoutProvider, useWorkoutContext } from "../context/WorkoutsV2/WorkoutContext";
 import { NutritionProvider, useNutritionContext } from "../context/Nutrition/NutritionContext";
-import { BillingProvider } from "../context/Billing/BillingContext";
+import { BillingProvider, useBilling } from "../context/Billing/BillingContext";
+import { useSyncManager } from "../context/database";
 
 // Screens
 import WelcomeScreen from "./welcomeScreen";
@@ -36,14 +37,13 @@ import OnboardingScreen1 from "./onboarding/onboardingScreen1";
 import OnboardingScreen2 from "./onboarding/onboardingScreen2";
 import OnboardingScreen3 from "./onboarding/onboardingScreen3";
 import OnboardingScreen4 from "./onboarding/onboardingScreen4";
-import OnboardingScreen6 from "./onboarding/onboardingScreen6";
-import OnboardingScreen8 from "./onboarding/onboardingScreen8";
-import OnboardingScreen10 from "./onboarding/onboardingScreen10";
-import OnboardingScreen11 from "./onboarding/onboardingScreen11";
-import OnboardingScreen12 from "./onboarding/onboardingScreen12";
+import OnboardingScreen5 from "./onboarding/onboardingScreen5";
+import OnboardingScreen8 from "./onboarding/onboardingScreen6";
+import OnboardingScreen10 from "./onboarding/onboardingScreen7";
+import OnboardingScreen11 from "./onboarding/onboardingScreen8";
+import OnboardingScreen12 from "./onboarding/onboardingScreen9";
 
 import LoadingScreen from "./loadingScreen";
-import WiFiStatusBanner from "../components/WiFiStatusBanner";
 
 // Other screens
 import WorkoutDetails from "./main/workoutScreens/exercisesScreen";
@@ -59,7 +59,7 @@ import AddExerciseScreen1 from "./settings/SettingsOptions/userExercises/AddExer
 import AddExerciseScreen2 from "./settings/SettingsOptions/userExercises/AddExerciseScreen2";
 import AddExerciseScreen3 from "./settings/SettingsOptions/userExercises/AddExerciseScreen3";
 import AddExerciseScreen4 from "./settings/SettingsOptions/userExercises/AddExerciseScreen4";
-import CameraScreen from "./camera";
+import CameraScreen from "./main/nutritionScreens/camera";
 import AdjustMacrosScreen from "./settings/SettingsOptions/adjustMacros/adjustMacros";
 import SetMacrosScreen from "./settings/SettingsOptions/adjustMacros/setMacros";
 
@@ -132,8 +132,12 @@ function TabNavigator() {
 function AuthenticatedApp() {
   const { isAuthenticated, loading: authLoading, user } = useAuthContext();
   const { loading: settingsLoading } = useSettings();
-  const { loading: workoutLoading } = useWorkoutContext();
-  const { loading: nutritionLoading } = useNutritionContext();
+  const { loaded: workoutLoaded } = useWorkoutContext();
+  const { loaded: nutritionLoaded } = useNutritionContext();
+  const { loaded: billingLoaded } = useBilling();
+  
+  // Centralized sync manager - handles all syncing
+  useSyncManager();
   
   // Check if onboarding is completed (access settings from user object)
   const onboardingCompleted = user?.settings?.onboardingCompleted;
@@ -157,7 +161,7 @@ function AuthenticatedApp() {
 
           </>
         ) : 
-        (settingsLoading || workoutLoading || nutritionLoading) ? (
+        (settingsLoading || !workoutLoaded || !nutritionLoaded || !billingLoaded) ? (
           // Loading screen while contexts are loading
           <Stack.Screen name="Loading" component={LoadingScreen} />
         ): 
@@ -189,7 +193,7 @@ function AuthenticatedApp() {
             <Stack.Screen name="Onboarding2" component={OnboardingScreen2} />
             <Stack.Screen name="Onboarding3" component={OnboardingScreen3} />
             <Stack.Screen name="Onboarding4" component={OnboardingScreen4} />
-            <Stack.Screen name="Onboarding6" component={OnboardingScreen6} />
+            <Stack.Screen name="Onboarding5" component={OnboardingScreen5} />
             <Stack.Screen name="Onboarding8" component={OnboardingScreen8} />
             <Stack.Screen name="Onboarding10" component={OnboardingScreen10} />
             <Stack.Screen name="Onboarding11" component={OnboardingScreen11} />
@@ -200,7 +204,7 @@ function AuthenticatedApp() {
     </NavigationContainer>
     
     {/* WiFi Status Banner - shows when offline */}
-    <WiFiStatusBanner />
+    
     </>
   );
 }
@@ -227,13 +231,6 @@ function AppContent() {
     Purchases.setLogLevel(LOG_LEVEL.VERBOSE);
     Purchases.configure({ apiKey });
   }, []);
-
-  useEffect(() => {
-    if (authLoading) {
-      return;
-    }
-    syncRevenueCatUser(user);
-  }, [user, authLoading]);
 
   return (
     <BillingProvider>
@@ -281,14 +278,3 @@ export default function App() {
   );
 }
 
-function syncRevenueCatUser(user) {
-  if (user?.appleUserId) {
-    return Purchases.logIn(user.appleUserId).catch((error) => {
-      console.warn("[RevenueCat] Failed to log in user", error);
-    });
-  }
-
-  return Purchases.logOut().catch((error) => {
-    console.warn("[RevenueCat] Failed to log out user", error);
-  });
-}

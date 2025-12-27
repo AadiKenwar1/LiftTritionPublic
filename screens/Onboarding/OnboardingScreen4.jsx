@@ -4,6 +4,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import { Ruler } from 'lucide-react-native';
+import WiFiStatusBanner from '../../components/WiFiStatusBanner';
 
 export default function OnboardingScreen4() {
   const navigation = useNavigation();
@@ -82,6 +83,7 @@ export default function OnboardingScreen4() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
+      <WiFiStatusBanner />
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.container}>
           <View style={styles.content}>

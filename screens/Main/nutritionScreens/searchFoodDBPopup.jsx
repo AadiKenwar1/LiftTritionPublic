@@ -2,52 +2,35 @@ import React from 'react';
 import { Modal, View, Text, StyleSheet, TouchableOpacity, TextInput, Keyboard, TouchableWithoutFeedback, FlatList, Alert, ActivityIndicator} from 'react-native';
 import { Ionicons, Entypo } from '@expo/vector-icons';
 import { useState } from 'react';
-import FoodSearch from '../../../components/FoodSearch';
+import FoodSearch from '../../../components/NutritionComponents/FoodSearch';
 import PopupModal from '../../../components/PopupModal';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useNutritionContext } from '../../../context/Nutrition/NutritionContext';
 
 export default function SearchFoodDBPopup(props) {
-  const [cals, setCals] = useState(0)
-  const [protein, setProtein] = useState(0);
-  const [carbs, setCarbs] = useState(0);
-  const [fats, setFats] = useState(0);
+  //Nutrition Context Functions
   const {addNutrition, nutritionData} = useNutritionContext()
-
+  //Macronutrient states
+  const [cals, setCals] = useState(0)
+  const [protein, setProtein] = useState(0)
+  const [carbs, setCarbs] = useState(0)
+  const [fats, setFats] = useState(0)
+  //User added food state
   const[addedFood, setAddedFood] = useState([])
+  //Added foods popup visibility state
   const [showAddedFoodsPopup, setShowAddedFoodsPopup] = useState(false);
 
+  //Remove added food and subtract from total
   function handleDelete(index) {
     const foodToRemove = addedFood[index];
-
-    // Subtract from parent macros
     setCals((prev) => (0, parseInt(prev, 10) - parseInt(foodToRemove.calories, 10)).toString());
     setProtein((prev) => (0, parseInt(prev, 10) - parseInt(foodToRemove.protein, 10)).toString());
     setCarbs((prev) => (0, parseInt(prev, 10) - parseInt(foodToRemove.carbs, 10)).toString());
     setFats((prev) => (0, parseInt(prev, 10) - parseInt(foodToRemove.fats, 10)).toString());
-
-    // Remove from local addedFood list
     setAddedFood((prev) => prev.filter((_, i) => i !== index));
   }
 
-  function handleAdd(){
-    const name = addedFood.map(item => item.name).join(", ");
-
-    addNutrition(
-      name,
-      parseInt(protein, 10) || 0,
-      parseInt(carbs, 10) || 0,
-      parseInt(fats, 10) || 0,
-      parseInt(cals, 10) || 0
-    );
-
-    setCals(0);
-    setProtein(0);
-    setCarbs(0);
-    setFats(0);
-    setAddedFood([]);
-  }
-
+  //Reset macros and added foods
   function handleReset(){
     setCals(0);
     setProtein(0);
@@ -56,6 +39,20 @@ export default function SearchFoodDBPopup(props) {
     setAddedFood([]);
   }
 
+  //Add added foods to nutrition data
+  function handleAdd(){
+    const name = addedFood.map(item => item.name).join(", ");
+    addNutrition(
+      name,
+      parseInt(protein, 10) || 0,
+      parseInt(carbs, 10) || 0,
+      parseInt(fats, 10) || 0,
+      parseInt(cals, 10) || 0
+    )
+    handleReset();
+  }
+
+  //Header for the search food database popup
   const header = (
     <>
       <View style={styles.headerContainer}>

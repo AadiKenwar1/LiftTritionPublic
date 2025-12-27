@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useState } from "react";
-import { useWorkoutContext } from "../context/WorkoutsV2/WorkoutContext";
+import { useWorkoutContext } from "../../context/WorkoutsV2/WorkoutContext";
 import { Ionicons } from "@expo/vector-icons";
 export default function ExerciseSelector(props) {
 

@@ -21,6 +21,7 @@ export default function PopupModal({
   closeButtonText,
   showSettingsLink,
   onNavigateToSettings,
+  marginBottom = 0,
 }) {
   return (
     <Modal
@@ -31,7 +32,7 @@ export default function PopupModal({
       onRequestClose={() => setModalVisible(false)}
     >
       <View style={styles.overlay}>
-        <View style={styles.modalContainer}>
+        <View style={[styles.modalContainer, { marginBottom: marginBottom }]}>
           <View style={styles.modalContent}>
             {children}
             

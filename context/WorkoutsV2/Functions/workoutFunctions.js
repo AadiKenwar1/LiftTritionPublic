@@ -1,26 +1,29 @@
-import { generateClient } from '@aws-amplify/api';
-import { createWorkout, updateWorkout, deleteWorkout as deleteWorkoutMutation, deleteExercise as deleteExerciseMutation, deleteExerciseLog } from '../../../graphql/mutations';
-import { listExercises, listExerciseLogs } from '../../../graphql/queries';
 import uuid from 'react-native-uuid';
 
-const client = generateClient();
+/*Function List:
+ * addWorkout
+ * deleteWorkout
+ * renameWorkout
+ * reorderWorkouts
+ * archiveWorkout
+ * unarchiveWorkout
+ * addNoteToWorkout
+ */
 
 /**
- * Add a new workout
+ * Add a new workout 
  * @param {string} name - Workout name
  * @param {string} userId - User ID
  * @param {function} setWorkouts - State setter for workouts
  * @returns {Promise} - Promise that resolves when workout is added
  */
 export async function addWorkout(name, userId, setWorkouts) {
-  // Get current workouts to determine the highest order
   let currentWorkouts = [];
   setWorkouts(prev => {
     currentWorkouts = prev;
     return prev;
   });
 
-  // Find the highest order value (or start at 0 if no workouts exist)
   const maxOrder = currentWorkouts.length > 0 
     ? Math.max(...currentWorkouts.map(w => w.order || 0))
     : -1;
@@ -32,36 +35,16 @@ export async function addWorkout(name, userId, setWorkouts) {
     order: maxOrder + 1, // New workout gets highest order (appears first)
     archived: false,
     note: "",
-    synced: false, // Mark as unsynced initially
+    synced: false, 
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
 
-  // Optimistic update - add new workout at the beginning and mark as unsynced
   setWorkouts(prev => [{ ...newWorkout, synced: false }, ...prev]);
-
-  try {
-    await client.graphql({
-      query: createWorkout,
-      variables: { input: newWorkout }
-    });
-    
-    // Mark as synced after successful database save
-    setWorkouts(prev => prev.map(workout => 
-      workout.id === newWorkout.id 
-        ? { ...workout, synced: true }
-        : workout
-    ));
-  } catch (error) {
-    console.error('Error adding workout:', error);
-    // Remove from local state on error
-    setWorkouts(prev => prev.filter(workout => workout.id !== newWorkout.id));
-    throw error;
-  }
 }
 
 /**
- * Delete a workout and all its exercises and logs
+ * Delete a workout and all its exercises and logs by setting the deleted flag to true for the workout, exercises, and logs
  * @param {string} workoutId - Workout ID to delete
  * @param {function} setWorkouts - State setter for workouts
  * @param {function} setExercises - State setter for exercises
@@ -69,291 +52,93 @@ export async function addWorkout(name, userId, setWorkouts) {
  * @returns {Promise} - Promise that resolves when workout is deleted
  */
 export async function deleteWorkout(workoutId, setWorkouts, setExercises, setLogs) {
-  // Optimistic update - remove from local state
-  setWorkouts(prev => prev.filter(workout => workout.id !== workoutId));
-  setExercises(prev => prev.filter(exercise => exercise.workoutId !== workoutId));
-  setLogs(prev => prev.filter(log => log.workoutId !== workoutId));
-
-  try {
-    // Step 1: Find and delete all logs for this workout
-    const logsResult = await client.graphql({
-      query: listExerciseLogs,
-      variables: { 
-        filter: { workoutId: { eq: workoutId } }
-      }
-    });
-    
-    const logsToDelete = logsResult.data.listExerciseLogs.items || [];
-    if (logsToDelete.length > 0) {
-      const deleteLogPromises = logsToDelete.map(log =>
-        client.graphql({
-          query: deleteExerciseLog,
-          variables: { input: { id: log.id } }
-        })
-      );
-      await Promise.all(deleteLogPromises);
-    }
-
-    // Step 2: Find and delete all exercises for this workout
-    const exercisesResult = await client.graphql({
-      query: listExercises,
-      variables: { 
-        filter: { workoutId: { eq: workoutId } }
-      }
-    });
-    
-    const exercisesToDelete = exercisesResult.data.listExercises.items || [];
-    if (exercisesToDelete.length > 0) {
-      const deleteExercisePromises = exercisesToDelete.map(exercise =>
-        client.graphql({
-          query: deleteExerciseMutation,
-          variables: { input: { id: exercise.id } }
-        })
-      );
-      await Promise.all(deleteExercisePromises);
-    }
-
-    // Step 3: Delete the workout itself
-    await client.graphql({
-      query: deleteWorkoutMutation,
-      variables: { input: { id: workoutId } }
-    });
-  } catch (error) {
-    console.error('Error deleting workout:', error);
-    // Note: In a real app, you'd want to restore the data on error
-    // For now, we'll just log the error
-    throw error;
-  }
+  setWorkouts(prev => prev.map(workout => 
+    workout.id === workoutId ? { ...workout, deleted: true } : workout
+  ));
+  setExercises(prev => prev.map(exercise => 
+    exercise.workoutId === workoutId ? { ...exercise, deleted: true } : exercise
+  ));
+  setLogs(prev => prev.map(log => 
+    log.workoutId === workoutId ? { ...log, deleted: true } : log
+  ));
 }
 
 /**
- * Rename a workout
+ * Rename a workout by updating the name field
  * @param {string} workoutId - Workout ID to rename
  * @param {string} newName - New workout name
  * @param {function} setWorkouts - State setter for workouts
  * @returns {Promise} - Promise that resolves when workout is renamed
  */
-export async function renameWorkout(workoutId, newName, setWorkouts) {
-  // Store original name for potential revert
-  let originalName = '';
-  
-  // Optimistic update - mark as unsynced
+export async function renameWorkout(workoutId, newName, setWorkouts) {  
   setWorkouts(prev => prev.map(workout => {
     if (workout.id === workoutId) {
-      originalName = workout.name; // Store original name
-      return { ...workout, name: newName, synced: false };
+      return { ...workout, name: newName, synced: false, updatedAt: new Date().toISOString() };
     }
     return workout;
   }));
-  
-  try {
-    const input = {
-      id: workoutId,
-      name: newName,
-      updatedAt: new Date().toISOString(),
-    };
-
-    await client.graphql({
-      query: updateWorkout,
-      variables: { input }
-    });
-
-    // Mark as synced after successful database save
-    setWorkouts(prev => prev.map(workout => 
-      workout.id === workoutId 
-        ? { ...workout, synced: true }
-        : workout
-    ));
-  } catch (error) {
-    console.error('Error renaming workout:', error);
-    // Revert optimistic update
-    setWorkouts(prev => prev.map(workout => 
-      workout.id === workoutId 
-        ? { ...workout, name: originalName, synced: true } // Revert to original name
-        : workout
-    ));
-    throw error;
-  }
 }
 
 /**
- * Reorder workouts
+ * Reorder workouts by updating the order field for each workout (highest order on top)
  * @param {Array} newOrder - Array of workout objects in new order
  * @param {function} setWorkouts - State setter for workouts
  * @returns {Promise} - Promise that resolves when workouts are reordered
  */
 export async function reorderWorkouts(newOrder, setWorkouts) {
-  // Store the original order for rollback
   let originalWorkouts = [];
   setWorkouts(prev => {
     originalWorkouts = [...prev];
     return prev;
   });
-  // Update order field for each workout
   const updatedWorkouts = newOrder.map((workout, index) => ({
     ...workout,
     order: newOrder.length - 1 - index, // Higher order = appears first
     synced: false,
+    updatedAt: new Date().toISOString(),
   }));
-  // Optimistic update
   setWorkouts(updatedWorkouts);
-  try {
-    // Update each workout's order in the database
-    const updatePromises = updatedWorkouts.map(workout => {
-      const input = {
-        id: workout.id,
-        order: workout.order,
-        updatedAt: new Date().toISOString(),
-      };
-
-      return client.graphql({
-        query: updateWorkout,
-        variables: { input }
-      });
-    });
-    await Promise.all(updatePromises);
-    // Mark all as synced
-    setWorkouts(prev => prev.map(workout => ({ ...workout, synced: true })));
-  } catch (error) {
-    console.error('Error reordering workouts:', error);
-    // Revert to original order on error
-    console.log('🔄 Reverting to original workout order due to error');
-    setWorkouts(originalWorkouts);
-    
-    throw error;
-  }
 }
 
 /**
- * Archive a workout
+ * Archive a workout by setting the archived flag to true
  * @param {string} workoutId - Workout ID to archive
  * @param {function} setWorkouts - State setter for workouts
  * @returns {Promise} - Promise that resolves when workout is archived
  */
 export async function archiveWorkout(workoutId, setWorkouts) {
-  // Optimistic update - mark as unsynced
   setWorkouts(prev => prev.map(workout => 
     workout.id === workoutId 
-      ? { ...workout, archived: true, synced: false }
+      ? { ...workout, archived: true, synced: false, updatedAt: new Date().toISOString() }
       : workout
   ));
-
-  try {
-    const input = {
-      id: workoutId,
-      archived: true,
-      updatedAt: new Date().toISOString(),
-    };
-
-    await client.graphql({
-      query: updateWorkout,
-      variables: { input }
-    });
-
-    // Mark as synced after successful database save
-    setWorkouts(prev => prev.map(workout => 
-      workout.id === workoutId 
-        ? { ...workout, synced: true }
-        : workout
-    ));
-  } catch (error) {
-    console.error('Error archiving workout:', error);
-    // Revert optimistic update
-    setWorkouts(prev => prev.map(workout => 
-      workout.id === workoutId 
-        ? { ...workout, archived: false, synced: true }
-        : workout
-    ));
-    throw error;
-  }
 }
 
 /**
- * Unarchive a workout
+ * Unarchive a workout by setting the archived flag to false
  * @param {string} workoutId - Workout ID to unarchive
  * @param {function} setWorkouts - State setter for workouts
  * @returns {Promise} - Promise that resolves when workout is unarchived
  */
 export async function unarchiveWorkout(workoutId, setWorkouts) {
-  // Optimistic update - mark as unsynced
   setWorkouts(prev => prev.map(workout => 
     workout.id === workoutId 
-      ? { ...workout, archived: false, synced: false }
+      ? { ...workout, archived: false, synced: false, updatedAt: new Date().toISOString() }
       : workout
   ));
-
-  try {
-    const input = {
-      id: workoutId,
-      archived: false,
-      updatedAt: new Date().toISOString(),
-    };
-
-    await client.graphql({
-      query: updateWorkout,
-      variables: { input }
-    });
-
-    // Mark as synced after successful database save
-    setWorkouts(prev => prev.map(workout => 
-      workout.id === workoutId 
-        ? { ...workout, synced: true }
-        : workout
-    ));
-  } catch (error) {
-    console.error('Error unarchiving workout:', error);
-    // Revert optimistic update
-    setWorkouts(prev => prev.map(workout => 
-      workout.id === workoutId 
-        ? { ...workout, archived: true, synced: true }
-        : workout
-    ));
-    throw error;
-  }
 }
 
 /**
- * Add a note to a workout
+ * Add a note to a workout by updating the note field
  * @param {string} workoutId - Workout ID
  * @param {string} note - Note content
  * @param {function} setWorkouts - State setter for workouts
  * @returns {Promise} - Promise that resolves when note is added
  */
 export async function addNoteToWorkout(workoutId, note, setWorkouts) {
-  // Optimistic update
   setWorkouts(prev => prev.map(workout =>
     workout.id === workoutId
-      ? { ...workout, note, synced: false }
+      ? { ...workout, note, synced: false, updatedAt: new Date().toISOString() }
       : workout
   ));
-
-  try {
-    await client.graphql({
-      query: updateWorkout,
-      variables: {
-        input: {
-          id: workoutId,
-          note,
-          synced: true
-        }
-      }
-    });
-
-    // Mark as synced after successful database save
-    setWorkouts(prev => prev.map(workout =>
-      workout.id === workoutId
-        ? { ...workout, synced: true }
-        : workout
-    ));
-  } catch (error) {
-    console.error('Error adding note to workout:', error);
-    // Revert optimistic update on error - we'd need to get the original note
-    // For now, we'll just mark as synced to avoid UI issues
-    setWorkouts(prev => prev.map(workout =>
-      workout.id === workoutId
-        ? { ...workout, synced: true }
-        : workout
-    ));
-    throw error;
-  }
 }

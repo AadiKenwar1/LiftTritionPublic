@@ -1,9 +1,14 @@
-import { generateClient } from '@aws-amplify/api';
-import { createExercise, updateExercise, deleteExercise as deleteExerciseMutation, deleteExerciseLog } from '../../../graphql/mutations';
-import { listExerciseLogs } from '../../../graphql/queries';
 import uuid from 'react-native-uuid';
 
-const client = generateClient();
+/*Function List:
+ * addExercise
+ * deleteExercise
+ * renameExercise
+ * reorderExercises
+ * archiveExercise
+ * unarchiveExercise
+ * addNoteToExercise
+ */
 
 /**
  * Add a new exercise to a workout
@@ -14,18 +19,16 @@ const client = generateClient();
  * @returns {Promise} - Promise that resolves when exercise is added
  */
 export async function addExercise(workoutId, exerciseName, userId, setExercises) {
-  // Get current exercises to determine the highest order for this workout
+  // Get current exercises to determine the highest order (order in which workouts are displayed) for this workout
   let currentExercises = [];
   setExercises(prev => {
     currentExercises = prev;
     return prev;
-  });
+  })
 
-  // Find the highest order value among exercises for this specific workout
   const workoutExercises = currentExercises.filter(ex => ex.workoutId === workoutId);
-  const maxOrder = workoutExercises.length > 0 
-    ? Math.max(...workoutExercises.map(ex => ex.order || 0))
-    : -1;
+  // Find the highest order value among exercises for this specific workout so we can add the new exercise to the end of the list
+  const maxOrder = workoutExercises.length > 0 ? Math.max(...workoutExercises.map(ex => ex.order || 0)): -1;
 
   const newExercise = {
     id: uuid.v4(),
@@ -40,72 +43,23 @@ export async function addExercise(workoutId, exerciseName, userId, setExercises)
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
-
-  // Optimistic update - add new exercise at the beginning and mark as unsynced
   setExercises(prev => [{ ...newExercise, synced: false }, ...prev]);
-
-  try {
-    await client.graphql({
-      query: createExercise,
-      variables: { input: newExercise }
-    });
-    
-    // Mark as synced after successful database save
-    setExercises(prev => prev.map(exercise => 
-      exercise.id === newExercise.id 
-        ? { ...exercise, synced: true }
-        : exercise
-    ));
-  } catch (error) {
-    console.error('Error adding exercise:', error);
-    // Remove from local state on error
-    setExercises(prev => prev.filter(exercise => exercise.id !== newExercise.id));
-    throw error;
-  }
 }
 
 /**
- * Delete an exercise and all its logs
+ * Delete an exercise by setting the deleted flag to true for the exercise and all its logs
  * @param {string} exerciseId - Exercise ID to delete
  * @param {function} setExercises - State setter for exercises
  * @param {function} setLogs - State setter for logs
  * @returns {Promise} - Promise that resolves when exercise is deleted
  */
 export async function deleteExercise(exerciseId, setExercises, setLogs) {
-  // Optimistic update - remove from local state
-  setExercises(prev => prev.filter(exercise => exercise.id !== exerciseId));
-  setLogs(prev => prev.filter(log => log.exerciseId !== exerciseId));
-
-  try {
-    // Step 1: Find and delete all logs for this exercise
-    const logsResult = await client.graphql({
-      query: listExerciseLogs,
-      variables: { 
-        filter: { exerciseId: { eq: exerciseId } }
-      }
-    });
-    
-    const logsToDelete = logsResult.data.listExerciseLogs.items || [];
-    if (logsToDelete.length > 0) {
-      const deleteLogPromises = logsToDelete.map(log =>
-        client.graphql({
-          query: deleteExerciseLog,
-          variables: { input: { id: log.id } }
-        })
-      );
-      await Promise.all(deleteLogPromises);
-    }
-
-    // Step 2: Delete the exercise itself
-    await client.graphql({
-      query: deleteExerciseMutation,
-      variables: { input: { id: exerciseId } }
-    });
-  } catch (error) {
-    console.error('Error deleting exercise:', error);
-    // Note: In a real app, you'd want to restore the data on error
-    throw error;
-  }
+  setExercises(prev => prev.map(exercise => 
+    exercise.id === exerciseId ? { ...exercise, deleted: true } : exercise
+  ));
+  setLogs(prev => prev.map(log => 
+    log.exerciseId === exerciseId ? { ...log, deleted: true } : log
+  ));
 }
 
 /**
@@ -116,223 +70,78 @@ export async function deleteExercise(exerciseId, setExercises, setLogs) {
  * @returns {Promise} - Promise that resolves when exercise is renamed
  */
 export async function renameExercise(exerciseId, newName, setExercises) {
-  // Optimistic update
   setExercises(prev => prev.map(exercise => 
     exercise.id === exerciseId 
-      ? { ...exercise, name: newName, synced: false }
+      ? { ...exercise, name: newName, synced: false, updatedAt: new Date().toISOString() }
       : exercise
   ));
-
-  try {
-    const input = {
-      id: exerciseId,
-      name: newName,
-      updatedAt: new Date().toISOString(),
-    };
-
-    await client.graphql({
-      query: updateExercise,
-      variables: { input }
-    });
-
-    // Mark as synced
-    setExercises(prev => prev.map(exercise => 
-      exercise.id === exerciseId 
-        ? { ...exercise, synced: true }
-        : exercise
-    ));
-  } catch (error) {
-    console.error('Error renaming exercise:', error);
-    // Revert optimistic update
-    setExercises(prev => prev.map(exercise => 
-      exercise.id === exerciseId 
-        ? { ...exercise, name: exercise.name, synced: true } // Revert to original name
-        : exercise
-    ));
-    throw error;
-  }
 }
 
 /**
- * Reorder exercises within a workout
+ * Reorder exercises within a workout by updating order field for each exercise (highest order on top)
  * @param {string} workoutId - Workout ID
- * @param {Array} newOrder - Array of exercise objects in new order
+ * @param {Array} newOrder - Array of exercise objects in new order (must only contain exercises from the specified workout)
  * @param {function} setExercises - State setter for exercises
  * @returns {Promise} - Promise that resolves when exercises are reordered
  */
 export async function reorderExercises(workoutId, newOrder, setExercises) {
-  // Update order field for each exercise
   const updatedExercises = newOrder.map((exercise, index) => ({
     ...exercise,
-    order: newOrder.length - 1 - index, // Higher order = appears first
+    order: newOrder.length - 1 - index, 
     synced: false,
   }));
 
-  // Optimistic update
+  // Update state - only update exercises that belong to this workout
   setExercises(prev => prev.map(exercise => {
+    // Skip exercises from other workouts (normal, no error)
+    if (exercise.workoutId !== workoutId) {
+      return exercise; // Don't touch exercises from other workouts
+    }
+    
     const updatedExercise = updatedExercises.find(ue => ue.id === exercise.id);
-    return updatedExercise || exercise;
+    return updatedExercise ? { ...updatedExercise, updatedAt: new Date().toISOString() } : exercise;
   }));
-
-  try {
-    // Update each exercise's order in the database
-    const updatePromises = updatedExercises.map(exercise => {
-      const input = {
-        id: exercise.id,
-        order: exercise.order,
-        updatedAt: new Date().toISOString(),
-      };
-
-      return client.graphql({
-        query: updateExercise,
-        variables: { input }
-      });
-    });
-
-    await Promise.all(updatePromises);
-
-    // Mark all as synced
-    setExercises(prev => prev.map(exercise => {
-      const updatedExercise = updatedExercises.find(ue => ue.id === exercise.id);
-      return updatedExercise ? { ...exercise, synced: true } : exercise;
-    }));
-  } catch (error) {
-    console.error('Error reordering exercises:', error);
-    // Note: In a real app, you'd want to revert to the original order
-    throw error;
-  }
 }
 
 /**
- * Archive an exercise
+ * Archive an exercise by setting the archived flag to true
  * @param {string} exerciseId - Exercise ID to archive
  * @param {function} setExercises - State setter for exercises
  * @returns {Promise} - Promise that resolves when exercise is archived
  */
 export async function archiveExercise(exerciseId, setExercises) {
-  // Optimistic update
   setExercises(prev => prev.map(exercise => 
     exercise.id === exerciseId 
-      ? { ...exercise, archived: true, synced: false }
+      ? { ...exercise, archived: true, synced: false, updatedAt: new Date().toISOString() }
       : exercise
   ));
-
-  try {
-    const input = {
-      id: exerciseId,
-      archived: true,
-      updatedAt: new Date().toISOString(),
-    };
-
-    await client.graphql({
-      query: updateExercise,
-      variables: { input }
-    });
-
-    // Mark as synced
-    setExercises(prev => prev.map(exercise => 
-      exercise.id === exerciseId 
-        ? { ...exercise, synced: true }
-        : exercise
-    ));
-  } catch (error) {
-    console.error('Error archiving exercise:', error);
-    // Revert optimistic update
-    setExercises(prev => prev.map(exercise => 
-      exercise.id === exerciseId 
-        ? { ...exercise, archived: false, synced: true }
-        : exercise
-    ));
-    throw error;
-  }
 }
 
 /**
- * Unarchive an exercise
+ * Unarchive an exercise by setting the archived flag to false
  * @param {string} exerciseId - Exercise ID to unarchive
  * @param {function} setExercises - State setter for exercises
  * @returns {Promise} - Promise that resolves when exercise is unarchived
  */
 export async function unarchiveExercise(exerciseId, setExercises) {
-  // Optimistic update
   setExercises(prev => prev.map(exercise => 
     exercise.id === exerciseId 
-      ? { ...exercise, archived: false, synced: false }
+      ? { ...exercise, archived: false, synced: false, updatedAt: new Date().toISOString() }
       : exercise
   ));
-
-  try {
-    const input = {
-      id: exerciseId,
-      archived: false,
-      updatedAt: new Date().toISOString(),
-    };
-
-    await client.graphql({
-      query: updateExercise,
-      variables: { input }
-    });
-
-    // Mark as synced
-    setExercises(prev => prev.map(exercise => 
-      exercise.id === exerciseId 
-        ? { ...exercise, synced: true }
-        : exercise
-    ));
-  } catch (error) {
-    console.error('Error unarchiving exercise:', error);
-    // Revert optimistic update
-    setExercises(prev => prev.map(exercise => 
-      exercise.id === exerciseId 
-        ? { ...exercise, archived: true, synced: true }
-        : exercise
-    ));
-    throw error;
-  }
 }
 
 /**
- * Add a note to an exercise
+ * Add a note to an exercise by updating the note field
  * @param {string} exerciseId - Exercise ID
  * @param {string} note - Note content
  * @param {function} setExercises - State setter for exercises
  * @returns {Promise} - Promise that resolves when note is added
  */
 export async function addNoteToExercise(exerciseId, note, setExercises) {
-  // Optimistic update
   setExercises(prev => prev.map(exercise =>
     exercise.id === exerciseId
-      ? { ...exercise, note, synced: false }
+      ? { ...exercise, note, synced: false, updatedAt: new Date().toISOString() }
       : exercise
   ));
-
-  try {
-    await client.graphql({
-      query: updateExercise,
-      variables: {
-        input: {
-          id: exerciseId,
-          note,
-          synced: true
-        }
-      }
-    });
-
-    // Mark as synced after successful database save
-    setExercises(prev => prev.map(exercise =>
-      exercise.id === exerciseId
-        ? { ...exercise, synced: true }
-        : exercise
-    ));
-  } catch (error) {
-    console.error('Error adding note to exercise:', error);
-    // Revert optimistic update on error - we'd need to get the original note
-    // For now, we'll just mark as synced to avoid UI issues
-    setExercises(prev => prev.map(exercise =>
-      exercise.id === exerciseId
-        ? { ...exercise, synced: true }
-        : exercise
-    ));
-    throw error;
-  }
 }

@@ -115,7 +115,7 @@ export default function PrivacyScreen() {
         <Text style={styles.bullet}>
           <Text style={styles.bold}>Amazon Web Services (AWS):</Text> All your data is stored securely on AWS AppSync (GraphQL database) in the us-east-1 region. AWS provides the infrastructure for data storage and synchronization.
         </Text>
-        
+
         <Text style={styles.bullet}>
           <Text style={styles.bold}>Apple:</Text> We use Apple Sign In for authentication. Apple provides your user ID, email, and name (if available) according to Apple's privacy practices.
         </Text>

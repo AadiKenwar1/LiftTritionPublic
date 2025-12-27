@@ -5,13 +5,10 @@ import { Dumbbell } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 function Log(props) {
-  const isUnsynced = props.currItem?.synced === false;
-  
   return (
     <View style={[
       styles.logButton, 
-      { opacity: props.isActive ? 0.8 : 1 },
-      isUnsynced && styles.logButtonUnsynced
+      { opacity: props.isActive ? 0.8 : 1 }
     ]}>
       <Pressable style={styles.iconContainer}>
         <LinearGradient
@@ -31,8 +28,7 @@ function Log(props) {
           minimumFontScale={0.7}
           style={[
             styles.logText, 
-            {fontFamily: props.bold ? "Inter_600SemiBold" : "Inter_400Regular"},
-            isUnsynced && styles.logTextUnsynced
+            {fontFamily: props.bold ? "Inter_600SemiBold" : "Inter_400Regular"}
           ]}
         >
           {typeof props.currItem === "string"
@@ -76,12 +72,6 @@ const styles = StyleSheet.create({
     borderWidth: 0.3,
     borderColor: 'grey',
   },
-  logButtonUnsynced: {
-    backgroundColor: "#9CA3AF", // Grey color for unsynced
-    borderColor: "#6B7280", // Darker grey border
-    borderLeftColor: "#6B7280", // Darker grey left border
-    shadowColor: "#9CA3AF",
-  },
   iconContainer: {
     marginRight: 12,
   },
@@ -105,9 +95,6 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 20,
     fontWeight: '500',
-  },
-  logTextUnsynced: {
-    color: "#F3F4F6", // Light grey text for unsynced
   },
   menuButton: {
     paddingHorizontal: 8,

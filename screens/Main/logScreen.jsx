@@ -2,8 +2,9 @@ import React from 'react';
 import PopupModal from "../../components/PopupModal.jsx";
 import { useSettings } from "../../context/Settings/SettingsContext.js";
 import Ionicons from '@expo/vector-icons/Ionicons'; // ✅ Correct import
-import { useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View} from "react-native";
+import { useState, useEffect } from 'react';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View, Alert } from "react-native";
+import NetInfo from '@react-native-community/netinfo';
 import Fab from '../../components/Fab.jsx';
 import { useWorkoutContext } from '../../context/WorkoutsV2/WorkoutContext.js';
 import { useBilling } from '../../context/Billing/BillingContext.js';
@@ -13,42 +14,70 @@ import NutritionScreen from './nutritionScreens/nutritionScreen.jsx'
 import { useNavigation } from "@react-navigation/native";
 import AddNutritionPopup from './nutritionScreens/addNutritionPopup.jsx'
 import { useRoute } from "@react-navigation/native";
-import ArchivedPopup from '../../components/ArchivedPopup.jsx';
+import ArchivedPopup from '../../components/WorkoutComponents/ArchivedPopup.jsx';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import SearchFoodDBPopup from './nutritionScreens/searchFoodDBPopup.jsx'
 import SavedFoodsPopup from './nutritionScreens/savedFoodsPopup.jsx'
 import { Fragment } from 'react';
 
-
-
-
 export default function LogScreen() {
-  const { mode, setMode} = useSettings();
+  //Settings Context Functions
+  const { mode} = useSettings();
+  //Billing Context Functions
   const { hasPremium } = useBilling();
+  //Navigation
   const navigation = useNavigation();
+  //Route
   const route = useRoute();
+  //Photo URI
   const photoUri = route.params?.photoUri;
   const cameraMode = route.params?.cameraMode;
   const barcodeData = route.params?.barcodeData;
-  
+  //Workout Name State
   const [workoutName, setWorkoutName] = useState('');
+  //Workout Context Functions
   const {workouts, addWorkout, reorderWorkouts} = useWorkoutContext();
-  
+  //Workout popup visibility states
   const [addWorkoutVisible, setAddWorkoutVisible] = useState(false)
-  function handleAddWorkout(inputName) {
-      console.log('🚀 Adding workout with context:', inputName);
-      console.log('📊 Current workouts count:', workouts.length);
-      addWorkout(inputName);
-      setWorkoutName(''); // clear input
-      setAddWorkoutVisible(false); // close modal
-  }
-
-
-  const [addNutritionVisible, setAddNutritionVisible] = useState(false)
   const [archivedWorkoutsVisible, setArchivedWorkoutsVisible] = useState(false)
+  //Nutrition popup visibility states
+  const [addNutritionVisible, setAddNutritionVisible] = useState(false)
   const [foodDatabaseVisible, setFoodDatabaseVisible] = useState(false)
   const [savedFoodsVisible, setSavedFoodsVisible] = useState(false)
+  
+  //WiFi Status
+  const [isConnected, setIsConnected] = useState(true);
+  useEffect(() => {
+    // Get initial state
+    NetInfo.fetch().then(state => {
+      setIsConnected(state.isConnected);
+    });
 
+    // Set up listener for network state changes
+    const unsubscribe = NetInfo.addEventListener(state => {
+      setIsConnected(state.isConnected);
+    });
+    
+    return () => unsubscribe();
+  }, []);
+
+  //Function to handle if user doesnt have premium or is not connected to internet
+  function handleNotPremiumOrConnected(connected) {
+    if (!connected) {
+      Alert.alert('No internet connection', 'Please connect to the internet to use this feature.');
+    } else {
+      navigation.navigate('Subscription');
+    }
+  }
+  
+  //Function to add a workout
+  function handleAddWorkout(inputName) {
+    addWorkout(inputName);
+    setWorkoutName('');
+    setAddWorkoutVisible(false);
+  }
+
+  //Basically just a dynamic fab button thats on top of the workoutScreen and nutritionScreen
   return (
     <>
       <CustomHeader/>
@@ -56,7 +85,6 @@ export default function LogScreen() {
       <Fab tabBarShown={true}>
         {mode === true
           ? [
-
               // Add Workout Button
               <TouchableOpacity
                 key="add-workout"
@@ -130,7 +158,7 @@ export default function LogScreen() {
                 {/* Archived Workouts Popup */}
                 <ArchivedPopup
                   visible={archivedWorkoutsVisible}
-                  data={workouts.filter((item) => item.archived)}
+                  data={workouts.filter((item) => item.archived && !item.deleted)}
                   onClose={() => setArchivedWorkoutsVisible(false)}
                   reorderWorkouts={reorderWorkouts}
                   isWorkout={true}
@@ -147,13 +175,11 @@ export default function LogScreen() {
                 />
               </TouchableOpacity>,
 
-
               //Coming Soon - AI Workout Generator (react fragment to even out the buttons)
               <Fragment key="ai-workout-generator-placeholder"></Fragment>,
               //Coming Soon - Workout Scheduler (react fragment to even out the buttons)
               <Fragment key="workout-scheduler-placeholder"></Fragment>,
               //<Fragment key="workout-scheduler-placeholder"></Fragment>
-
               
             ]
           : [
@@ -178,12 +204,12 @@ export default function LogScreen() {
                 />
               </TouchableOpacity>,
 
-
               //Camera Button
               <TouchableOpacity
                 key="camera"
-                style={[styles.fabButtons, { backgroundColor: '#4CD964', opacity: hasPremium ? 1 : 0.5 }]}
-                onPress={() => {hasPremium ? setTimeout(() => {navigation.navigate('CameraScreen')}, 600) : navigation.navigate('Subscription')}}
+                style={[styles.fabButtons, { backgroundColor: '#4CD964', opacity: (hasPremium && isConnected) ? 1 : 0.5 }]}
+                activeOpacity={0.7}
+                onPress={() => (hasPremium && isConnected) ? setTimeout(() => {navigation.navigate('CameraScreen')}, 600) : handleNotPremiumOrConnected(isConnected)}
               >
                 <Ionicons
                   name='camera'
@@ -193,14 +219,14 @@ export default function LogScreen() {
                   shadowRadius={4}
                   shadowOpacity={0.2}
                 />
-       
               </TouchableOpacity>,
 
               //Food Database Button
               <TouchableOpacity
                 key="food-database"
-                style={[styles.fabButtons, { backgroundColor: '#4CD964' }]}
-                onPress={() => setFoodDatabaseVisible(!foodDatabaseVisible)}
+                style={[styles.fabButtons, { backgroundColor: '#4CD964', opacity: (hasPremium && isConnected) ? 1 : 0.5 }]}
+                activeOpacity={0.7}
+                onPress={() => (hasPremium && isConnected) ? setFoodDatabaseVisible(!foodDatabaseVisible) : handleNotPremiumOrConnected(isConnected)}
               >
                 <MaterialCommunityIcons
                   name='database-search'
@@ -234,13 +260,10 @@ export default function LogScreen() {
                   visible={savedFoodsVisible}
                   onClose={() => setSavedFoodsVisible(false)}
                 />
-              </TouchableOpacity>
-              
+              </TouchableOpacity>  
             ]
         }
       </Fab>
-
-
     </>
   );
 }

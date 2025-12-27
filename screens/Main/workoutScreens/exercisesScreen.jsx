@@ -1,65 +1,50 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Alert,
-  TouchableOpacity,
-} from "react-native";
+import {View, StyleSheet, Alert, TouchableOpacity} from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { useWorkoutContext } from "../../../context/WorkoutsV2/WorkoutContext";
-import DraggableLogList from "../../../components/DraggableLogList";
-import ExerciseSelector from "../../../components/ExerciseSelector";
+import DraggableLogList from "../../../components/WorkoutComponents/DraggableLogList";
+import ExerciseSelector from "../../../components/WorkoutComponents/ExerciseSelector";
 import PopupModal from "../../../components/PopupModal";
 import { Ionicons } from "@expo/vector-icons";
 import CustomHeader from "../../../components/CustomHeader";
-import NotesModal from "../../../components/Notes";
-import ArchivedPopup from '../../../components/ArchivedPopup'
+import NotesModal from "../../../components/WorkoutComponents/Notes";
+import ArchivedPopup from '../../../components/WorkoutComponents/ArchivedPopup'
 import Foundation from '@expo/vector-icons/Foundation';
 import Fab from "../../../components/Fab"
 
 export default function WorkoutDetails() {
-  // V2 Context - now using for main functionality
-  const {
-    workouts,
-    addExercise,
-    reorderExercises,
-    deleteExercise,
-    archiveExercise,
-    getExercisesForWorkout,
-    addNoteToWorkout,
-  } = useWorkoutContext();
-
-
-  //Gets the workout exercise is contained in
+  //Workout Context Functions
+  const {workouts, addExercise, reorderExercises, deleteExercise, archiveExercise, getExercisesForWorkout, addNoteToWorkout} = useWorkoutContext();
+  //Gets the workout id and workout object from the route params
   const route = useRoute();
   const { workoutId } = route.params;
   const workout = workouts.find((w) => w.id === workoutId);
-  
   // Get exercises for this workout using V2 flat structure
   const workoutExercises = getExercisesForWorkout(workoutId);
-
-  const [modalVisible, setModalVisible] = useState(false);
-
-
-  //Adds exercise to workout
+  //Add exercise popup visibility
+  const [addExerciseVisible, setAddExerciseVisible] = useState(false);
+  //Archived popup visibility
+  const [archivedVisible, setArchivedVisible] = useState("");
+  //Notes popup visibility and note state
+  const [notesVisible, setNotesVisible] = useState(false);
+  const [note, setNote] = useState(workout.note);
+  //Selected exercise object state
   const [selectedExercise, setSelectedExercise] = useState("");
+  //Navigation
+  const navigation = useNavigation();
+
+  //Function to add exercise to workout
   function handleAddExercise() {
-    const alreadyExists = workoutExercises.some(
-      (item) => item.name === selectedExercise,
-    );
+    const alreadyExists = workoutExercises.some((item) => item.name === selectedExercise);
     if (selectedExercise && !alreadyExists) {
-      console.log('🚀 Adding exercise with V2 context:', selectedExercise);
-      console.log('📊 Current V2 exercises count for workout:', workoutExercises.length);
       addExercise(workoutId, selectedExercise);
-      setModalVisible(false);
+      setAddExerciseVisible(false);
     } else {
       Alert.alert("", "This exercise has already been added");
     }
   }
 
-  //Navigates to logsScreen when exercise is clicked
-  const navigation = useNavigation();
+  //Function to navigate to logs for an exercise when clicked
   function goToLogDetails(exercise) {
     navigation.navigate("LogDetails", {
       workoutId: workout.id,
@@ -67,7 +52,13 @@ export default function WorkoutDetails() {
     });
   }
 
-  //Exercise menu indicated by "⋮"
+  //Function to close notes popup and add note to workout
+  function handleCloseNotes() {
+    setNotesVisible(false);
+    addNoteToWorkout(workout.id, note);
+  }
+
+  //Exercise edit menu, allowing archiving and deleting
   function openExerciseMenu(workout, exercise) {
     Alert.alert("Exercise Options", "", [
       {
@@ -76,7 +67,6 @@ export default function WorkoutDetails() {
           console.log('🚀 Archiving exercise with V2 context:', exercise.name);
           archiveExercise(exercise.id);
         }
-
       },
       {
         text: "Delete",
@@ -93,44 +83,20 @@ export default function WorkoutDetails() {
     ]);
   }
 
-  const [note, setNote] = useState(workout.note);
-  const [notesVisible, setNotesVisible] = useState(false);
-  function handleClose() {
-    setNotesVisible(false);
-    console.log('🚀 Adding workout note with V2 context:', note);
-    addNoteToWorkout(workout.id, note);
-  }
-
-
-  const [archivedVisible, setArchivedVisible] = useState("");
-
   return (
-    /*Display Exercises With daggable functionality.
-        Creates a header containing add button with
-        Popup Modal where user selects exercise to add.*/
     <>
       <CustomHeader title={`Exercises in ${workout.name}`} showBack />
 
       <View style={styles.container}>
 
-        {/**Display Exercises in Workout */}
-        <DraggableLogList
-          data={workoutExercises.filter((item) => !item.archived)}
-          workout={workout}
-          reorderExercises={reorderExercises}
-          function2={goToLogDetails}
-          onMenuPress={openExerciseMenu} // ✅ pass kebab menu handler
-        />
-
-
-        {/**Floating Action Buttons */}
+        {/**Floating Action Button for adding, archiving, and notes */}
         <Fab>
           {[
             // Add Button
             <TouchableOpacity
               key="add"
               style={styles.addExerciseButton}
-              onPress={() => setModalVisible(!modalVisible)}
+              onPress={() => setAddExerciseVisible(!addExerciseVisible)}
             >
               <Ionicons
                 name="add"
@@ -171,37 +137,50 @@ export default function WorkoutDetails() {
           ]}
         </Fab>
 
-        {/* Modals */}
+        {/**Display exercises*/}
+        <DraggableLogList
+          data={workoutExercises.filter((item) => !item.archived && !item.deleted)}
+          workout={workout}
+          reorderExercises={reorderExercises}
+          function2={goToLogDetails}
+          onMenuPress={openExerciseMenu}
+        />
+
+        
+        {/* Add exercise popup */}
         <PopupModal
-          modalVisible={modalVisible}
-          setModalVisible={setModalVisible}
+          modalVisible={addExerciseVisible}
+          setModalVisible={setAddExerciseVisible}
           showButtons={true}
+          marginBottom={80}
           onAdd={handleAddExercise}
-          onClose={() => setModalVisible(false)}
+          onClose={() => setAddExerciseVisible(false)}
           showSettingsLink={true}
           onNavigateToSettings={() => {
-            setModalVisible(false);
+            setAddExerciseVisible(false);
             navigation.navigate("UserExercisesScreen");
           }}
         >
           <ExerciseSelector
             selectedExercise={selectedExercise}
             setSelectedExercise={setSelectedExercise}
-            setModalVisible={setModalVisible}
+            setModalVisible={setAddExerciseVisible}
           />
         </PopupModal>
 
+        {/* Archived exercises popup */}
         <ArchivedPopup
           visible={archivedVisible}
-          data={workoutExercises.filter((item) => item.archived)}
+          data={workoutExercises.filter((item) => item.archived && !item.deleted)}
           onClose={() => setArchivedVisible(false)}
           marginBottom={30}
           workout={workout}
         />
 
+        {/* Notes popup */}
         <NotesModal
           visible={notesVisible}
-          onClose={handleClose}
+          onClose={handleCloseNotes}
           note={note}
           setNote={setNote}
           title={"Notes for " + workout.name}

@@ -6,12 +6,10 @@ import {
     TouchableOpacity,
     ScrollView,
 } from 'react-native';
-import CustomHeader from '../../components/CustomHeader';
 import { useNavigation } from '@react-navigation/native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Entypo from '@expo/vector-icons/Entypo';
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import {Dumbbell, CircleUserRound, Apple} from 'lucide-react-native';
 
@@ -91,6 +89,7 @@ export default function Settings() {
               </View>
             </TouchableOpacity>
 
+            {/**
             <TouchableOpacity style={styles.settingRow} onPress={() => navigation.navigate("About")}>
               <View style={styles.rowContent}>
                 <View style={styles.settingInfo}>
@@ -100,12 +99,13 @@ export default function Settings() {
                 <FontAwesome5 name="info-circle" size={28} color="white" />
               </View>
             </TouchableOpacity>
+            */}
 
             <TouchableOpacity style={styles.settingRow} onPress={() => navigation.navigate("Support")}>
               <View style={styles.rowContent}>
                 <View style={styles.settingInfo}>
-                  <Text style={styles.settingText}>Help & Support</Text>
-                  <Text style={styles.settingSubtext}>Get help and contact support</Text>
+                  <Text style={styles.settingText}>Suggestions & Support</Text>
+                  <Text style={styles.settingSubtext}>Contact support or suggest app improvements</Text>
                 </View>
                 <Entypo name="help-with-circle" size={28} color="white" />
               </View>

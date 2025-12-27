@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import { Cake } from 'lucide-react-native';
+import WiFiStatusBanner from '../../components/WiFiStatusBanner';
 
 export default function OnboardingScreen2() {
   const navigation = useNavigation();
@@ -114,6 +115,7 @@ export default function OnboardingScreen2() {
 
   return (
     <View style={styles.container}>
+      <WiFiStatusBanner />
       <View style={styles.content}>
       <Cake size={32} color="#00B8A9" style={styles.cakeIcon} />
         <Text style={styles.title}>When's your birthday?</Text>
@@ -309,7 +311,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
   },
   pickerItem: {
-    fontSize: 17,
+    fontSize: 16,
     color: 'white',
     fontWeight: '500',
     textAlign: 'center',

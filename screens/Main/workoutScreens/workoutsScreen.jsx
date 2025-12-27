@@ -1,35 +1,29 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-} from "react-native";
+import {View, Text, StyleSheet, TextInput} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import PopupModal from "../../../components/PopupModal";
-import DraggableLogList from "../../../components/DraggableLogList";
+import DraggableLogList from "../../../components/WorkoutComponents/DraggableLogList";
 import { useWorkoutContext } from "../../../context/WorkoutsV2/WorkoutContext";
 import { Alert } from "react-native";
 
 export default function LogScreen() {
+  //Navigation 
   const navigation = useNavigation();
-
-  const {
-    workouts,
-    reorderWorkouts,
-    deleteWorkout,
-    renameWorkout,
-    archiveWorkout,
-  } = useWorkoutContext();
+  //Workout Context Functions
+  const {workouts, reorderWorkouts, deleteWorkout, renameWorkout, archiveWorkout} = useWorkoutContext();
+  //Get selectedworkout object
+  const [selectedWorkout, setSelectedWorkout] = useState(null);
+  //Rename popup visibility
+  const [renameVisible, setRenameVisible] = useState(false);
+  //New workout name input
+  const [newName, setNewName] = useState("");
 
   //Navigates to exerciseScreen when workout is clicked
   function goToWorkoutDetails(workout) {
     navigation.navigate("WorkoutDetails", { workoutId: workout.id });
   }
 
-  //Workout menu indicated by "⋮"
-  const [selectedWorkout, setSelectedWorkout] = useState(null);
+  //Workout edit menu, allowing renaming, archiving, and deleting
   function openWorkoutMenu(workout) {
     Alert.alert(
       "Workout Options",
@@ -63,9 +57,7 @@ export default function LogScreen() {
     );
   }
 
-  //Rename workout function
-  const [renameVisible, setRenameVisible] = useState(false);
-  const [newName, setNewName] = useState("");
+  //Rename workout popup (Maybe move to its own component)  
   function renamePopUp(workout) {
     return (
       <PopupModal
@@ -98,11 +90,7 @@ export default function LogScreen() {
     );
   }
 
-  const [archivedVisible, setArchivedVisible] = useState(false);
   return (
-    /*Display Workouts With daggable functionality.
-      Creates a header containing add button with
-      Popup Modal where user enters Workout to add.*/
     <>
       <View style={styles.container}>
         <View style={styles.headerContainer}>
@@ -111,19 +99,18 @@ export default function LogScreen() {
           <View style={styles.headerLine} />
         </View>
         {/*Current Workouts*/}
-        {workouts.filter((item) => !item.archived).length > 0 && (
+        {workouts.filter((item) => !item.archived && !item.deleted).length > 0 && (
           <DraggableLogList
             bold={true}
-            data={workouts.filter((item) => !item.archived).sort((a, b) => b.order - a.order)}
+            data={workouts.filter((item) => !item.archived && !item.deleted).sort((a, b) => b.order - a.order)}
             reorderWorkouts={reorderWorkouts}
             function2={goToWorkoutDetails}
-            onMenuPress={openWorkoutMenu} // ✅ pass kebab menu handler
+            onMenuPress={openWorkoutMenu} // pass kebab menu handler
           />
         )}
 
-
         {renamePopUp(selectedWorkout)}
-        {workouts.filter((item) => !item.archived).length === 0 && <Text style={styles.noWorkoutsText}>Create a workout to get started!</Text>}
+        {workouts.filter((item) => !item.archived && !item.deleted).length === 0 && <Text style={styles.noWorkoutsText}>Create a workout to get started!</Text>}
 
       </View>
     </>

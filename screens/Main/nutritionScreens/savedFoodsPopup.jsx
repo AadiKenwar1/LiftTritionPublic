@@ -6,9 +6,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Nut } from 'lucide-react-native';
 
 export default function SavedFoodsPopup(props) {
-  const { addNutrition, nutritionData, setNutritionData, editNutrition } = useNutritionContext();
-
-  const savedItems = nutritionData.filter(item => item.saved);
+  //Nutrition Context Functions
+  const { addNutrition, nutritionData, editNutrition } = useNutritionContext();
+  //Filter saved items from nutritionData (exclude deleted items)
+  const savedItems = nutritionData.filter(item => item.saved && !item.deleted);
 
   return (
     <Modal
@@ -29,6 +30,7 @@ export default function SavedFoodsPopup(props) {
 
             {/* Saved Items List */}
             <View style={styles.savedContainer}>
+              {/* If there are saved items, show the list, else show the empty container */}
               {savedItems.length > 0 ? (
                 <FlatList
                   data={savedItems}
@@ -71,6 +73,7 @@ export default function SavedFoodsPopup(props) {
                       </View>
                       
                       <View style={styles.savedItemButtonContainer}>
+                        {/* Add Nutrition Item Button */}
                         <TouchableOpacity 
                           style={styles.savedItemAddButton}
                           onPress={() => {
@@ -86,7 +89,8 @@ export default function SavedFoodsPopup(props) {
                         >
                           <Ionicons name="add" size={24} color="white"/>
                         </TouchableOpacity>
-   
+
+                        {/* Delete Nutrition Item Button */}
                         <TouchableOpacity 
                           style={styles.savedItemDeleteButton}
                           onPress={async () => {

@@ -1,16 +1,13 @@
-import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import React, { useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
 import { useAuthContext } from "../../../context/Auth/AuthContext";
 import { useSettings } from "../../../context/Settings/SettingsContext";
 import CustomHeader from "../../../components/CustomHeader";
-import { useNutritionContext } from "../../../context/Nutrition/NutritionContext";
-import { useWorkoutContext } from "../../../context/WorkoutsV2/WorkoutContext";
 
 export default function ProfileScreen() {
-  const { user, clearSessionAndState, deleteAccount } = useAuthContext(); // assumes user object has email
+  const { user, signOut, deleteAccount } = useAuthContext();
   const { birthDate, height, bodyWeight, unit, resetSettings } = useSettings();
-  const { resetNutritionContext } = useNutritionContext();
-  const { resetWorkoutContext } = useWorkoutContext();
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   const handleDeleteAccount = async () => {
     Alert.alert(
@@ -38,8 +35,6 @@ export default function ProfileScreen() {
                       
                       if (result.success) {
                         console.log('✅ Account deleted successfully');
-                        resetNutritionContext();
-                        resetWorkoutContext();
                         resetSettings();
                         Alert.alert(
                           "Account Deleted",
@@ -49,11 +44,19 @@ export default function ProfileScreen() {
                         // Navigation will be handled automatically by the auth state change
                       } else {
                         console.error('❌ Account deletion failed:', result.error);
-                        Alert.alert(
-                          "Deletion Failed",
-                          result.error || "Failed to delete account. Please try again.",
-                          [{ text: "OK" }]
-                        );
+                        if (result.code === 'NO_INTERNET') {
+                          Alert.alert(
+                            "No Internet Connection",
+                            result.error || "Please connect to the internet to delete your account.",
+                            [{ text: "OK" }]
+                          );
+                        } else {
+                          Alert.alert(
+                            "Deletion Failed",
+                            result.error || "Failed to delete account. Please try again.",
+                            [{ text: "OK" }]
+                          );
+                        }
                       }
                     } catch (error) {
                       console.error('❌ Account deletion error:', error);
@@ -73,6 +76,58 @@ export default function ProfileScreen() {
     );
   };
 
+  const handleSignOut = async () => {
+    Alert.alert(
+      "Sign Out",
+      "Your data will be backed up to the cloud before signing out. You must have an internet connection.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Sign Out",
+          onPress: async () => {
+            setIsSigningOut(true);
+            try {
+              const result = await signOut();
+              
+              if (result.success) {
+                // Contexts will automatically clear when user becomes null
+                resetSettings();
+                Alert.alert(
+                  "Signed Out",
+                  "You have been signed out successfully. Your data has been backed up.",
+                  [{ text: "OK" }]
+                );
+              } else {
+                if (result.code === 'NO_INTERNET') {
+                  Alert.alert(
+                    "No Internet Connection",
+                    result.error || "Please connect to the internet to sign out and backup your data.",
+                    [{ text: "OK" }]
+                  );
+                } else {
+                  Alert.alert(
+                    "Sign Out Failed",
+                    result.error || "Failed to sign out. Please try again.",
+                    [{ text: "OK" }]
+                  );
+                }
+              }
+            } catch (error) {
+              console.error('❌ Sign out error:', error);
+              Alert.alert(
+                "Error",
+                "An unexpected error occurred. Please try again.",
+                [{ text: "OK" }]
+              );
+            } finally {
+              setIsSigningOut(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   // Format birthdate if present
   let birthDateString = birthDate
     ? new Date(birthDate).toLocaleDateString()
@@ -82,7 +137,6 @@ export default function ProfileScreen() {
     <>
       <CustomHeader title="Profile" showBack />
       <View style={styles.container} >
-
       
         <View style={styles.card}>
           <Text style={styles.label}>Email</Text>
@@ -106,8 +160,19 @@ export default function ProfileScreen() {
 
         {/* Action Buttons */}
         <View style={styles.actionsContainer}>
-          <TouchableOpacity style={styles.actionButton} onPress={clearSessionAndState}>
-            <Text style={styles.actionButtonText}>Sign Out</Text>
+          <TouchableOpacity 
+            style={[styles.actionButton, isSigningOut && styles.actionButtonDisabled]} 
+            onPress={handleSignOut}
+            disabled={isSigningOut}
+          >
+            {isSigningOut ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="small" color="white" />
+                <Text style={[styles.actionButtonText, styles.loadingText]}>Backing up...</Text>
+              </View>
+            ) : (
+              <Text style={styles.actionButtonText}>Sign Out</Text>
+            )}
           </TouchableOpacity>
 
           <TouchableOpacity style={[styles.actionButton, styles.deleteButton]} onPress={handleDeleteAccount}>
@@ -182,5 +247,17 @@ const styles = StyleSheet.create({
   },
   deleteButtonText: {
     color: 'red',
+  },
+  actionButtonDisabled: {
+    opacity: 0.6,
+  },
+  loadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  loadingText: {
+    marginLeft: 0,
   },
 });

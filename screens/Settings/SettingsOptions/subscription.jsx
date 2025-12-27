@@ -18,7 +18,7 @@ import CustomHeader from "../../../components/CustomHeader";
 const { width: screenWidth } = Dimensions.get('window');
 
 export default function SubscriptionScreen() {
-  const { offerings, loading, error, purchasePackage, restorePurchases, hasPremium } = useBilling();
+  const { offerings, loading, error, purchasePackage, restorePurchases, refreshSubscription, hasPremium } = useBilling();
   const [processing, setProcessing] = useState(false);
 
   const packageToSell = useMemo(
@@ -56,6 +56,18 @@ export default function SubscriptionScreen() {
       }
     } catch (err) {
       Alert.alert("Restore failed", err?.message ?? "Please try again.");
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleRefresh = async () => {
+    try {
+      setProcessing(true);
+      await refreshSubscription();
+      Alert.alert("Refreshed", "Your subscription status has been updated.");
+    } catch (err) {
+      Alert.alert("Refresh failed", err?.message ?? "Please try again.");
     } finally {
       setProcessing(false);
     }
@@ -145,6 +157,16 @@ export default function SubscriptionScreen() {
             disabled={processing}
           >
             <Text style={styles.secondaryButtonText}>Restore Purchases</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.secondaryButton, (processing || loading) && styles.disabledButton]}
+            onPress={handleRefresh}
+            disabled={processing || loading}
+          >
+            <Text style={styles.secondaryButtonText}>
+              {loading ? "Fetching subscriptions..." : "Refresh Subscription"}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.linkButton} onPress={handleOpenStore}>

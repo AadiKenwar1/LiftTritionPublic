@@ -4,6 +4,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import Slider from '@react-native-community/slider';
 import { Turtle, Rabbit } from 'lucide-react-native';
+import WiFiStatusBanner from '../../components/WiFiStatusBanner';
 
 export default function OnboardingScreen10() {
   const navigation = useNavigation();
@@ -56,6 +57,7 @@ export default function OnboardingScreen10() {
 
   return (
     <View style={styles.container}>
+      <WiFiStatusBanner />
       <View style={styles.content}>
         <Text style={styles.title}>How fast do you want to reach your goal?</Text>
         

@@ -1,180 +1,159 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  Alert,
-  TouchableOpacity,
-  ScrollView,
-  Keyboard,
-  TouchableWithoutFeedback,
-} from "react-native";
+import {View, Text, TextInput, StyleSheet, Alert, TouchableOpacity, ScrollView, Keyboard, TouchableWithoutFeedback} from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { useWorkoutContext } from "../../../context/WorkoutsV2/WorkoutContext";
-import { Entypo } from "@expo/vector-icons";
 import CustomHeader from "../../../components/CustomHeader";
-import NotesModal from "../../../components/Notes";
+import NotesModal from "../../../components/WorkoutComponents/Notes";
 import { Ionicons } from "@expo/vector-icons";
 import Foundation from '@expo/vector-icons/Foundation';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { useSettings } from "../../../context/Settings/SettingsContext";
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function LogDetails() {
-  // V2 Context - now using for main functionality
-  const {
-    workouts,
-    exercises,
-    logs,
-    addLog,
-    deleteLog,
-    getLogsForExercise,
-    addNoteToExercise,
-  } = useWorkoutContext();
-
+  //Workout Context Functions
+  const {workouts, exercises, addLog, deleteLog, getLogsForExercise, addNoteToExercise} = useWorkoutContext();
+  //Settings Context Functions
   const { setLastExercise, unit } = useSettings();
-  //Gets ids of parent exercise and workout
+  //Gets parent exercise and workout ids and objects
   const route = useRoute();
   const { workoutId, exerciseId } = route.params;
   const workout = workouts.find((w) => w.id === workoutId);
   const exercise = exercises.find((e) => e.id === exerciseId);
-  
-  // Get logs for this exercise using V2 flat structure
+  // Get logs for this exercise 
   const exerciseLogs = getLogsForExercise(exerciseId);
-
-  //Set information
+  //Default log information
   const [reps, setReps] = useState('');
   const [weight, setWeight] = useState('');
   const [rpe, setRpe] = useState('');
-  const [date, setDate] = useState(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  //Notes popup visibility and note state
+  const [notesVisible, setNotesVisible] = useState(false);
+  const [note, setNote] = useState(exercise?.note || "");
 
-
+  //Function to add log
   function handleAddLog() {
     if (!reps || !weight) {
-      Alert.alert("Missing Info", "Please enter both reps and weight.");
-      return;
+      Alert.alert("Missing Info", "Please enter both reps and weight.")
+      return
+    }
+    if(parseFloat(rpe) > 10 || parseFloat(rpe) < 1) {
+      Alert.alert("Invalid RPE", "Please enter a RPE between 1 and 10.")
+      return
     }
     const noRPE = rpe === '';
     const logData = {
       workoutId: workoutId,
       weight: parseFloat(weight),
       reps: parseInt(reps),
-      rpe: noRPE ? 8 : parseFloat(rpe)
-    };
-    
-    console.log('🚀 Adding log with V2 context:', logData);
-    console.log('📊 Current V2 logs count for exercise:', exerciseLogs.length);
+      rpe: noRPE ? 7 : parseFloat(rpe)
+    };    
     addLog(exerciseId, logData);
     setLastExercise(exercise.name);
-    //setReps("");
-    //setWeight("");
-    //setRpe("");
+    
   }
 
-  //Display logs functions - V2 flat structure
-  function displayLogs() {
-    // Group logs by date
+  //Function to close notes popup and add note to exercise
+  function handleCloseNotes() {
+      setNotesVisible(false);
+      addNoteToExercise(exerciseId, note);
+    }
+
+  //Group logs by date
+  function groupLogsByDate(logs) {
     const logsByDate = {};
-    exerciseLogs.forEach(log => {
+    logs.filter(log => !log.deleted).forEach(log => {
       if (!logsByDate[log.date]) {
         logsByDate[log.date] = [];
       }
       logsByDate[log.date].push(log);
     });
-
-    return Object.keys(logsByDate)
-      .slice()
-      .reverse()
-      .map((date) => {
-        return (
-          //This is the date surrounded by lines
-          <View key={date}>
-            <View style={styles.lineWithText}>
-              <View style={styles.line} />
-              <Text style={styles.lineText}>{date}</Text>
-              <View style={styles.line} />
-            </View>
-
-            {logsByDate[date].map((entry, index) => {
-              const content = (
-                <>
-                  <Text style={[
-                    styles.logText,
-                    entry.synced === false && styles.logTextUnsynced
-                  ]}>
-                    {entry.weight} {unit ? 'lbs' : 'kg'} x {entry.reps} reps{" "}
-                    {entry.rpe !== undefined && entry.rpe !== 8
-                      ? "x RPE: " + entry.rpe
-                      : ""}
-                  </Text>
-
-                  {/* Kebab Menu Button */}
-                  <TouchableOpacity
-                    onPress={() => {
-                      Alert.alert(
-                        "Log Options",
-                        `Reps: ${entry.reps}, Weight: ${entry.weight}`,
-                        [
-                          {
-                            text: "Delete",
-                            style: "destructive",
-                            onPress: () => {
-                              console.log('🚀 Deleting log with V2 context:', entry.id);
-                              deleteLog(entry.id);
-                            },          
-                          },
-                          {
-                            text: "Cancel",
-                            style: "cancel",
-                          },
-                        ],
-                      );
-                    }}
-                    style={styles.kebabButton}
-                  >
-                    <Ionicons name="pencil" size={20} color="white" />
-                  </TouchableOpacity>
-                </>
-              );
-
-              // Render gradient for synced items; solid style for unsynced
-              if (entry.synced === false) {
-                return (
-                  <View
-                    key={entry.id || index}
-                    style={[styles.logItem, styles.logItemUnsynced]}
-                  >
-                    {content}
-                  </View>
-                );
-              }
-
-              return (
-                <View key={entry.id || index} style={styles.logItemWrapper}>
-                  <LinearGradient
-                    colors={['#1A7FE0', '#2D9CFF', '#3DAFFF']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 0, y: 1 }}
-                    style={styles.logItem}
-                  >
-                    {content}
-                  </LinearGradient>
-                </View>
-              );
-            })}
-          </View>
-        );
-      });
+    return logsByDate;
   }
 
-  const [note, setNote] = useState(exercise?.note || "");
-  const [notesVisible, setNotesVisible] = useState(false);
-  function handleClose() {
-    setNotesVisible(false);
-    console.log('🚀 Adding exercise note with V2 context:', note);
-    addNoteToExercise(exerciseId, note);
+  //Render log content (text and button)
+  function renderLogContent(entry) {
+    return (
+      <>
+        {/* Log Text */}
+        <Text style={styles.logText}>
+          {entry.weight} {unit ? 'lbs' : 'kg'} x {entry.reps} reps{" "}
+          {entry.rpe !== undefined && entry.rpe !== 7 ? "x RPE: " + entry.rpe : ""}
+        </Text>
+
+        {/* Edit Menu Button */}
+        <TouchableOpacity
+          onPress={() => {
+            Alert.alert(
+              "Log Options",
+              `Reps: ${entry.reps}, Weight: ${entry.weight}`,
+              [
+                {
+                  text: "Delete",
+                  style: "destructive",
+                  onPress: () => {
+                    console.log('🚀 Deleting log with V2 context:', entry.id);
+                    deleteLog(entry.id);
+                  },
+                },
+                {
+                  text: "Cancel",
+                  style: "cancel",
+                },
+              ],
+            );
+          }}
+          style={styles.kebabButton}
+        >
+          <Ionicons name="pencil" size={20} color="white" />
+        </TouchableOpacity>
+      </>
+    );
+  }
+
+  //Render a single log entry
+  function renderLogContainer(entry, index) {
+    return (
+      <View key={entry.id || index} style={styles.logItemWrapper}>
+        <LinearGradient
+          colors={['#1A7FE0', '#2D9CFF', '#3DAFFF']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={styles.logItem}
+        >
+          {renderLogContent(entry)}
+        </LinearGradient>
+      </View>
+    );
+  }
+
+  //Render date header
+  function renderDateHeader(date) {
+    return (
+      <View style={styles.lineWithText}>
+        <View style={styles.line} />
+        <Text style={styles.lineText}>{date}</Text>
+        <View style={styles.line} />
+      </View>
+    );
+  }
+
+  //Render all logs for a specific date
+  function renderDateGroup(date, logs) {
+    return (
+      <View key={date}>
+        {renderDateHeader(date)}
+        {logs.map((entry, index) => renderLogContainer(entry, index))}
+      </View>
+    );
+  }
+
+  //Function to display logs
+  function displayLogs() {
+    const logsByDate = groupLogsByDate(exerciseLogs);
+    const sortedDates = Object.keys(logsByDate).slice().reverse();
+    
+    return sortedDates.map((date) => 
+      renderDateGroup(date, logsByDate[date])
+    );
   }
 
   return (
@@ -187,6 +166,7 @@ export default function LogDetails() {
           >
           <View style={styles.container}>
             <View style={styles.inputGroup}>
+              {/* Weight Input */}
               <TextInput
                 style={styles.input}
                 placeholder="Weight*"
@@ -195,6 +175,7 @@ export default function LogDetails() {
                 value={weight}
                 onChangeText={setWeight}
               />
+              {/* Reps Input */}
               <TextInput
                 style={styles.input}
                 placeholder="Reps*"
@@ -203,6 +184,7 @@ export default function LogDetails() {
                 value={reps}
                 onChangeText={setReps}
               />
+              {/* RPE Input */}
               <TextInput
                 style={styles.input}
                 placeholder="RPE"
@@ -211,6 +193,7 @@ export default function LogDetails() {
                 value={rpe}
                 onChangeText={setRpe}
               />
+              {/* Add Log Button */}
               <TouchableOpacity style={styles.add} onPress={handleAddLog}>
                 <LinearGradient
                   colors={['#1A7FE0', '#2D9CFF', '#3DAFFF']}
@@ -222,18 +205,17 @@ export default function LogDetails() {
                 </LinearGradient>
               </TouchableOpacity>
             </View>
+            {/* RPE Info Text */}
             <Text style={styles.rpeInfo}>Not sure what RPE means? No problem, you can leave it blank.</Text>
+            {/* Display Logs */}
             {displayLogs()}
           </View>
         </ScrollView>
       </TouchableWithoutFeedback>
-      {/* Notes Button outside ScrollView so it doesn't scroll */}
+      {/* Notes Button and Popup*/}
       <TouchableOpacity
         style={styles.notesButton}
-        onPress={() => {
-          setNotesVisible(!notesVisible);
-        }}
-      >
+        onPress={() => {setNotesVisible(!notesVisible);}}>
         <View>
           <Foundation
             name="clipboard-notes"
@@ -241,10 +223,9 @@ export default function LogDetails() {
             color="white"
           />
         </View>
-
         <NotesModal
           visible={notesVisible}
-          onClose={handleClose}
+          onClose={handleCloseNotes}
           note={note}
           setNote={setNote}
           title={
@@ -288,20 +269,11 @@ const styles = StyleSheet.create({
     borderColor: 'grey',
     overflow: 'hidden',
   },
-  logItemUnsynced: {
-    backgroundColor: "#9CA3AF", // Grey color for unsynced
-    borderColor: "#6B7280", // Darker grey border
-    shadowColor: "#9CA3AF",
-    marginBottom: 12,
-  },
   logText: {
     fontSize: 16,
     color: "white",
     fontWeight: "500",
     flex: 1,
-  },
-  logTextUnsynced: {
-    color: "#F3F4F6", // Light grey text for unsynced
   },
   inputGroup: {
     flexDirection: "row",

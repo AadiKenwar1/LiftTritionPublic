@@ -1,53 +1,49 @@
 import React, {useState, useEffect, useMemo} from 'react';
 import { View, Text, StyleSheet, Dimensions, ScrollView, FlatList, TouchableOpacity, Modal, TextInput, Alert, Pressable} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import FoodSearch from '../../../components/FoodSearch';
 import { useNutritionContext } from '../../../context/Nutrition/NutritionContext';
-import { Image } from 'react-native';
-import WeightUpdateModal from '../../../components/WeightModal';
-import EditNutritionModal from '../../../components/EditNutritionModal';
-import ViewIngredients from '../../../components/ViewIngredients';
-import DatePickerModal from '../../../components/DatePickerModal';
+import WeightUpdateModal from '../../../components/NutritionComponents/WeightModal';
+import EditNutritionModal from '../../../components/NutritionComponents/EditNutritionModal';
+import ViewIngredients from '../../../components/NutritionComponents/ViewIngredients';
+import DatePickerModal from '../../../components/NutritionComponents/DatePickerModal';
 import { useSettings } from '../../../context/Settings/SettingsContext';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { getLocalDateKey } from '../../../utils/date';
+import { getLocalDateKey, formatDateForDisplay2 } from '../../../utils/date';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Nut, Scale } from 'lucide-react-native';
 
-const { width: screenWidth } = Dimensions.get('window');
+
 export default function NutritionScreen({photoUri, cameraMode, barcodeData}) {
-
+  //Settings context functions and variables
   const {bodyWeight, unit, goalWeight} = useSettings()
-  // Get all nutrition context functions and the current analyzing state
-  // currentlyAnalyzing will be the photo URI if analysis is in progress, or null if not
-  const {nutritionData, setNutritionData, getTodaysMacro, getMacroForDate, getTodaysLogs, getLogsForDate, addNutritionFromPhoto, addNutritionFromLabel, addNutritionFromBarcode, analyzeAndAddNutritionFromPhotoUri, deleteNutrition, editNutrition, updateIngredientsAndMacros, currentlyAnalyzing} = useNutritionContext()
-
+  //Nutrition context functions and variables
+  const {nutritionData, setNutritionData, getMacroForDate, getLogsForDate, addNutritionFromPhoto, addNutritionFromLabel, addNutritionFromBarcode, analyzeAndAddNutritionFromPhotoUri, deleteNutrition, editNutrition, updateIngredientsAndMacros, currentlyAnalyzing} = useNutritionContext()
+  //Selected date state
   const [selectedDate, setSelectedDate] = useState(new Date())
-  const [todaysLogs, setTodaysLogs] = useState(getTodaysLogs())
-  const [todaysProtein, setTodaysProtein] = useState(getTodaysMacro('protein'))
-  const [todaysCarbs, setTodaysCarbs] = useState(getTodaysMacro('carbs'))
-  const [todaysFats, setTodaysFats] = useState(getTodaysMacro('fats'))
 
-  // Weight management state
-  const [showWeightModal, setShowWeightModal] = useState(false);
-  
+  //Macros for selected date (default uses todays macros but can change depending on selected date, name is a bit misleading)
+  const today = new Date()
+  const [todaysLogs, setTodaysLogs] = useState(getLogsForDate(today))
+  const [todaysProtein, setTodaysProtein] = useState(getMacroForDate('protein', today))
+  const [todaysCarbs, setTodaysCarbs] = useState(getMacroForDate('carbs', today))
+  const [todaysFats, setTodaysFats] = useState(getMacroForDate('fats', today))
+
+  // Weight update modal state
+  const [showWeightModal, setShowWeightModal] = useState(false)
   // Date picker modal state
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false)
+  // Check if selected date is today
+  const isTodaySelected = getLocalDateKey() === getLocalDateKey(selectedDate)
 
-  const today = getLocalDateKey() === getLocalDateKey(selectedDate)
 
-
+  //Effect to handle displaying and fetching nutrition data for the selected date
   useEffect(() => {
-    // Check if selected date is today
-    const today = new Date()
-    const isToday = selectedDate.toDateString() === today.toDateString()
-    
+    const isToday = getLocalDateKey() === getLocalDateKey(selectedDate)
     if (isToday) {
-      setTodaysProtein(getTodaysMacro('protein'))
-      setTodaysCarbs(getTodaysMacro('carbs'))
-      setTodaysFats(getTodaysMacro('fats'))
-      setTodaysLogs(getTodaysLogs())
+      setTodaysProtein(getMacroForDate('protein', today))
+      setTodaysCarbs(getMacroForDate('carbs', today))
+      setTodaysFats(getMacroForDate('fats', today))
+      setTodaysLogs(getLogsForDate(today))
     } else {
       setTodaysProtein(getMacroForDate('protein', selectedDate))
       setTodaysCarbs(getMacroForDate('carbs', selectedDate))
@@ -57,45 +53,28 @@ export default function NutritionScreen({photoUri, cameraMode, barcodeData}) {
   }, [nutritionData, selectedDate])
 
   // Effect to handle photo/barcode analysis when new data comes in
-  // This runs whenever photoUri, cameraMode, or barcodeData changes
-  // Note: The analyzing state is now managed by the context (currentlyAnalyzing)
-  // This ensures the analyzing message persists across mode switches
+  // The analyzing state is managed in NutritionContext(currentlyAnalyzing)
   useEffect(() => {
-    // Only proceed if we have photo or barcode data to analyze
     if (photoUri || barcodeData) {
-      // Determine which analysis function to call based on camera mode
-      console.log('Camera mode:', cameraMode);
       let analysisPromise;
-      
       switch (cameraMode) {
         case 'WIDE':
-          // Picture mode - general food analysis with ingredients
-          console.log('Calling addNutritionFromPhoto for WIDE mode');
           analysisPromise = addNutritionFromPhoto(photoUri);
           break;
         case 'TALL':
-          // Nutrition Label mode - precise label reading
-          console.log('Calling addNutritionFromLabel for TALL mode');
           analysisPromise = addNutritionFromLabel(photoUri);
           break;
         case 'BARCODE':
-          // Barcode mode - product identification
-          console.log('Calling addNutritionFromBarcode for BARCODE mode');
           analysisPromise = addNutritionFromBarcode(barcodeData);
           break;
         default:
-          // Default to picture mode for backward compatibility
-          console.log('Calling addNutritionFromPhoto for default mode');
           analysisPromise = addNutritionFromPhoto(photoUri);
           break;
       }
-      
-      // Note: We no longer need to manage isAnalyzing state here
-      // The context now handles the analyzing state automatically via currentlyAnalyzing
-      // This ensures the analyzing message persists across mode switches and component re-renders
     }
   }, [photoUri, cameraMode, barcodeData]);
 
+  //Function to handle the menu press on a nutrition entry
   const handleMenuPress = (item) => {
     Alert.alert(
       item.name,
@@ -137,6 +116,7 @@ export default function NutritionScreen({photoUri, cameraMode, barcodeData}) {
   const [showIngredientsModal, setShowIngredientsModal] = useState(false);
   const [viewingIngredientsItem, setViewingIngredientsItem] = useState(null);
 
+  // Open the edit modal on a nutrition entry
   const openEditModal = (item) => {
     setEditingItem(item);
     setEditName(item.name);
@@ -147,6 +127,7 @@ export default function NutritionScreen({photoUri, cameraMode, barcodeData}) {
     setShowEditModal(true);
   };
 
+  //Function to save edited nutrition entry
   const handleSaveEdit = async () => {
     if (editingItem) {
       try {
@@ -166,35 +147,15 @@ export default function NutritionScreen({photoUri, cameraMode, barcodeData}) {
     }
   };
 
-  const handleDateSelect = (date) => {
-    setSelectedDate(date);
-  };
-
-  const formatDateForDisplay = (date) => {
-    const today = new Date();
-    const isToday = date.toDateString() === today.toDateString();
-    
-    if (isToday) {
-      return "Today's Nutrition ";
-    } else {
-      const options = { month: 'long', day: 'numeric', year: 'numeric' };
-      return `${date.toLocaleDateString('en-US', options)} `;
-    }
-  };
-
   // Memoize sorted logs to avoid re-sorting on every render
   const sortedLogs = useMemo(() => {
     return [...todaysLogs].sort((a, b) => b.time - a.time);
   }, [todaysLogs]);
 
+  //Items in the nutrition list
   function renderItem({item}){
-    const isUnsynced = item?.synced === false;
-    
     return(
-      <View style={[
-        styles.itemContainer, 
-        isUnsynced && styles.itemContainerUnsynced
-      ]}>
+      <View style={styles.itemContainer}>
         <View style={styles.itemHeader}>
           <View style={styles.nameContainer}>
             <Pressable style={styles.iconContainer}>
@@ -285,6 +246,7 @@ export default function NutritionScreen({photoUri, cameraMode, barcodeData}) {
       <FlatList
         ListHeaderComponent={
           <View style={styles.headerContainer}>
+
             {/* Current Weight Section */}
             <View style={styles.weightSection}>
               <TouchableOpacity 
@@ -317,21 +279,23 @@ export default function NutritionScreen({photoUri, cameraMode, barcodeData}) {
                 </View>
               </TouchableOpacity>
             </View>
-            {/* Today's Macros Header */}
+
+            {/* Today's Nutrition Header */}
             <Pressable 
               style={styles.headerButton}
               onPress={() => setShowDatePicker(true)}
             >
-              
               <View style={styles.headerContent}>
                 <View style={styles.headerTitleRow}>
                   <View style={styles.headerLine} />
                   <View flexDirection="row" alignItems="center" gap={0} paddingHorizontal={2.25}>
-                    <Text style={styles.header}>{formatDateForDisplay(selectedDate)}</Text>
+                    <Text style={styles.header}>{formatDateForDisplay2(selectedDate)}</Text>
                     <Ionicons name="calendar-outline" size={25} color="white" />
                   </View>
                   <View style={styles.headerLine} />
                 </View>
+
+                {/* Show analyzing message when context indicates analysis is in progress */}
                 {currentlyAnalyzing && (
                   <View style={styles.analyzingContainer}>
                     <Text style={styles.analyzingText}>Analyzing photo and adding nutrition entry...</Text>
@@ -339,9 +303,6 @@ export default function NutritionScreen({photoUri, cameraMode, barcodeData}) {
                 )}
               </View>
             </Pressable>
-            {/* Show analyzing message when context indicates analysis is in progress */}
-            {/* This will persist across mode switches since it's managed by the context */}
-            
           </View>
         }
         data={sortedLogs}
@@ -352,7 +313,7 @@ export default function NutritionScreen({photoUri, cameraMode, barcodeData}) {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <MaterialIcons name="restaurant" size={60} color="#8E8E93" />
-            <Text style={styles.emptyText}>No nutrition logs for {today === true ? "today" : formatDateForDisplay(selectedDate)}</Text>
+            <Text style={styles.emptyText}>No nutrition logs for {isTodaySelected ? "today" : formatDateForDisplay2(selectedDate)}</Text>
             <Text style={styles.emptySubtext}>Start tracking your meals to see your progress</Text>
           </View>
         }
@@ -407,7 +368,7 @@ export default function NutritionScreen({photoUri, cameraMode, barcodeData}) {
       <DatePickerModal
         visible={showDatePicker}
         onClose={() => setShowDatePicker(false)}
-        onDateSelect={handleDateSelect}
+        onDateSelect={(date) => setSelectedDate(date)}
         initialDate={selectedDate}
       />
     </View>
@@ -572,12 +533,6 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     borderWidth: 0.3,
     borderColor: 'grey',
-  },
-  itemContainerUnsynced: {
-    backgroundColor: '#9CA3AF', // Grey color for unsynced
-    borderColor: '#6B7280', // Darker grey border
-    borderLeftColor: '#6B7280', // Darker grey left border
-    shadowColor: '#9CA3AF',
   },
   itemHeader: {
     flexDirection: 'row',

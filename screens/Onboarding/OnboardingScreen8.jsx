@@ -1,169 +1,98 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { Flag } from 'lucide-react-native';
+import { NotepadText } from 'lucide-react-native';
+import WiFiStatusBanner from '../../components/WiFiStatusBanner';
 
-export default function OnboardingScreen8() {
+export default function OnboardingScreen11() {
   const navigation = useNavigation();
   const route = useRoute();
-  const { birthDate, age, gender, height, weight, unit, activityFactor } = route.params || {};
   
-  const [goalType, setGoalType] = useState('maintain');
-  const [goalWeight, setGoalWeight] = useState(weight?.toString() || '');
-  const [isValidGoal, setIsValidGoal] = useState(true);
-  const [errorMessage, setErrorMessage] = useState('');
-
-  const goalOptions = ['lose', 'maintain', 'gain'];
-
-  // Function to validate goal weight and return error message
-  const validateGoalWeight = (value, type) => {
-    if (type === 'maintain') return { isValid: true, errorMessage: '' };
-    if (!value || value.trim() === '') return { isValid: false, errorMessage: 'Please enter your target weight' };
-    
-    const goalWeightNum = parseFloat(value);
-    const currentWeight = parseFloat(weight);
-    
-    if (isNaN(goalWeightNum)) return { isValid: false, errorMessage: 'Please enter a valid number' };
-    if (goalWeightNum <= 0) return { isValid: false, errorMessage: 'Weight must be greater than 0' };
-    
-    if (type === 'gain' && goalWeightNum <= currentWeight) {
-      return { isValid: false, errorMessage: `Target weight must be greater than ${currentWeight} ${unit ? 'lbs' : 'kg'}` };
-    }
-    if (type === 'lose' && goalWeightNum >= currentWeight) {
-      return { isValid: false, errorMessage: `Target weight must be less than ${currentWeight} ${unit ? 'lbs' : 'kg'}` };
-    }
-    
-    return { isValid: true, errorMessage: '' };
-  };
+  // Get any params passed from previous screen
+  const params = route.params || {};
+  const { birthDate, age, height, weight, unit, activityFactor, goalType, goalWeight, goalPace } = params;
 
   const handleBack = () => {
     navigation.goBack();
   };
 
   const handleNext = () => {
-    if (!isValidGoal) return;
-
-    const goalWeightNum = parseFloat(goalWeight) || weight;
-
-    // Store all data collected so far
-    navigation.navigate('Onboarding10', {
-      birthDate,
-      age,
-      gender,
-      height,
-      weight,
-      unit,
-      activityFactor,
-      goalType,
-      goalWeight: goalWeightNum
-    });
-  };
-
-  // Handle goal type change
-  const handleGoalTypeChange = (type) => {
-    setGoalType(type);
-    const validation = validateGoalWeight(goalWeight, type);
-    setIsValidGoal(validation.isValid);
-    setErrorMessage(validation.errorMessage);
-  };
-
-  // Handle goal weight change
-  const handleGoalWeightChange = (value) => {
-    setGoalWeight(value);
-    const validation = validateGoalWeight(value, goalType);
-    setIsValidGoal(validation.isValid);
-    setErrorMessage(validation.errorMessage);
+    // Navigate to macro calculation screen with all collected onboarding data
+    navigation.navigate('Onboarding12', params);
   };
 
   return (
+    <View style={styles.container}>
+      <WiFiStatusBanner />
+      <View style={styles.content}>
+        {/* Header Section */}
+        <View style={styles.headerSection}>
+          <NotepadText size={32} color="#00B8A9" style={styles.notepadIcon} />
+          <Text style={styles.headerTitle}>Review Your Profile</Text>
+          <Text style={styles.headerSubtitle}>
+            Here's a summary of all the information you've provided
+          </Text>
+        </View>
 
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={styles.container}>
-        <View style={styles.content}>
-          <Flag size={32} color="#00B8A9" style={styles.flagIcon} />
-          <Text style={styles.title}>What's your goal?</Text>
-            
-            
-            
-            <Text style={styles.description}>
-              Choose your primary fitness goal to help us calculate your personalized nutrition plan.
-            </Text>
-
-            {/* Goal Type Selection */}
-            <View style={styles.buttonRow}>
-              {goalOptions.map((option) => (
-                <TouchableOpacity
-                  key={option}
-                  style={[
-                    styles.optionButton,
-                    goalType === option && styles.optionButtonActive,
-                  ]}
-                  onPress={() => handleGoalTypeChange(option)}
-                >
-                  <Text
-                    style={[
-                      styles.optionText,
-                      goalType === option && styles.optionTextActive,
-                    ]}
-                  >
-                    {option.charAt(0).toUpperCase() + option.slice(1)}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+        {/* Profile Summary */}
+          <View style={styles.summaryGrid}>
+            <View style={styles.summaryItem}>
+              <Text style={styles.summaryLabel}>Age</Text>
+              <Text style={styles.summaryValue}>{age} years</Text>
             </View>
-
-            {/* Target Weight Input (only show if not maintaining) */}
+            <View style={styles.summaryItem}>
+              <Text style={styles.summaryLabel}>Current Weight</Text>
+              <Text style={styles.summaryValue}>{weight} {unit ? 'lbs' : 'kg'}</Text>
+            </View>
+            <View style={styles.summaryItem}>
+              <Text style={styles.summaryLabel}>Goal Weight</Text>
+              <Text style={styles.summaryValue}>
+                {goalType === 'maintain' ? weight : goalWeight} {unit ? 'lbs' : 'kg'}
+              </Text>
+            </View>
+            <View style={styles.summaryItem}>
+              <Text style={styles.summaryLabel}>Goal Type</Text>
+              <Text style={styles.summaryValue}>{goalType?.charAt(0).toUpperCase() + goalType?.slice(1)}</Text>
+            </View>
             {goalType !== 'maintain' && (
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>
-                  Target Weight ({unit ? 'lbs' : 'kg'})
-                </Text>
-                <TextInput
-                  style={[styles.input, !isValidGoal && goalType !== 'maintain' && styles.inputError]}
-                  keyboardType="numeric"
-                  value={0}
-                  onChangeText={handleGoalWeightChange}
-                  placeholder={`Enter target weight in ${unit ? 'lbs' : 'kg'}`}
-                  placeholderTextColor="#9CA3AF"
-                />
-                {!isValidGoal && errorMessage ? (
-                  <Text style={styles.errorText}>
-                    {errorMessage}
-                  </Text>
-                ) : (
-                  <Text style={styles.inputHint}>
-                    Current weight: {weight} {unit ? 'lbs' : 'kg'}
-                  </Text>
-                )}
+              <View style={styles.summaryItem}>
+                <Text style={styles.summaryLabel}>Weekly Pace</Text>
+                <Text style={styles.summaryValue}>{goalPace?.toFixed(1)} {unit ? 'lbs' : 'kg'}/week</Text>
               </View>
             )}
+            <View style={styles.summaryItem}>
+              <Text style={styles.summaryLabel}>Training Frequency</Text>
+              <Text style={styles.summaryValue}>
+                {(() => {
+                  const frequencyOptions = [
+                    { label: '0 times/week', value: 1.2 },
+                    { label: '1–2 times/week', value: 1.375 },
+                    { label: '3–4 times/week', value: 1.55 },
+                    { label: '5+ times/week', value: 1.725 },
+                  ];
+                  const currentOption = frequencyOptions.find(option => option.value === activityFactor);
+                  return currentOption ? currentOption.label : 'Not set';
+                })()}
+              </Text>
+          </View>
+        </View>
 
-            {goalType === 'maintain' && (
-              <View style={styles.maintainInfo}>
-                <Text style={styles.maintainText}>
-                  Your target weight will be set to your current weight of {weight} {unit ? 'lbs' : 'kg'}
-                </Text>
-              </View>
-            )}
-            
-                         <View style={styles.buttonContainer}>
-               <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-                 <Ionicons name="arrow-back" size={20} color="white" />
-                 <Text style={styles.backButtonText}>Back</Text>
-               </TouchableOpacity>
-               
-               <TouchableOpacity 
-                 style={[styles.nextButton, !isValidGoal && styles.nextButtonDisabled]} 
-                 onPress={handleNext}
-                 disabled={!isValidGoal}
-               >
-                 <Text style={styles.nextButtonText}>Next</Text>
-               </TouchableOpacity>
-             </View>
-           </View>
-         </View>
-       </TouchableWithoutFeedback>
+
+
+        {/* Navigation Buttons */}
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+            <Ionicons name="arrow-back" size={20} color="white" />
+            <Text style={styles.backButtonText}>Back</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
+            <Text style={styles.nextButtonText}>Next</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
   );
 }
 
@@ -180,135 +109,73 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     width: '100%',
   },
-  title: {
+  headerSection: {
+    alignItems: 'center',
+    marginBottom: 20,
+    paddingHorizontal: 10,
+    width: '100%',
+  },
+  headerTitle: {
     fontSize: 28,
     fontWeight: '800',
     color: '#00B8A9',
     marginBottom: 5,
     textAlign: 'center',
+    letterSpacing: -0.5,
     fontFamily: 'Inter_800ExtraBold',
   },
-  flagIcon: {
+  notepadIcon: {
     marginBottom: 5,
   },
-  description: {
-    fontSize: 15,
+  headerSubtitle: {
+    fontSize: 16,
     color: 'white',
     textAlign: 'center',
     lineHeight: 22,
-    marginBottom: 20,
-    paddingHorizontal: 10,
+    paddingHorizontal: 15,
     maxWidth: 320,
+    fontWeight: '500',
     fontFamily: 'Inter_400Regular',
     opacity: 0.9,
   },
-  buttonRow: {
+  summaryGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '100%',
-    maxWidth: 320,
-    marginBottom: 20,
-    gap: 12,
+    flexWrap: 'wrap',
   },
-  optionButton: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 10,
+  summaryItem: {
+    width: '48%',
+    height: '22.5%',
     backgroundColor: '#1A1A1A',
+    borderRadius: 12,
+    padding: 14,
     alignItems: 'center',
+    borderWidth: 0.3,
+    borderColor: 'grey',
+    marginBottom: 15,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
     justifyContent: 'center',
-    borderWidth: 0.3,
-    borderColor: 'grey',
-    shadowColor: "black",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.8,
-    shadowRadius: 3,
   },
-  optionButtonActive: {
-    backgroundColor: '#00B8A9',
-    borderColor: '#00B8A9',
-  },
-  optionText: {
-    color: 'white',
-    fontWeight: '600',
-    fontSize: 15,
-    fontFamily: 'Inter_600SemiBold',
-  },
-  optionTextActive: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-    fontFamily: 'Inter_700Bold',
-  },
-  inputContainer: {
-    width: '100%',
-    maxWidth: 320,
-    marginBottom: 25,
-  },
-  inputLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: 'white',
-    marginBottom: 12,
-    textAlign: 'center',
-    fontFamily: 'Inter_600SemiBold',
-  },
-  input: {
-    borderRadius: 12,
-    paddingHorizontal: 18,
-    paddingVertical: 16,
-    fontSize: 17,
-    backgroundColor: '#1A1A1A',
-    color: 'white',
-    textAlign: 'center',
-    fontWeight: '600',
-    borderWidth: 0.3,
-    borderColor: 'grey',
-    shadowColor: "black",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.8,
-    shadowRadius: 3,
-    fontFamily: 'Inter_600SemiBold',
-  },
-  inputError: {
-    borderColor: '#E53E3E',
-    backgroundColor: '#1A1A1A',
-  },
-  inputHint: {
-    fontSize: 13,
+  summaryLabel: {
+    fontSize: 12,
     color: '#9CA3AF',
-    marginTop: 8,
-    fontStyle: 'italic',
+    marginBottom: 6,
+    fontWeight: '600',
     textAlign: 'center',
-    fontFamily: 'Inter_400Regular',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    fontFamily: 'Inter_600SemiBold',
   },
-  errorText: {
-    fontSize: 13,
-    color: '#E53E3E',
-    marginTop: 8,
-    textAlign: 'center',
-    fontWeight: '500',
-    fontFamily: 'Inter_500Medium',
-  },
-  maintainInfo: {
-    backgroundColor: '#1A1A1A',
-    padding: 18,
-    borderRadius: 12,
-    marginBottom: 25,
-    borderWidth: 0.3,
-    borderColor: '#00B8A9',
-    shadowColor: "black",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.8,
-    shadowRadius: 3,
-    width: '100%',
-    maxWidth: 320,
-  },
-  maintainText: {
+  summaryValue: {
     fontSize: 15,
+    fontWeight: '700',
     color: '#00B8A9',
     textAlign: 'center',
-    fontWeight: '600',
-    fontFamily: 'Inter_600SemiBold',
+    letterSpacing: -0.2,
+    fontFamily: 'Inter_700Bold',
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -316,7 +183,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     maxWidth: 320,
-    marginTop: 20,
+    marginTop: -50,
   },
   backButton: {
     flexDirection: 'row',
@@ -347,14 +214,10 @@ const styles = StyleSheet.create({
     minWidth: 120,
     alignItems: 'center',
   },
-  nextButtonDisabled: {
-    backgroundColor: '#666666',
-    opacity: 0.6,
-  },
   nextButtonText: {
     color: 'white',
     fontWeight: '600',
     fontSize: 18,
     fontFamily: 'Inter_600SemiBold',
   },
-}); 
+});

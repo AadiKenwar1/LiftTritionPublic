@@ -6,7 +6,7 @@ import { TouchableOpacity, Dimensions} from "react-native";
 import PopupModal from "../../PopupModal";
 import { useWorkoutContext } from "../../../context/WorkoutsV2/WorkoutContext";
 import { useNutritionContext } from "../../../context/Nutrition/NutritionContext";
-import ItemSelector from '../../ItemSelector'
+import ItemSelector from '../ItemSelector'
 import { useSettings } from "../../../context/Settings/SettingsContext";
 import getStyles from "./CSS";
 import { smoothData } from "../smoothData";
@@ -26,7 +26,7 @@ export default function LogLineChart(props) {
   const styles = getStyles(mode)
 
   // Context - using for main functionality
-  const {getLiftLogs, formatForChart, logs, getExerciseNames, loading} = useWorkoutContext()
+  const {getLiftLogs, formatForChart, logs} = useWorkoutContext()
   const {getMacroForLast30Days, nutritionData} = useNutritionContext()
 
   const [selectedLift, setSelectedLift] = useState(lastExercise || "Barbell Bench Press")
@@ -136,6 +136,7 @@ export default function LogLineChart(props) {
       <PopupModal
         modalVisible={selectModalVisible}
         setModalVisible={setSelectModalVisible}
+        marginBottom={80}
       >
         <ItemSelector
           selectedItem={mode === true? selectedLift: selectedMacro}

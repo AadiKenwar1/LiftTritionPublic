@@ -1,11 +1,31 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { useAuthContext } from '../context/Auth/AuthContext';
 import LiftTritionIcon from '../assets/LiftTrition_SVG_Icon.svg';
 
 export default function WelcomeScreen() {
   const { signInWithApple, loading } = useAuthContext();
+
+  const handleSignIn = async () => {
+    const result = await signInWithApple();
+    if (!result.success) {
+      if (result.code === 'NO_INTERNET') {
+        Alert.alert(
+          "No Internet Connection",
+          result.error || "Please connect to the internet to sign in.",
+          [{ text: "OK" }]
+        );
+      } else if (result.code !== 'ERR_CANCELED') {
+        // Don't show alert if user canceled
+        Alert.alert(
+          "Sign In Failed",
+          result.error || "Failed to sign in. Please try again.",
+          [{ text: "OK" }]
+        );
+      }
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -22,7 +42,7 @@ export default function WelcomeScreen() {
 
         <TouchableOpacity 
           style={[styles.getStartedButton, loading && styles.buttonDisabled]} 
-          onPress={signInWithApple}
+          onPress={handleSignIn}
           disabled={loading}
         >
           <Text style={[styles.getStartedButtonText]}>

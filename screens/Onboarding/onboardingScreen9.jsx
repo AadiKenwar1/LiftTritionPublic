@@ -9,19 +9,37 @@ import {
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import NetInfo from '@react-native-community/netinfo';
 import { useAuthContext } from '../../context/Auth/AuthContext';
 import { useSettings } from '../../context/Settings/SettingsContext';
+import WiFiStatusBanner from '../../components/WiFiStatusBanner';
 
 export default function OnboardingScreen12() {
   const navigation = useNavigation();
   const route = useRoute();
-  const { markOnboardingCompleted } = useAuthContext();
+  const { markOnboardingCompleted, user } = useAuthContext();
   const { calculateMacros, updateWeight } = useSettings();
   
   // Get all onboarding data from previous screens
   const { birthDate, age, gender, height, weight, unit, activityFactor, goalType, goalWeight, goalPace } = route.params || {};
   
   const [calculatedMacros, setCalculatedMacros] = useState(null);
+  const [isConnected, setIsConnected] = useState(true);
+
+  // Check network connectivity
+  useEffect(() => {
+    // Get initial state
+    NetInfo.fetch().then(state => {
+      setIsConnected(state.isConnected);
+    });
+
+    // Listen for network changes
+    const unsubscribe = NetInfo.addEventListener(state => {
+      setIsConnected(state.isConnected);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
 
   // Calculate macros when we get to this onboarding screen
@@ -38,10 +56,28 @@ export default function OnboardingScreen12() {
     }
   }, [weight, height, age, activityFactor, goalType, goalWeight, goalPace, unit]);
 
-
+  // Watch for onboardingCompleted to become true, then navigate
+  // This ensures the navigation structure has updated before we try to navigate
+  useEffect(() => {
+    if (user?.settings?.onboardingCompleted) {
+      // Navigation structure has updated, now we can navigate safely
+      navigation.replace('Tabs');
+    }
+  }, [user?.settings?.onboardingCompleted, navigation]);
 
   //Since this is the onboarding screen, we need to mark the onboarding as completed and save the data to the database
   async function handleNext(){
+    // Check network connectivity before proceeding
+    const netInfo = await NetInfo.fetch();
+    if (!netInfo.isConnected) {
+      Alert.alert(
+        'No Internet Connection',
+        'Please connect to the internet to complete onboarding.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+
     try {
       const onboardingData = {
         birthDate,
@@ -57,14 +93,15 @@ export default function OnboardingScreen12() {
         calculatedMacros
       };
 
+      // Update weight first (before markOnboardingCompleted to avoid race condition)
+      await updateWeight(weight);
+
       const result = await markOnboardingCompleted(onboardingData);
       if (!result.success) {
         Alert.alert('Error', result.error || 'Failed to complete onboarding');
         return;
       }
-
-      updateWeight(weight);
-      navigation.replace('Tabs');
+      // Navigation will be handled by useEffect when onboardingCompleted becomes true
     } catch (error) {
       console.error('Error completing onboarding:', error);
       Alert.alert('Error', 'Something went wrong. Please try again.');
@@ -90,6 +127,7 @@ export default function OnboardingScreen12() {
 
   return (
     <View style={styles.container}>
+      <WiFiStatusBanner />
       <View style={styles.content}>
         {/* Header Section */}
         <View style={styles.headerSection}>
@@ -172,8 +210,14 @@ export default function OnboardingScreen12() {
             <Text style={styles.backButtonText}>Back</Text>
           </TouchableOpacity>
           
-          <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
-            <Text style={styles.nextButtonText}>Finish </Text>
+          <TouchableOpacity 
+            style={[styles.nextButton, !isConnected && styles.disabledButton]} 
+            onPress={handleNext}
+            disabled={!isConnected}
+          >
+            <Text style={[styles.nextButtonText, !isConnected && styles.disabledButtonText]}>
+              Finish
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -407,5 +451,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 18,
     fontFamily: 'Inter_600SemiBold',
+  },
+  disabledButton: {
+    backgroundColor: '#888888',
+    opacity: 0.6,
+  },
+  disabledButtonText: {
+    color: '#CCCCCC',
   },
 });

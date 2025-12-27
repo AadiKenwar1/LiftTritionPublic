@@ -51,3 +51,41 @@ export const clearAppleUserSession = async () => {
   }
 };
 
+// Cache the full user object (for offline access)
+export const cacheUserData = async (userData) => {
+  try {
+    await AsyncStorage.setItem('@LiftTrition:cachedUserData', JSON.stringify(userData));
+    console.log('✅ User data cached successfully');
+    return true;
+  } catch (error) {
+    console.error('❌ Error caching user data:', error);
+    return false;
+  }
+};
+
+// Get cached user data (for offline access)
+export const getCachedUserData = async () => {
+  try {
+    const cachedData = await AsyncStorage.getItem('@LiftTrition:cachedUserData');
+    if (!cachedData) {
+      return null;
+    }
+    return JSON.parse(cachedData);
+  } catch (error) {
+    console.error('❌ Error retrieving cached user data:', error);
+    return null;
+  }
+};
+
+// Clear cached user data (on sign-out)
+export const clearCachedUserData = async () => {
+  try {
+    await AsyncStorage.removeItem('@LiftTrition:cachedUserData');
+    console.log('✅ Cached user data cleared');
+    return true;
+  } catch (error) {
+    console.error('❌ Error clearing cached user data:', error);
+    return false;
+  }
+};
+

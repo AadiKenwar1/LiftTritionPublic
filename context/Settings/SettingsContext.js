@@ -1,12 +1,11 @@
 // theme/ThemeContext.js
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getLocalDateKey } from '../../utils/date';
-import { generateClient } from '@aws-amplify/api';
-import { createSettings, updateSettings } from '../../graphql/mutations';
 import { useAuthContext } from '../Auth/AuthContext';
+import { STORAGE_KEYS } from '../storageKeys';
 
-const client = generateClient();
 
 const SettingsContext = createContext();
 
@@ -44,7 +43,8 @@ export const SettingsProvider = ({ children }) => {
     const [age, setAge] = useState(settings.age ?? 19);
     const [gender, setGender] = useState(settings.gender ?? 'male');
     const [bodyWeight, setBodyWeight] = useState(settings.bodyWeight ?? 150);
-    const [weightProgress, setWeightProgress] = useState(settings.weightProgress ?? []);
+    const [weightProgress, setWeightProgress] = useState([]);
+    const [weightProgressLoaded, setWeightProgressLoaded] = useState(false);
     const [height, setHeight] = useState(settings.height ?? 60);
 
     /**GOAL WEIGHTS
@@ -63,25 +63,39 @@ export const SettingsProvider = ({ children }) => {
      * CENTRALIZED WEIGHT UPDATE FUNCTION
      * Updates both bodyWeight and weightProgress with new weight entry
      */
-    const updateWeight = (newWeight) => {
+    const updateWeight = async (newWeight) => {
         if (!isNaN(newWeight) && newWeight > 0) {
             setBodyWeight(newWeight);
             
             const dateKey = getLocalDateKey();
-            setWeightProgress(prev => {
-                // Check if we already have an entry for today
-                const existingIndex = prev.findIndex(entry => entry.label === dateKey);
+            
+            // Read from AsyncStorage first (source of truth), update it, save it, then update state
+            try {
+                const data = await AsyncStorage.getItem(STORAGE_KEYS.weightProgress);
+                const currentArray = data ? JSON.parse(data) : [];
+                
+                // Find or add entry for today
+                const existingIndex = currentArray.findIndex(entry => entry.label === dateKey);
+                let updatedArray;
                 
                 if (existingIndex !== -1) {
-                    // Update existing entry for today
-                    const updatedArray = [...prev];
+                    // Update existing entry
+                    updatedArray = [...currentArray];
                     updatedArray[existingIndex] = { label: dateKey, value: newWeight };
-                    return updatedArray;
                 } else {
                     // Add new entry for today DO NOT CHANGE THIS
-                    return [{ label: dateKey, value: newWeight }, ...prev];
+                    updatedArray = [{ label: dateKey, value: newWeight }, ...currentArray];
                 }
-            });
+                
+                // Save to AsyncStorage (await ensures it's saved before returning)
+                await AsyncStorage.setItem(STORAGE_KEYS.weightProgress, JSON.stringify(updatedArray));
+                
+                // Update state with what we saved
+                setWeightProgress(updatedArray);
+                setWeightProgressLoaded(true);
+            } catch (error) {
+                console.error('Error updating weightProgress:', error);
+            }
         }
     };
 
@@ -266,7 +280,35 @@ export const SettingsProvider = ({ children }) => {
     }
 
     const [loaded, setLoaded] = useState(false);
-    const [settingsId, setSettingsId] = useState(settings.id ?? null); // Track settings object id
+
+    // Load weightProgress from AsyncStorage on mount AND when user changes (reloads after sign-in)
+    useEffect(() => {
+        const loadWeightProgress = async () => {
+            try {
+                const data = await AsyncStorage.getItem(STORAGE_KEYS.weightProgress);
+                setWeightProgress(data ? JSON.parse(data) : []);
+                setWeightProgressLoaded(true);
+            } catch (error) {
+                console.error('Error loading weightProgress from AsyncStorage:', error);
+                setWeightProgress([]);
+                setWeightProgressLoaded(true);
+            }
+        };
+        
+        if (user) {
+            loadWeightProgress(); // Reload when user signs in
+        } else {
+            setWeightProgress([]);
+            setWeightProgressLoaded(false);
+        }
+    }, [user]);
+
+    // Save to AsyncStorage whenever weightProgress changes (after initial load)
+    useEffect(() => {
+        if (weightProgressLoaded && user) {
+            AsyncStorage.setItem(STORAGE_KEYS.weightProgress, JSON.stringify(weightProgress));
+        }
+    }, [weightProgress, weightProgressLoaded, user]);
 
     // Update local state when AuthContext user changes
     useEffect(() => {
@@ -278,7 +320,6 @@ export const SettingsProvider = ({ children }) => {
             setAge(s.age ?? 19);
             setGender(s.gender ?? 'male');
             setBodyWeight(s.bodyWeight ?? 150);
-            setWeightProgress(s.weightProgress ?? []);
             setHeight(s.height ?? 60);
             setGoalType(s.goalType ?? 'maintain');
             setGoalWeight(s.goalWeight ?? s.bodyWeight ?? 150);
@@ -288,25 +329,30 @@ export const SettingsProvider = ({ children }) => {
             setProteinGoal(s.proteinGoal ?? 0);
             setCarbsGoal(s.carbsGoal ?? 0);
             setFatsGoal(s.fatsGoal ?? 0);
-            setSettingsId(s.id ?? null);
             setLoaded(true);
+        } else {
+            setWeightProgress([]);
+            setWeightProgressLoaded(false);
         }
     }, [user?.settings]);
 
-    // Save settings to AppSync whenever they change (after initial load)
+    // Update cached user data whenever settings change (works offline)
     useEffect(() => {
         if (!loaded) return;
-        async function saveSettings() {
+        if (!user) return; // Don't update cache if user is null (signing out/deleting account)
+        
+        async function updateCache() {
             try {
-                const input = {
-                    id: settingsId,
+                const { cacheUserData } = await import('../Auth/sessionStorage');
+                const updatedSettings = {
+                    id: user.userId,
                     mode,
                     unit,
                     birthDate,
                     age,
                     gender,
                     bodyWeight,
-                    weightProgress: JSON.stringify(weightProgress || []),
+                    // weightProgress removed - now stored in AsyncStorage
                     height,
                     goalType,
                     goalWeight,
@@ -316,22 +362,21 @@ export const SettingsProvider = ({ children }) => {
                     proteinGoal,
                     carbsGoal,
                     fatsGoal,
+                    lastExercise,
                 };
-                console.log('[SettingsContext] Saving settings to AppSync:', input);
-                if (settingsId) {
-                    const updateResult = await client.graphql({ query: updateSettings, variables: { input } });
-                    console.log('[SettingsContext] Update result from AppSync:', updateResult);
-                } else {
-                    const createResult = await client.graphql({ query: createSettings, variables: { input } });
-                    console.log('[SettingsContext] Create result from AppSync:', createResult);
-                    setSettingsId(createResult.data.createSettings.id);
-                }
+                
+                const updatedUser = {
+                    ...user,
+                    settings: { ...user.settings, ...updatedSettings }
+                };
+                
+                await cacheUserData(updatedUser);
+                console.log('[SettingsContext] Updated cached user data with new settings');
             } catch (e) {
-                console.error('[SettingsContext] Error saving settings to AppSync:', e);
-                Alert.alert('Settings Save Failed', 'Unable to save your settings. Please check your connection and try again.');
+                console.error('[SettingsContext] Error updating cached user data:', e);
             }
         }
-        saveSettings();
+        updateCache();
     }, [
         mode,
         unit,
@@ -339,7 +384,7 @@ export const SettingsProvider = ({ children }) => {
         age,
         gender,
         bodyWeight,
-        weightProgress,
+        // weightProgress removed - now stored in AsyncStorage
         height,
         goalType,
         goalWeight,
@@ -349,7 +394,9 @@ export const SettingsProvider = ({ children }) => {
         proteinGoal,
         carbsGoal,
         fatsGoal,
+        lastExercise,
         loaded,
+        user,
     ]);
 
     return (
@@ -395,6 +442,7 @@ export const SettingsProvider = ({ children }) => {
                 resetSettings,
                 lastExercise,
                 setLastExercise,
+                loaded,
             }}
         >
             {children}
