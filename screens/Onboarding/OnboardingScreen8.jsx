@@ -19,7 +19,7 @@ export default function OnboardingScreen11() {
 
   const handleNext = () => {
     // Navigate to macro calculation screen with all collected onboarding data
-    navigation.navigate('Onboarding12', params);
+    navigation.navigate('Onboarding9', params);
   };
 
   return (

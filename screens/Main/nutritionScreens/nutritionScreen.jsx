@@ -71,6 +71,9 @@ export default function NutritionScreen({photoUri, cameraMode, barcodeData}) {
           analysisPromise = addNutritionFromPhoto(photoUri);
           break;
       }
+      analysisPromise?.catch(() => {
+        Alert.alert('Analysis Failed', 'Failed to analyze nutrition data.');
+      });
     }
   }, [photoUri, cameraMode, barcodeData]);
 
@@ -180,15 +183,7 @@ export default function NutritionScreen({photoUri, cameraMode, barcodeData}) {
                 onPress={async () => {
                   try {
                     const newSaved = !item.saved;
-                    await editNutrition(
-                      item.id,
-                      item.name,
-                      item.protein,
-                      item.carbs,
-                      item.fats,
-                      item.calories,
-                      newSaved // Pass the new saved value
-                    );
+                    await editNutrition(item.id, item.name, item.protein, item.carbs, item.fats, item.calories, newSaved); 
                   } catch (error) {
                     Alert.alert("Error", "Failed to update bookmark status. Please try again.");
                   }

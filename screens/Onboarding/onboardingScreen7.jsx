@@ -19,7 +19,7 @@ export default function OnboardingScreen10() {
 
   const handleNext = () => {
     // Store all data collected so far
-    navigation.navigate('Onboarding11', {
+    navigation.navigate('Onboarding8', {
       birthDate,
       age,
       gender,

@@ -49,7 +49,7 @@ export default function OnboardingScreen4() {
     }
 
     // Store all data collected so far
-    navigation.navigate('Onboarding6', {
+    navigation.navigate('Onboarding5', {
       birthDate,
       age,
       gender,

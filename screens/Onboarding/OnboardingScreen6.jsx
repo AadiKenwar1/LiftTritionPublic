@@ -48,7 +48,7 @@ export default function OnboardingScreen8() {
     const goalWeightNum = parseFloat(goalWeight) || weight;
 
     // Store all data collected so far
-    navigation.navigate('Onboarding10', {
+    navigation.navigate('Onboarding7', {
       birthDate,
       age,
       gender,

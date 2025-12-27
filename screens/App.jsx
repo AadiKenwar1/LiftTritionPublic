@@ -38,10 +38,10 @@ import OnboardingScreen2 from "./onboarding/onboardingScreen2";
 import OnboardingScreen3 from "./onboarding/onboardingScreen3";
 import OnboardingScreen4 from "./onboarding/onboardingScreen4";
 import OnboardingScreen5 from "./onboarding/onboardingScreen5";
-import OnboardingScreen8 from "./onboarding/onboardingScreen6";
-import OnboardingScreen10 from "./onboarding/onboardingScreen7";
-import OnboardingScreen11 from "./onboarding/onboardingScreen8";
-import OnboardingScreen12 from "./onboarding/onboardingScreen9";
+import OnboardingScreen6 from "./onboarding/onboardingScreen6";
+import OnboardingScreen7 from "./onboarding/onboardingScreen7";
+import OnboardingScreen8 from "./onboarding/onboardingScreen8";
+import OnboardingScreen9 from "./onboarding/onboardingScreen9";
 
 import LoadingScreen from "./loadingScreen";
 
@@ -194,10 +194,10 @@ function AuthenticatedApp() {
             <Stack.Screen name="Onboarding3" component={OnboardingScreen3} />
             <Stack.Screen name="Onboarding4" component={OnboardingScreen4} />
             <Stack.Screen name="Onboarding5" component={OnboardingScreen5} />
+            <Stack.Screen name="Onboarding6" component={OnboardingScreen6} />
+            <Stack.Screen name="Onboarding7" component={OnboardingScreen7} />
             <Stack.Screen name="Onboarding8" component={OnboardingScreen8} />
-            <Stack.Screen name="Onboarding10" component={OnboardingScreen10} />
-            <Stack.Screen name="Onboarding11" component={OnboardingScreen11} />
-            <Stack.Screen name="Onboarding12" component={OnboardingScreen12} />
+            <Stack.Screen name="Onboarding9" component={OnboardingScreen9} />
           </>
         )}
       </Stack.Navigator>
