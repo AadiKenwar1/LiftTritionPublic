@@ -21,7 +21,7 @@ function Log(props) {
         </LinearGradient>
       </Pressable>
       <TouchableOpacity style={styles.textArea} onPress={props.function}>
-        <View style={styles.textContainer}>
+        <View style={[styles.textContainer, {height: props.bold ? 50 : 40}]}>
         <Text
           numberOfLines={3}  // ✅ Required for adjustsFontSizeToFit
           adjustsFontSizeToFit={true}
@@ -86,9 +86,10 @@ const styles = StyleSheet.create({
   },
   textArea: {
     flex: 1,
+    //borderWidth: 0.3,
   },
   textContainer: {
-    height: 50,
+    //height: 50,
     justifyContent: "center",
   },
   logText: {

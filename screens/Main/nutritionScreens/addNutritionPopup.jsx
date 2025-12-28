@@ -19,11 +19,11 @@ export default function AddNutritionScreen(props) {
   const navigation = useNavigation();
   //User meal input
   const [mainInput, setMainInput] = useState('');
-  //Macros state
-  const [cals, setCals] = useState(0)
-  const [protein, setProtein] = useState(0);
-  const [carbs, setCarbs] = useState(0);
-  const [fats, setFats] = useState(0);
+  //Macros state - use empty strings for blank initial state
+  const [cals, setCals] = useState('')
+  const [protein, setProtein] = useState('');
+  const [carbs, setCarbs] = useState('');
+  const [fats, setFats] = useState('');
   // Loading states for individual macros
   const [loadingCals, setLoadingCals] = useState(false);
   const [loadingProtein, setLoadingProtein] = useState(false);
@@ -86,19 +86,33 @@ export default function AddNutritionScreen(props) {
 
     try {
       const generatedValue = await handleGenerateMacros(macroType);
-      // Update the specific macro value based on the generation
+      const generatedNum = parseInt(generatedValue, 10) || 0;
+      
+      // Update the specific macro value - treat empty string as 0
       switch(macroType) {
         case 'calories':
-          setCals((prev) => parseInt(prev,10) + parseInt(generatedValue, 10));
+          setCals((prev) => {
+            const prevNum = parseInt(prev, 10) || 0;
+            return (prevNum + generatedNum).toString();
+          });
           break;
         case 'protein':
-          setProtein((prev) => (parseInt(prev,10) + parseInt(generatedValue, 10)).toString());
+          setProtein((prev) => {
+            const prevNum = parseInt(prev, 10) || 0;
+            return (prevNum + generatedNum).toString();
+          });
           break;
         case 'carbs':
-          setCarbs((prev) => parseInt(prev,10) + parseInt(generatedValue, 10));
+          setCarbs((prev) => {
+            const prevNum = parseInt(prev, 10) || 0;
+            return (prevNum + generatedNum).toString();
+          });
           break;
         case 'fats':
-          setFats((prev) => parseInt(prev,10) + parseInt(generatedValue, 10));
+          setFats((prev) => {
+            const prevNum = parseInt(prev, 10) || 0;
+            return (prevNum + generatedNum).toString();
+          });
           break;
       }
     } finally {
@@ -122,10 +136,10 @@ export default function AddNutritionScreen(props) {
 
   //Function to reset the macros and user meal input
   function handleReset(){
-    setCals(0)
-    setProtein(0)
-    setCarbs(0)
-    setFats(0)
+    setCals('')
+    setProtein('')
+    setCarbs('')
+    setFats('')
     setMainInput('')
   }
 
@@ -159,7 +173,7 @@ export default function AddNutritionScreen(props) {
     const header = (
       <View style={styles.headerContainer}>
         <Text style={styles.headerTitle}>Manual Nutrition Entry</Text>
-        <Text style={styles.headerSubtitle}>Enter your meal details manually or use AI to help generate macros</Text>
+        <Text style={styles.headerSubtitle}>Enter your meal details manually or use AI to help generate nutritional values</Text>
       </View>
     )
     //Footer containing the macro inputs, AI buttons, reset button, and close button
@@ -175,7 +189,7 @@ export default function AddNutritionScreen(props) {
             <TextInput
               style={styles.macroInput}
               placeholder=""
-              value={loadingCals ? "Generating..." : cals.toString()}
+              value={loadingCals ? "Generating..." : cals}
               onChangeText={setCals}
               keyboardType="numeric"
               editable={!loadingCals}
@@ -211,7 +225,7 @@ export default function AddNutritionScreen(props) {
             <TextInput
               style={styles.macroInput}
               placeholder=""
-              value={loadingProtein ? "Generating..." : protein.toString()}
+              value={loadingProtein ? "Generating..." : protein}
               onChangeText={setProtein}
               keyboardType="numeric"
               editable={!loadingProtein}
@@ -247,7 +261,7 @@ export default function AddNutritionScreen(props) {
             <TextInput
               style={styles.macroInput}
               placeholder=""
-              value={loadingCarbs ? "Generating..." : carbs.toString()}
+              value={loadingCarbs ? "Generating..." : carbs}
               onChangeText={setCarbs}
               keyboardType="numeric"
               editable={!loadingCarbs}
@@ -283,7 +297,7 @@ export default function AddNutritionScreen(props) {
             <TextInput
               style={styles.macroInput}
               placeholder=""
-              value={loadingFats ? "Generating..." : fats.toString()}
+              value={loadingFats ? "Generating..." : fats}
               onChangeText={setFats}
               keyboardType="numeric"
               editable={!loadingFats}

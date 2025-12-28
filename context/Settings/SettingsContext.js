@@ -235,17 +235,17 @@ export const SettingsProvider = ({ children }) => {
         // For 'maintain', no adjustment needed
 
         // Protein calculation with progressive adjustments
-        let proteinMultiplier = 0.8; // Base multiplier (g/lb)
+        let proteinMultiplier = 0.55; // Base multiplier (g/lb)
         
         // Add protein based on training frequency
         if (currentActivityFactor === 1.2) {
-            proteinMultiplier += 0.1; // 0 times a week
+            proteinMultiplier += 0.1; // 0 times a week (sedentary)
         } else if (currentActivityFactor === 1.375) {
-            proteinMultiplier += 0.2; // 1-2 times a week
+            proteinMultiplier += 0.2; // 1-2 times a week (light activity)
         } else if (currentActivityFactor === 1.55) {
-            proteinMultiplier += 0.3; // 3-4 times a week
+            proteinMultiplier += 0.3; // 3-4 times a week (moderate activity)
         } else if (currentActivityFactor === 1.725) {
-            proteinMultiplier += 0.4; // 5+ times a week
+            proteinMultiplier += 0.4; // 5+ times a week (very active)
         }
         
         // Add extra protein for weight loss goals
@@ -253,13 +253,28 @@ export const SettingsProvider = ({ children }) => {
             proteinMultiplier += 0.1;
         }
         
+        // Cap protein at 1.0g/lb (diminishing returns above this)
+        proteinMultiplier = Math.min(proteinMultiplier, 1.1);
+        
         // Use converted weight (already in lbs at this point)
         const proteinGrams = currentBodyWeight * proteinMultiplier;
         const proteinKcal = proteinGrams * 4;
 
-        // Fat calculation (27.5% of total calories)
-        const fatKcal = calResult * 0.275;
-        const fatGrams = fatKcal / 9;
+        // Fat calculation based on goal type (determined by weight comparison)
+        let fatMultiplier;
+        if (currentBodyWeight > currentGoalWeight) {
+            // Cutting: lower fat to prioritize carbs for performance
+            fatMultiplier = 0.3;
+        } else if (currentBodyWeight < currentGoalWeight) {
+            // Gaining: higher fat is fine when calories are higher
+            fatMultiplier = 0.4;
+        } else {
+            // Maintaining: middle ground
+            fatMultiplier = 0.35;
+        }
+        
+        const fatGrams = currentBodyWeight * fatMultiplier;
+        const fatKcal = fatGrams * 9;
 
         // Carb calculation (remaining calories)
         const carbKcal = calResult - proteinKcal - fatKcal;

@@ -89,7 +89,7 @@ export default function WeightUpdateModal({ visible, onClose }) {
           <View style={styles.modalContainer}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Update Weight</Text>
-              <Text style={styles.modalSubtitle}>Enter your current weight{'\n'}Macros will be updated automatically</Text>
+              <Text style={styles.modalSubtitle}>Enter your current weight{'\n'}Macros will be updated accordingly</Text>
             </View>
 
             <View style={styles.modalContent}>
