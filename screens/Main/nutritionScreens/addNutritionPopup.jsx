@@ -5,6 +5,7 @@ import { useState, useEffect} from 'react';
 import { askOpenAI } from '../../../utils/openAI';
 import { useNutritionContext } from '../../../context/Nutrition/NutritionContext';
 import { useBilling } from '../../../context/Billing/BillingContext.js';
+import { useAuthContext } from '../../../context/Auth/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import NetInfo from '@react-native-community/netinfo';
@@ -15,6 +16,7 @@ export default function AddNutritionScreen(props) {
   //addNutrition and has Premium to check if AI macro generation is available
   const {addNutrition} = useNutritionContext()
   const { hasPremium } = useBilling();
+  const { user } = useAuthContext();
   //Navigation to navigate to subscription screen
   const navigation = useNavigation();
   //User meal input
@@ -56,7 +58,8 @@ export default function AddNutritionScreen(props) {
   Give only a number as the response, no units or explanation. Assume common serving sizes.`;
 
     try {
-      const aiResponse = await askOpenAI(question);
+      const userId = user?.userId || null;
+      const aiResponse = await askOpenAI(question, userId, null);
       console.log(aiResponse)
       const cleanValue = parseInt(aiResponse.match(/\d+/)?.[0] || '0', 10);
       return cleanValue.toString();
@@ -154,6 +157,7 @@ export default function AddNutritionScreen(props) {
       parseInt(cals, 10) || 0
     );
     handleReset();
+    props.onClose();
   }
 
   //Function to handle if user doesnt have premium or is not connected to internet

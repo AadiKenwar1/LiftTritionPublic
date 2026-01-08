@@ -1,0 +1,13 @@
+{
+  "name": "graphql-proxy",
+  "version": "1.0.0",
+  "description": "Lambda function to proxy GraphQL requests with JWT authentication",
+  "main": "index.js",
+  "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.700.0"
+  }
+}
+
+
+
+

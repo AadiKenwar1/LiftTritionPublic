@@ -1,10 +1,8 @@
-import { generateClient } from '@aws-amplify/api';
+import { graphql } from '../../../utils/graphqlClient';
 import { createNutrition, updateNutrition, deleteNutrition } from '../../../graphql/mutations';
 
 export async function syncNutrition(userId, nutritionData, setNutritionData) {
   try {
-    const client = generateClient();
-  
   // Sync deletions first
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log('🗑️ [syncNutrition] Starting deletion sync phase');
@@ -17,10 +15,10 @@ export async function syncNutrition(userId, nutritionData, setNutritionData) {
     const startTime = Date.now();
     const deleteResults = await Promise.allSettled(
       deletedItems.map(item =>
-        client.graphql({
+        graphql({
           query: deleteNutrition,
           variables: { input: { id: item.id } }
-        })
+        }, { userId, authToken: null })
       )
     );
     const duration = Date.now() - startTime;
@@ -96,35 +94,67 @@ export async function syncNutrition(userId, nutritionData, setNutritionData) {
         isPhoto: item.isPhoto || false,
         ingredients: item.ingredients || [],
         saved: item.saved || false,
+        isPlaceholder: item.isPlaceholder || false,
         synced: true,
+      };
+
+      // Helper function to check if error message indicates a conditional failure
+      const isConditionalFailure = (errorMessage) => {
+        return errorMessage?.includes('conditional request failed') || 
+               errorMessage?.includes('ConditionalCheckFailedException');
       };
 
       // Try update first (for edited items that exist in DB)
       try {
-        const updateResult = await client.graphql({
+        const updateResult = await graphql({
           query: updateNutrition,
           variables: { input }
-        });
+        }, { userId, authToken: null });
         
-        // Check for GraphQL errors
-        if (updateResult.errors) {
-          throw new Error('Update failed');
-        }
-        
+        // If we get here, update succeeded
         return { success: true, id: item.id };
-      } catch (error) {
-        // If update fails (item doesn't exist), try create
-        const createResult = await client.graphql({
-          query: createNutrition,
-          variables: { input }
-        });
+      } catch (updateError) {
+        const updateErrorMessage = updateError?.message || '';
         
-        // Check for GraphQL errors
-        if (createResult.errors) {
-          throw new Error('Create failed');
+        // Check if it's a conditional failure (item doesn't exist)
+        if (isConditionalFailure(updateErrorMessage)) {
+          // Item doesn't exist, try create
+          console.log(`ℹ️ [Nutrition] Update failed (item doesn't exist), now creating: ${item.id}`);
+          try {
+            const createResult = await graphql({
+              query: createNutrition,
+              variables: { input }
+            }, { userId, authToken: null });
+            
+            // If we get here, create succeeded
+            return { success: true, id: item.id };
+          } catch (createError) {
+            const createErrorMessage = createError?.message || '';
+            
+            // If create also fails with conditional error, item was created between attempts (race condition)
+            if (isConditionalFailure(createErrorMessage)) {
+              // Retry update (item now exists)
+              try {
+                const retryUpdateResult = await graphql({
+                  query: updateNutrition,
+                  variables: { input }
+                }, { userId, authToken: null });
+                
+                // If we get here, retry update succeeded
+                return { success: true, id: item.id };
+              } catch (retryError) {
+                console.error(`❌ [Nutrition] Both create and update failed for item ${item.id}:`, retryError.message);
+                throw retryError;
+              }
+            } else {
+              // Create failed for a different reason
+              throw createError;
+            }
+          }
+        } else {
+          // Update failed for a different reason (not conditional failure)
+          throw updateError;
         }
-        
-        return { success: true, id: item.id };
       }
     })
   );

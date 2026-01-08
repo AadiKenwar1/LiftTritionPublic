@@ -187,6 +187,7 @@ export const getNutrition = /* GraphQL */ `
       ingredients
       saved
       synced
+      isPlaceholder
       createdAt
       updatedAt
       __typename
@@ -214,6 +215,7 @@ export const listNutritions = /* GraphQL */ `
         ingredients
         saved
         synced
+        isPlaceholder
         createdAt
         updatedAt
         __typename

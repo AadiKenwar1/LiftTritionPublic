@@ -1,6 +1,24 @@
-import { generateClient } from '@aws-amplify/api';
+import { graphql } from '../../utils/graphqlClient';
 import { getSettings, listNutritions, listUserExercises, listWorkouts, listExercises, listExerciseLogs } from '../../graphql/queries';
 import { deleteWorkout, deleteNutrition, deleteSettings, createSettings, deleteUserExercise, deleteExercise, deleteExerciseLog, createNutrition, createWorkout, createExercise, createExerciseLog, createUserExercise, updateSettings } from '../../graphql/mutations';
+
+/**
+ * IMPORTANT: Mutation Naming Convention
+ * 
+ * The GraphQL proxy Lambda (lambda-functions/graphql-proxy/index.js) uses pattern matching
+ * to enforce user-based access control on mutations. It specifically looks for:
+ * - Mutations starting with "Create" (e.g., CreateWorkout, CreateNutrition, CreateSettings)
+ * - Mutations starting with "Update" (e.g., UpdateSettings, UpdateWorkout)
+ * 
+ * When adding new mutations to this file, you MUST follow this naming convention:
+ * - Create mutations: Must start with "Create" (e.g., CreateNewFeature)
+ * - Update mutations: Must start with "Update" (e.g., UpdateNewFeature)
+ * - Delete mutations: Can be named anything (e.g., DeleteNewFeature, RemoveNewFeature)
+ * 
+ * This is critical for security - the proxy automatically adds the authenticated userId
+ * to Create/Update mutation inputs. If you don't follow this convention, the security
+ * enforcement may not work correctly.
+ */
 
 /**
  * Checks if Apple user exists in the database
@@ -9,11 +27,10 @@ import { deleteWorkout, deleteNutrition, deleteSettings, createSettings, deleteU
  */
 export const checkAppleUserExists = async (appleUserId) => {
   try {
-    const client = generateClient();
-    const result = await client.graphql({
+    const result = await graphql({
       query: getSettings,
       variables: { id: appleUserId }
-    });
+    }, { userId: appleUserId, authToken: null });
     
     return {
       success: true,
@@ -39,8 +56,7 @@ export const checkAppleUserExists = async (appleUserId) => {
  */
 export const createDefaultSettings = async (appleUserId, email, name = null) => {
   try {
-    const client = generateClient();
-    const result = await client.graphql({
+    const result = await graphql({
       query: createSettings,
       variables: {
         input: {
@@ -64,7 +80,7 @@ export const createDefaultSettings = async (appleUserId, email, name = null) => 
           onboardingCompleted: false,
         }
       }
-    });
+    }, { userId: appleUserId, authToken: null });
     
     return {
       success: true,
@@ -86,11 +102,10 @@ export const createDefaultSettings = async (appleUserId, email, name = null) => 
  */
 export const loadAppleUserData = async (appleUserId) => {
   try {
-    const client = generateClient();
-    const settingsResult = await client.graphql({
+    const settingsResult = await graphql({
       query: getSettings,
       variables: { id: appleUserId }
-    });
+    }, { userId: appleUserId, authToken: null });
     
     // Parse JSON fields in settings data
     const parsedSettings = settingsResult.data.getSettings ? {
@@ -122,23 +137,21 @@ export const loadAppleUserData = async (appleUserId) => {
  */
 export const saveNutritionToDatabase = async (userId, nutritionData) => {
   try {
-    const client = generateClient();
-    
     // Step 1: Delete all existing nutrition data for this user
-    const existingResult = await client.graphql({
+    const existingResult = await graphql({
       query: listNutritions,
       variables: { 
         filter: { userId: { eq: userId } }
       }
-    });
+    }, { userId, authToken: null });
     
     const existingItems = existingResult.data.listNutritions.items || [];
     if (existingItems.length > 0) {
       const deletePromises = existingItems.map(item =>
-        client.graphql({
+        graphql({
           query: deleteNutrition,
           variables: { input: { id: item.id } }
-        })
+        }, { userId, authToken: null })
       );
       await Promise.all(deletePromises);
       console.log(`🗑️ Deleted ${existingItems.length} existing nutrition entries`);
@@ -162,12 +175,13 @@ export const saveNutritionToDatabase = async (userId, nutritionData) => {
             isPhoto: item.isPhoto || false,
             ingredients: item.ingredients || [],
             saved: item.saved || false,
+            isPlaceholder: item.isPlaceholder || false,
             synced: true,
           };
-          return client.graphql({
+          return graphql({
             query: createNutrition,
             variables: { input }
-          });
+          }, { userId, authToken: null });
         });
         
         await Promise.all(createPromises);
@@ -200,69 +214,67 @@ export const saveNutritionToDatabase = async (userId, nutritionData) => {
  */
 export const saveWorkoutDataToDatabase = async (userId, workouts, exercises, logs, userExercises) => {
   try {
-    const client = generateClient();
-    
     // Step 1: Delete all existing workout data (in dependency order)
     // Delete logs first
-    const existingLogsResult = await client.graphql({
+    const existingLogsResult = await graphql({
       query: listExerciseLogs,
       variables: { filter: { userId: { eq: userId } }
-    }});
+    }}, { userId, authToken: null });
     const existingLogs = existingLogsResult.data.listExerciseLogs.items || [];
     if (existingLogs.length > 0) {
       await Promise.all(existingLogs.map(log =>
-        client.graphql({
+        graphql({
           query: deleteExerciseLog,
           variables: { input: { id: log.id } }
-        })
+        }, { userId, authToken: null })
       ));
       console.log(`🗑️ Deleted ${existingLogs.length} existing exercise logs`);
     }
     
     // Delete exercises
-    const existingExercisesResult = await client.graphql({
+    const existingExercisesResult = await graphql({
       query: listExercises,
       variables: { filter: { userId: { eq: userId } }
-    }});
+    }}, { userId, authToken: null });
     const existingExercises = existingExercisesResult.data.listExercises.items || [];
     if (existingExercises.length > 0) {
       await Promise.all(existingExercises.map(ex =>
-        client.graphql({
+        graphql({
           query: deleteExercise,
           variables: { input: { id: ex.id } }
-        })
+        }, { userId, authToken: null })
       ));
       console.log(`🗑️ Deleted ${existingExercises.length} existing exercises`);
     }
     
     // Delete workouts
-    const existingWorkoutsResult = await client.graphql({
+    const existingWorkoutsResult = await graphql({
       query: listWorkouts,
       variables: { filter: { userId: { eq: userId } }
-    }});
+    }}, { userId, authToken: null });
     const existingWorkouts = existingWorkoutsResult.data.listWorkouts.items || [];
     if (existingWorkouts.length > 0) {
       await Promise.all(existingWorkouts.map(workout =>
-        client.graphql({
+        graphql({
           query: deleteWorkout,
           variables: { input: { id: workout.id } }
-        })
+        }, { userId, authToken: null })
       ));
       console.log(`🗑️ Deleted ${existingWorkouts.length} existing workouts`);
     }
     
     // Delete user exercises
-    const existingUserExercisesResult = await client.graphql({
+    const existingUserExercisesResult = await graphql({
       query: listUserExercises,
       variables: { filter: { userId: { eq: userId } }
-    }});
+    }}, { userId, authToken: null });
     const existingUserExercises = existingUserExercisesResult.data.listUserExercises.items || [];
     if (existingUserExercises.length > 0) {
       await Promise.all(existingUserExercises.map(ue =>
-        client.graphql({
+        graphql({
           query: deleteUserExercise,
           variables: { input: { id: ue.id } }
-        })
+        }, { userId, authToken: null })
       ));
       console.log(`🗑️ Deleted ${existingUserExercises.length} existing user exercises`);
     }
@@ -282,10 +294,10 @@ export const saveWorkoutDataToDatabase = async (userId, workouts, exercises, log
             note: workout.note || null,
             synced: true,
           };
-          return client.graphql({
+          return graphql({
             query: createWorkout,
             variables: { input }
-          });
+          }, { userId, authToken: null });
         }));
         console.log(`✅ Saved ${activeWorkouts.length} workouts to database`);
       }
@@ -307,10 +319,10 @@ export const saveWorkoutDataToDatabase = async (userId, workouts, exercises, log
             note: exercise.note || null,
             synced: true,
           };
-          return client.graphql({
+          return graphql({
             query: createExercise,
             variables: { input }
-          });
+          }, { userId, authToken: null });
         }));
         console.log(`✅ Saved ${activeExercises.length} exercises to database`);
       }
@@ -332,10 +344,10 @@ export const saveWorkoutDataToDatabase = async (userId, workouts, exercises, log
             rpe: log.rpe,
             synced: true,
           };
-          return client.graphql({
+          return graphql({
             query: createExerciseLog,
             variables: { input }
-          });
+          }, { userId, authToken: null });
         }));
         console.log(`✅ Saved ${activeLogs.length} exercise logs to database`);
       }
@@ -356,10 +368,10 @@ export const saveWorkoutDataToDatabase = async (userId, workouts, exercises, log
             mainMuscle: ue.mainMuscle,
             accessoryMuscles: ue.accessoryMuscles || [],
           };
-          return client.graphql({
+          return graphql({
             query: createUserExercise,
             variables: { input }
-          });
+          }, { userId, authToken: null });
         }));
         console.log(`✅ Saved ${activeUserExercises.length} user exercises to database`);
       }
@@ -390,13 +402,12 @@ export const saveWorkoutDataToDatabase = async (userId, workouts, exercises, log
  */
 export const loadNutritionFromDatabase = async (userId) => {
   try {
-    const client = generateClient();
-    const result = await client.graphql({
+    const result = await graphql({
       query: listNutritions,
       variables: { 
         filter: { userId: { eq: userId } }
       }
-    });
+    }, { userId, authToken: null });
     
     const nutritionData = (result.data.listNutritions.items || []).map(item => ({
       ...item,
@@ -424,24 +435,23 @@ export const loadNutritionFromDatabase = async (userId) => {
  */
 export const loadWorkoutDataFromDatabase = async (userId) => {
   try {
-    const client = generateClient();
     const [workoutsResult, exercisesResult, logsResult, userExercisesResult] = await Promise.all([
-      client.graphql({
+      graphql({
         query: listWorkouts,
         variables: { filter: { userId: { eq: userId } }
-      }}),
-      client.graphql({
+      }}, { userId, authToken: null }),
+      graphql({
         query: listExercises,
         variables: { filter: { userId: { eq: userId } }
-      }}),
-      client.graphql({
+      }}, { userId, authToken: null }),
+      graphql({
         query: listExerciseLogs,
         variables: { filter: { userId: { eq: userId } }
-      }}),
-      client.graphql({
+      }}, { userId, authToken: null }),
+      graphql({
         query: listUserExercises,
         variables: { filter: { userId: { eq: userId } }
-      }}),
+      }}, { userId, authToken: null }),
     ]);
     
     const workouts = (workoutsResult.data.listWorkouts.items || []).map(item => ({
@@ -496,26 +506,25 @@ export const loadWorkoutDataFromDatabase = async (userId) => {
 export const deleteAppleUserData = async (appleUserId) => {
   try {
     console.log('🗑️ Starting account deletion for user:', appleUserId);
-    const client = generateClient();
     
     // Step 1: Delete ExerciseLogs first (they depend on exercises)
     console.log('📝 Step 1: Deleting ExerciseLogs...');
-    const exerciseLogsResult = await client.graphql({
+    const exerciseLogsResult = await graphql({
       query: listExerciseLogs,
       variables: { 
         filter: { userId: { eq: appleUserId } }
       }
-    });
+    }, { userId: appleUserId, authToken: null });
     
     const exerciseLogsToDelete = exerciseLogsResult.data.listExerciseLogs.items || [];
     console.log(`Found ${exerciseLogsToDelete.length} ExerciseLogs to delete`);
     
     if (exerciseLogsToDelete.length > 0) {
       const deleteLogPromises = exerciseLogsToDelete.map(log =>
-        client.graphql({
+        graphql({
           query: deleteExerciseLog,
           variables: { input: { id: log.id } }
-        })
+        }, { userId: appleUserId, authToken: null })
       );
       await Promise.all(deleteLogPromises);
       console.log('✅ ExerciseLogs deleted successfully');
@@ -523,22 +532,22 @@ export const deleteAppleUserData = async (appleUserId) => {
     
     // Step 2: Delete Exercises (they depend on workouts)
     console.log('💪 Step 2: Deleting Exercises...');
-    const exercisesResult = await client.graphql({
+    const exercisesResult = await graphql({
       query: listExercises,
       variables: { 
         filter: { userId: { eq: appleUserId } }
       }
-    });
+    }, { userId: appleUserId, authToken: null });
     
     const exercisesToDelete = exercisesResult.data.listExercises.items || [];
     console.log(`Found ${exercisesToDelete.length} Exercises to delete`);
     
     if (exercisesToDelete.length > 0) {
       const deleteExercisePromises = exercisesToDelete.map(exercise =>
-        client.graphql({
+        graphql({
           query: deleteExercise,
           variables: { input: { id: exercise.id } }
-        })
+        }, { userId: appleUserId, authToken: null })
       );
       await Promise.all(deleteExercisePromises);
       console.log('✅ Exercises deleted successfully');
@@ -546,22 +555,22 @@ export const deleteAppleUserData = async (appleUserId) => {
     
     // Step 3: Delete Workouts (independent)
     console.log('🏋️ Step 3: Deleting Workouts...');
-    const workoutsResult = await client.graphql({
+    const workoutsResult = await graphql({
       query: listWorkouts,
       variables: { 
         filter: { userId: { eq: appleUserId } }
       }
-    });
+    }, { userId: appleUserId, authToken: null });
     
     const workoutsToDelete = workoutsResult.data.listWorkouts.items || [];
     console.log(`Found ${workoutsToDelete.length} Workouts to delete`);
     
     if (workoutsToDelete.length > 0) {
       const deleteWorkoutPromises = workoutsToDelete.map(workout =>
-        client.graphql({
+        graphql({
           query: deleteWorkout,
           variables: { input: { id: workout.id } }
-        })
+        }, { userId: appleUserId, authToken: null })
       );
       await Promise.all(deleteWorkoutPromises);
       console.log('✅ Workouts deleted successfully');
@@ -571,20 +580,20 @@ export const deleteAppleUserData = async (appleUserId) => {
     console.log('📦 Step 4: Deleting remaining data (Nutrition, UserExercises, Settings)...');
     const [nutritionResult, userExercisesResult, settingsResult] = await Promise.all([
       // Delete nutrition entries
-      client.graphql({
+      graphql({
         query: listNutritions,
         variables: { 
           filter: { userId: { eq: appleUserId } }
         }
-      }).then(async (result) => {
+      }, { userId: appleUserId, authToken: null }).then(async (result) => {
         const items = result.data.listNutritions.items || [];
         console.log(`Found ${items.length} Nutrition entries to delete`);
         if (items.length > 0) {
           const deletePromises = items.map(nutrition =>
-            client.graphql({
+            graphql({
               query: deleteNutrition,
               variables: { input: { id: nutrition.id } }
-            })
+            }, { userId: appleUserId, authToken: null })
           );
           await Promise.all(deletePromises);
           console.log('✅ Nutrition entries deleted successfully');
@@ -593,20 +602,20 @@ export const deleteAppleUserData = async (appleUserId) => {
       }),
       
       // Delete user exercises
-      client.graphql({
+      graphql({
         query: listUserExercises,
         variables: { 
           filter: { userId: { eq: appleUserId } }
         }
-      }).then(async (result) => {
+      }, { userId: appleUserId, authToken: null }).then(async (result) => {
         const items = result.data.listUserExercises.items || [];
         console.log(`Found ${items.length} UserExercises to delete`);
         if (items.length > 0) {
           const deletePromises = items.map(exercise =>
-            client.graphql({
+            graphql({
               query: deleteUserExercise,
               variables: { input: { id: exercise.id } }
-            })
+            }, { userId: appleUserId, authToken: null })
           );
           await Promise.all(deletePromises);
           console.log('✅ UserExercises deleted successfully');
@@ -615,10 +624,10 @@ export const deleteAppleUserData = async (appleUserId) => {
       }),
       
       // Delete settings
-      client.graphql({
+      graphql({
         query: deleteSettings,
         variables: { input: { id: appleUserId } }
-      }).then(() => {
+      }, { userId: appleUserId, authToken: null }).then(() => {
         console.log('✅ Settings deleted successfully');
         return 1;
       })
@@ -657,10 +666,8 @@ export const deleteAppleUserData = async (appleUserId) => {
  */
 export const saveWeightProgressToDatabase = async (userId, weightProgress) => {
   try {
-    const client = generateClient();
-    
     // Update Settings with weightProgress
-    const updateResult = await client.graphql({
+    const updateResult = await graphql({
       query: updateSettings,
       variables: {
         input: {
@@ -668,7 +675,7 @@ export const saveWeightProgressToDatabase = async (userId, weightProgress) => {
           weightProgress: JSON.stringify(weightProgress || []),
         }
       }
-    });
+    }, { userId, authToken: null });
     
     console.log(`✅ Saved ${weightProgress?.length || 0} weight progress entries to database`);
     return { success: true };
@@ -685,11 +692,10 @@ export const saveWeightProgressToDatabase = async (userId, weightProgress) => {
  */
 export const loadWeightProgressFromDatabase = async (userId) => {
   try {
-    const client = generateClient();
-    const settingsResult = await client.graphql({
+    const settingsResult = await graphql({
       query: getSettings,
       variables: { id: userId }
-    });
+    }, { userId, authToken: null });
     
     const weightProgress = settingsResult.data.getSettings?.weightProgress
       ? JSON.parse(settingsResult.data.getSettings.weightProgress)
@@ -717,8 +723,6 @@ export const loadWeightProgressFromDatabase = async (userId) => {
  */
 export const saveSettingsToDatabase = async (userId, settings) => {
   try {
-    const client = generateClient();
-    
     const input = {
       id: userId,
       mode: settings.mode,
@@ -739,10 +743,10 @@ export const saveSettingsToDatabase = async (userId, settings) => {
       // weightProgress is saved separately via saveWeightProgressToDatabase
     };
     
-    const updateResult = await client.graphql({
+    const updateResult = await graphql({
       query: updateSettings,
       variables: { input }
-    });
+    }, { userId, authToken: null });
     
     console.log('✅ Saved settings to database');
     return { success: true };

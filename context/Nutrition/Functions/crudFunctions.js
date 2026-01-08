@@ -2,7 +2,7 @@ import uuid from "react-native-uuid";
 import { getLocalDateKey } from "../../../utils/date";
 
 // Create - Add new nutrition entry
-export async function addNutrition(nutritionData, setNutritionData, userId, name, protein, carbs, fats, calories, isPhoto = false, ingredients = []) {
+export async function addNutrition(nutritionData, setNutritionData, userId, name, protein, carbs, fats, calories, isPhoto = false, ingredients = [], isPlaceholder = false) {
   const date = getLocalDateKey();
   const time = Date.now();
   const newEntry = {
@@ -19,6 +19,7 @@ export async function addNutrition(nutritionData, setNutritionData, userId, name
     ingredients,
     saved: false,
     synced: false,
+    isPlaceholder,
   };
   console.log('[DEBUG] addNutrition - userId:', userId);
   console.log('[DEBUG] addNutrition - newEntry:', newEntry);
@@ -33,7 +34,7 @@ export async function addNutrition(nutritionData, setNutritionData, userId, name
 // Read - Get logs for a specific date (excludes deleted items)
 export function getLogsForDate(nutritionData, date) {
   const dateKey = getLocalDateKey(date);
-  return nutritionData.filter(entry => entry.date === dateKey && !entry.deleted);
+  return nutritionData.filter(entry => entry.date === dateKey && !entry.deleted && !entry.isPlaceholder);
 }
 
 // Read - Get macro totals for a specific date

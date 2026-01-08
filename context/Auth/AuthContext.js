@@ -1,11 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { generateClient } from '@aws-amplify/api';
+import { graphql } from '../../utils/graphqlClient';
 import { updateSettings } from '../../graphql/mutations';
 import NetInfo from '@react-native-community/netinfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Import Amplify configuration first
-import './amplifyConfig';
 
 // Import for internal use
 import { signInWithApple as appleSignIn, extractUserData } from './appleAuth';
@@ -31,6 +30,7 @@ import {
   clearCachedUserData
 } from './sessionStorage';
 import { STORAGE_KEYS } from '../storageKeys';
+import { storeToken, clearToken, getNewToken, isTokenExpired, getStoredToken, storeAppleIdentityToken } from '../../utils/tokenManager';
 
 
 
@@ -141,6 +141,10 @@ export function AuthProvider({ children }) {
         // Continue with sign-out even if clearing fails
       }
 
+      // Step 8.5: Clear JWT token
+      await clearToken();
+      console.log('✅ JWT token cleared');
+
       // Step 8: Clear session and state
       await clearSessionAndState();
 
@@ -223,6 +227,7 @@ export function AuthProvider({ children }) {
       if (!sessionData) {
         // No session = user is NOT signed in
         console.log('No existing Apple user session found');
+        await clearToken(); // Clear token if no session
         resetAuthState();
         return;
       }
@@ -235,15 +240,23 @@ export function AuthProvider({ children }) {
         // Normal case: use cache (works offline)
         setAuthenticatedUser(cachedUser);
         console.log('✅ Loaded user from cache (data already in AsyncStorage)');
+        
+        // Check if token exists and is valid (optional - will refresh on next API call if needed)
+        const token = await getStoredToken();
+        if (!token || isTokenExpired(token)) {
+          console.log('⚠️ Token expired or missing, will refresh on next API call');
+        }
       } else {
         // Edge case: session exists but no cache (shouldn't happen)
         // Clear session and require re-sign-in
         console.log('Session exists but no cache - clearing session');
         await clearAppleUserSession();
+        await clearToken();
         resetAuthState();
       }
     } catch (error) {
       console.log('Error checking auth state:', error);
+      await clearToken();
       resetAuthState();
     } finally {
       setLoading(false);
@@ -265,7 +278,25 @@ export function AuthProvider({ children }) {
       return { success: false, error: 'Missing required user data from Apple', code: 'INVALID_USER_DATA' };
     }
 
-    // Step 3: Check network connectivity (required for database operations)
+    // Step 3: Get and store JWT token (before any database queries)
+    try {
+      const jwtToken = await getNewToken(
+        appleUserData.appleUserId, 
+        signInResult.credential.identityToken
+      );
+      await storeToken(jwtToken);
+      
+      // Store Apple identityToken for future JWT refresh
+      await storeAppleIdentityToken(signInResult.credential.identityToken);
+      
+      console.log('✅ JWT token and Apple identity token stored');
+    } catch (error) {
+      console.error('❌ Failed to get JWT token:', error);
+      // Continue anyway - token generation failure shouldn't block sign-in
+      // The queries will attempt to get a new token if needed
+    }
+
+    // Step 4: Check network connectivity (required for database operations)
     const netInfo = await NetInfo.fetch();
     if (!netInfo.isConnected) {
       return { 
@@ -275,11 +306,11 @@ export function AuthProvider({ children }) {
       };
     }
 
-    // Step 4: Check if user exists
+    // Step 5: Check if user exists
     const userExistsResult = await checkAppleUserExists(appleUserData.appleUserId);
     if (!userExistsResult.success) return userExistsResult;
 
-    // Step 5: Load or create user data
+    // Step 6: Load or create user data
     let userData;
     if (userExistsResult.exists) {
       // Clear AsyncStorage before restore (ensures clean start)
@@ -356,6 +387,10 @@ export function AuthProvider({ children }) {
       // Continue with deletion even if clearing fails
     }
 
+    // Clear JWT token
+    await clearToken();
+    console.log('✅ JWT token cleared');
+
     await clearSessionAndState();
     return { success: true, message: 'Account deleted successfully.' };
   };
@@ -365,8 +400,7 @@ export function AuthProvider({ children }) {
   const markOnboardingCompleted = async (onboardingData = null) => {
     if (!user?.appleUserId) return { success: false, error: 'No user to update' };
     try {
-      const client = generateClient();
-            const updateInput = {
+      const updateInput = {
         id: user.appleUserId,
         onboardingCompleted: true,
       };
@@ -389,10 +423,10 @@ export function AuthProvider({ children }) {
         }
       }
       
-      await client.graphql({
+      await graphql({
         query: updateSettings,
         variables: { input: updateInput }
-      });
+      }, { userId: user.appleUserId, authToken: null });
       
       // Update user state with new settings
       const updatedSettings = { ...user.settings, ...updateInput };

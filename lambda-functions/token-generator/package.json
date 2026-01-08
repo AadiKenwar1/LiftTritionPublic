@@ -1,0 +1,14 @@
+{
+  "name": "token-generator",
+  "version": "1.0.0",
+  "description": "Lambda function to generate JWT tokens for authenticated users",
+  "main": "index.js",
+  "dependencies": {
+    "jsonwebtoken": "^9.0.2",
+    "@aws-sdk/client-secrets-manager": "^3.700.0"
+  }
+}
+
+
+
+

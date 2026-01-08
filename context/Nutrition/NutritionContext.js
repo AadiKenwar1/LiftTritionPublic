@@ -69,7 +69,7 @@ export function NutritionProvider({ children }) {
     setCurrentlyAnalyzing(uri);
     try {
       setProcessedPhotoUris(prev => new Set(prev).add(uri));
-      return await addNutritionFromPhoto(uri, (...args) => crud.addNutrition(nutritionData, setNutritionData, user.userId, ...args));
+      return await addNutritionFromPhoto(uri, (...args) => crud.addNutrition(nutritionData, setNutritionData, user.userId, ...args), user.userId, null);
     } finally {
       setCurrentlyAnalyzing(null);
     }
@@ -80,7 +80,7 @@ export function NutritionProvider({ children }) {
     setCurrentlyAnalyzing(uri);
     try {
       setProcessedPhotoUris(prev => new Set(prev).add(uri));
-      return await addNutritionFromLabel(uri, (...args) => crud.addNutrition(nutritionData, setNutritionData, user.userId, ...args));
+      return await addNutritionFromLabel(uri, (...args) => crud.addNutrition(nutritionData, setNutritionData, user.userId, ...args), user.userId, null);
     } finally {
       setCurrentlyAnalyzing(null);
     }
@@ -91,7 +91,7 @@ export function NutritionProvider({ children }) {
     setCurrentlyAnalyzing(uri);
     try {
       setProcessedPhotoUris(prev => new Set(prev).add(uri));
-      return await addNutritionFromBarcode(uri, (...args) => crud.addNutrition(nutritionData, setNutritionData, user.userId, ...args));
+      return await addNutritionFromBarcode(uri, (...args) => crud.addNutrition(nutritionData, setNutritionData, user.userId, ...args), user.userId, null);
     } finally {
       setCurrentlyAnalyzing(null);
     }
@@ -107,8 +107,8 @@ export function NutritionProvider({ children }) {
       value={{ 
         nutritionData,
         setNutritionData, 
-        addNutrition: (name, protein, carbs, fats, calories, isPhoto = false, ingredients = []) =>
-          crud.addNutrition(nutritionData, setNutritionData, user.userId, name, protein, carbs, fats, calories, isPhoto, ingredients),
+        addNutrition: (name, protein, carbs, fats, calories, isPhoto = false, ingredients = [], isPlaceholder = false) =>
+          crud.addNutrition(nutritionData, setNutritionData, user.userId, name, protein, carbs, fats, calories, isPhoto, ingredients, isPlaceholder),
         deleteNutrition: (id) => crud.deleteNutrition(nutritionData, setNutritionData, id, user.userId),
         editNutrition: (id, name, protein, carbs, fats, calories, saved) => crud.editNutrition(nutritionData, setNutritionData, id, name, protein, carbs, fats, calories, user.userId, saved),
         updateIngredientsAndMacros: (id, ingredients, totalMacros) => crud.updateIngredientsAndMacros(nutritionData, setNutritionData, id, ingredients, totalMacros, user.userId),

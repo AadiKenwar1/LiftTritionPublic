@@ -101,10 +101,10 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.8,
+    shadowOpacity: 0.2,
     shadowRadius: 3,
     borderWidth: 0.3,
-    borderColor: 'black',
+    borderColor: 'grey',
   },
   getStartedButtonText: {
     color: 'white',

@@ -16,11 +16,11 @@ async function uriToBase64(uri) {
 }
 
 // Picture Mode - General food analysis with ingredients
-export async function addNutritionFromPhoto(uri, addNutrition) {
+export async function addNutritionFromPhoto(uri, addNutrition, userId, authToken = null) {
   try {
     const base64Image = await uriToBase64(uri);
 
-    let openAIResponse = await askOpenAIVisionPicture(base64Image);
+    let openAIResponse = await askOpenAIVisionPicture(base64Image, userId, authToken);
     console.log('OpenAI Vision Picture raw response:', openAIResponse);
 
     // Attempt to extract JSON from code block if present
@@ -141,11 +141,11 @@ export async function addNutritionFromPhoto(uri, addNutrition) {
 }
 
 // Nutrition Label Mode - Precise label reading (no ingredients)
-export async function addNutritionFromLabel(uri, addNutrition) {
+export async function addNutritionFromLabel(uri, addNutrition, userId, authToken = null) {
   try {
     const base64Image = await uriToBase64(uri);
 
-    let openAIResponse = await askOpenAIVisionNutritionLabel(base64Image);
+    let openAIResponse = await askOpenAIVisionNutritionLabel(base64Image, userId, authToken);
     console.log('OpenAI Vision Nutrition Label raw response:', openAIResponse);
 
     // Attempt to extract JSON from code block if present
@@ -210,11 +210,11 @@ export async function addNutritionFromLabel(uri, addNutrition) {
 }
 
 // Barcode Mode - Product identification (no ingredients)
-export async function addNutritionFromBarcode(uri, addNutrition) {
+export async function addNutritionFromBarcode(uri, addNutrition, userId, authToken = null) {
   try {
     const base64Image = await uriToBase64(uri);
 
-    let openAIResponse = await askOpenAIVisionBarcode(base64Image);
+    let openAIResponse = await askOpenAIVisionBarcode(base64Image, userId, authToken);
     console.log('OpenAI Vision Barcode raw response:', openAIResponse);
 
     // Attempt to extract JSON from code block if present

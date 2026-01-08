@@ -1,8 +1,4 @@
-# This "input" configures a global authorization rule to enable public access to
-# all models in this schema. Learn more about authorization rules here: https://docs.amplify.aws/cli/graphql/authorization-rules
-input AMPLIFY { globalAuthRule: AuthRule = { allow: public } } # FOR TESTING ONLY!
-
-type Workout @model {
+type Workout @model @auth(rules: [{ allow: public, provider: apiKey }]) {
   id: ID!
   userId: ID!
   name: String!
@@ -14,11 +10,12 @@ type Workout @model {
   updatedAt: AWSDateTime!
 }
 
-type Exercise @model {
+type Exercise @model @auth(rules: [{ allow: public, provider: apiKey }]) {
   id: ID!
   workoutId: ID!
   userId: ID!
   name: String!
+  userMax: Float
   order: Int!
   archived: Boolean
   note: String
@@ -27,7 +24,7 @@ type Exercise @model {
   updatedAt: AWSDateTime!
 }
 
-type ExerciseLog @model {
+type ExerciseLog @model @auth(rules: [{ allow: public, provider: apiKey }]) {
   id: ID!
   exerciseId: ID!
   workoutId: ID!
@@ -41,20 +38,20 @@ type ExerciseLog @model {
   updatedAt: AWSDateTime!
 }
 
-type UserExercise @model {
+type UserExercise @model @auth(rules: [{ allow: public, provider: apiKey }]) {
   id: ID!
   userId: ID!
   name: String!
   isCompound: Boolean!
   fatigueFactor: Float!
+  userMax: Float
   mainMuscle: String!
   accessoryMuscles: [String]
-  synced: Boolean
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
 
-type Nutrition @model {
+type Nutrition @model @auth(rules: [{ allow: public, provider: apiKey }]) {
   id: ID!
   userId: ID!
   name: String!
@@ -68,11 +65,12 @@ type Nutrition @model {
   ingredients: [String]
   saved: Boolean
   synced: Boolean
+  isPlaceholder: Boolean
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
 
-type Settings @model {
+type Settings @model @auth(rules: [{ allow: public, provider: apiKey }]) {
   id: ID!         # This will be the userId for the settings record
   mode: Boolean
   unit: Boolean

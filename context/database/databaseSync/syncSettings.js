@@ -1,4 +1,4 @@
-import { generateClient } from '@aws-amplify/api';
+import { graphql } from '../../../utils/graphqlClient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { updateSettings, createSettings } from '../../../graphql/mutations';
 import { getCachedUserData } from '../../Auth/sessionStorage';
@@ -12,7 +12,6 @@ export async function syncSettings(userId) {
   const weightProgressData = await AsyncStorage.getItem(STORAGE_KEYS.weightProgress);
   const weightProgress = weightProgressData ? JSON.parse(weightProgressData) : [];
 
-  const client = generateClient();
   const input = {
     id: userId,
     mode: cachedUser.settings.mode,
@@ -32,27 +31,51 @@ export async function syncSettings(userId) {
     carbsGoal: cachedUser.settings.carbsGoal,
     fatsGoal: cachedUser.settings.fatsGoal,
     onboardingCompleted: cachedUser.settings.onboardingCompleted ?? false,
-    lastExercise: cachedUser.settings.lastExercise ?? '',
+    // Note: lastExercise is not included as it's not in UpdateSettingsInput type
+  };
+
+  // Helper function to check if error message indicates a conditional failure
+  const isConditionalFailure = (errorMessage) => {
+    return errorMessage?.includes('conditional request failed') || 
+           errorMessage?.includes('ConditionalCheckFailedException');
   };
 
   // Always try to update first (settings should exist after onboarding)
   try {
-    const result = await client.graphql({ query: updateSettings, variables: { input } });
+    const result = await graphql({ query: updateSettings, variables: { input } }, { userId, authToken: null });
     // Check for GraphQL errors in response
     if (result.errors) {
       return { success: false, synced: false, error: 'GraphQL errors in updateSettings' };
     }
   } catch (error) {
-    // If update fails (settings don't exist), create them
-    if (error.message?.includes('not found') || error.errors?.[0]?.errorType === 'NotFound') {
+    const errorMessage = error?.message || '';
+    
+    // If update fails (settings don't exist) - check for conditional failure or not found
+    if (isConditionalFailure(errorMessage) || error.message?.includes('not found') || error.errors?.[0]?.errorType === 'NotFound') {
+      console.log(`ℹ️ [Settings] Update failed (item doesn't exist), now creating: ${userId}`);
       try {
-        const result = await client.graphql({ query: createSettings, variables: { input } });
+        const result = await graphql({ query: createSettings, variables: { input } }, { userId, authToken: null });
         // Check for GraphQL errors in response
         if (result.errors) {
           return { success: false, synced: false, error: 'GraphQL errors in createSettings' };
         }
       } catch (createError) {
-        return { success: false, synced: false, error: createError.message };
+        const createErrorMessage = createError?.message || '';
+        
+        // If create also fails with conditional error, item was created between attempts (race condition)
+        if (isConditionalFailure(createErrorMessage)) {
+          console.log(`ℹ️ [Settings] Create failed (race condition), retrying update: ${userId}`);
+          try {
+            const retryResult = await graphql({ query: updateSettings, variables: { input } }, { userId, authToken: null });
+            if (retryResult.errors) {
+              return { success: false, synced: false, error: 'GraphQL errors in retry updateSettings' };
+            }
+          } catch (retryError) {
+            return { success: false, synced: false, error: retryError.message };
+          }
+        } else {
+          return { success: false, synced: false, error: createError.message };
+        }
       }
     } else {
       return { success: false, synced: false, error: error.message };

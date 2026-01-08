@@ -10,8 +10,6 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { useWorkoutContext } from "../../../../context/WorkoutsV2/WorkoutContext";
 import { useAuthContext } from "../../../../context/Auth/AuthContext";
-import { generateClient } from '@aws-amplify/api';
-import { deleteUserExercise } from "../../../../graphql/mutations";
 import CustomHeader from "../../../../components/CustomHeader";
 import { Entypo, Ionicons } from "@expo/vector-icons";
 import { Dumbbell } from 'lucide-react-native';
@@ -21,7 +19,6 @@ export default function UserExercises() {
   const navigation = useNavigation();
   const { user } = useAuthContext();
   const { setExerciseLibrary, userExercises, setUserExercises, deleteUserExercise } = useWorkoutContext();
-  const client = generateClient();
 
   const handleDelete = (exerciseName) => {
     Alert.alert(

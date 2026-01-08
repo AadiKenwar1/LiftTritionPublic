@@ -13,12 +13,14 @@ import NetInfo from '@react-native-community/netinfo';
 import { useAuthContext } from '../../context/Auth/AuthContext';
 import { useSettings } from '../../context/Settings/SettingsContext';
 import WiFiStatusBanner from '../../components/WiFiStatusBanner';
+import {useNutritionContext} from '../../context/Nutrition/NutritionContext';
 
 export default function OnboardingScreen12() {
   const navigation = useNavigation();
   const route = useRoute();
   const { markOnboardingCompleted, user } = useAuthContext();
   const { calculateMacros, updateWeight } = useSettings();
+  const { addNutrition } = useNutritionContext();
   
   // Get all onboarding data from previous screens
   const { birthDate, age, gender, height, weight, unit, activityFactor, goalType, goalWeight, goalPace } = route.params || {};
@@ -95,6 +97,9 @@ export default function OnboardingScreen12() {
 
       // Update weight first (before markOnboardingCompleted to avoid race condition)
       await updateWeight(weight);
+
+      //Add dummy nutrition entry to the database to align dates of bodyweight graphs with nutrition graphs
+      await addNutrition('Dummy Data', 0, 0, 0, 0, false, [], true);
 
       const result = await markOnboardingCompleted(onboardingData);
       if (!result.success) {

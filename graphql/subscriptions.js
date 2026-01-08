@@ -238,6 +238,7 @@ export const onCreateNutrition = /* GraphQL */ `
       ingredients
       saved
       synced
+      isPlaceholder
       createdAt
       updatedAt
       __typename
@@ -262,6 +263,7 @@ export const onUpdateNutrition = /* GraphQL */ `
       ingredients
       saved
       synced
+      isPlaceholder
       createdAt
       updatedAt
       __typename
@@ -286,6 +288,7 @@ export const onDeleteNutrition = /* GraphQL */ `
       ingredients
       saved
       synced
+      isPlaceholder
       createdAt
       updatedAt
       __typename

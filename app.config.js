@@ -53,7 +53,7 @@ export default {
     },
 
     extra: {
-      OPENAI_API_KEY: process.env.OPENAI_API_KEY,      
+      API_GATEWAY_URL: 'https://um1z6mkple.execute-api.us-east-1.amazonaws.com/prod-v2',
       FATSECRET_CLIENT_ID: process.env.FATSECRET_CLIENT_ID,
       FATSECRET_CLIENT_SECRET: process.env.FATSECRET_CLIENT_SECRET,
       APPSYNC_ENDPOINT: process.env.APPSYNC_ENDPOINT,
@@ -70,6 +70,7 @@ export default {
     plugins: [
       "expo-font",
       "expo-apple-authentication",
+      "expo-secure-store",
     ],
   },
 };

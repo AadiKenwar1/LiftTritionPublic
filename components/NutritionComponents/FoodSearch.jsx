@@ -11,11 +11,13 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { getFoodSearchResults, getFoodDetails } from '../../utils/foodCache';
+import { useAuthContext } from '../../context/Auth/AuthContext';
 
 let debounceTimer;
 
 // FoodSearch component provides a search bar and results list for searching foods using Open Food Facts API
 export default function FoodSearch(props) {
+  const { user } = useAuthContext();
   // State for search query, results, loading indicators, and added foods
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
@@ -31,7 +33,8 @@ export default function FoodSearch(props) {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(async () => {
       setLoading(true);
-      const foods = await getFoodSearchResults(query);
+      const userId = user?.userId || null;
+      const foods = await getFoodSearchResults(query, userId, null);
       setResults(foods);
       setLoading(false);
     }, 400);
@@ -40,7 +43,8 @@ export default function FoodSearch(props) {
   // Handle selection of a food item: fetch nutrition details and update parent state
   async function handleSelect(item) {
     setFetchingDetails(true);
-    const details = await getFoodDetails(item);
+    const userId = user?.userId || null;
+    const details = await getFoodDetails(item, userId, null);
     setFetchingDetails(false);
 
     if (details) {

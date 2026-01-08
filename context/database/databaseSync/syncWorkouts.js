@@ -1,4 +1,4 @@
-import { generateClient } from '@aws-amplify/api';
+import { graphql } from '../../../utils/graphqlClient';
 import { 
   createWorkout, 
   updateWorkout,
@@ -17,7 +17,6 @@ import {
 export async function syncWorkouts(userId, workouts, exercises, logs, userExercises, setters) {
   try {
     const { setWorkouts, setExercises, setLogs, setUserExercises } = setters;
-    const client = generateClient();
 
   // Helper function to sync deletions
   const syncDeletions = async (items, deleteMutation, setter, itemType) => {
@@ -30,10 +29,10 @@ export async function syncWorkouts(userId, workouts, exercises, logs, userExerci
     const startTime = Date.now();
     const deleteResults = await Promise.allSettled(
       deletedItems.map(item =>
-        client.graphql({
+        graphql({
           query: deleteMutation,
           variables: { input: { id: item.id } }
-        })
+        }, { userId, authToken: null })
       )
     );
     const duration = Date.now() - startTime;
@@ -105,12 +104,18 @@ export async function syncWorkouts(userId, workouts, exercises, logs, userExerci
           synced: true,
         };
 
+        // Helper function to check if error message indicates a conditional failure
+        const isConditionalFailure = (errorMessage) => {
+          return errorMessage?.includes('conditional request failed') || 
+                 errorMessage?.includes('ConditionalCheckFailedException');
+        };
+
         // Try update first (for edited items that exist in DB)
         try {
-          const updateResult = await client.graphql({
+          const updateResult = await graphql({
             query: updateWorkout,
             variables: { input }
-          });
+          }, { userId, authToken: null });
           
           // Check for GraphQL errors
           if (updateResult.errors) {
@@ -119,18 +124,55 @@ export async function syncWorkouts(userId, workouts, exercises, logs, userExerci
           
           return { success: true, id: w.id };
         } catch (error) {
-          // If update fails (item doesn't exist), try create
-          const createResult = await client.graphql({
-            query: createWorkout,
-            variables: { input }
-          });
+          const errorMessage = error?.message || '';
           
-          // Check for GraphQL errors
-          if (createResult.errors) {
-            throw new Error('Create failed');
+          // Check if it's a conditional failure (item doesn't exist)
+          if (isConditionalFailure(errorMessage)) {
+            // Item doesn't exist, try create
+            console.log(`ℹ️ [Workouts] Update failed (item doesn't exist), now creating: ${w.id}`);
+            try {
+              const createResult = await graphql({
+                query: createWorkout,
+                variables: { input }
+              }, { userId, authToken: null });
+              
+              // Check for GraphQL errors
+              if (createResult.errors) {
+                throw new Error('Create failed');
+              }
+              
+              return { success: true, id: w.id };
+            } catch (createError) {
+              const createErrorMessage = createError?.message || '';
+              
+              // If create also fails with conditional error, item was created between attempts (race condition)
+              if (isConditionalFailure(createErrorMessage)) {
+                // Retry update (item now exists)
+                console.log(`ℹ️ [Workouts] Create failed (race condition), retrying update: ${w.id}`);
+                try {
+                  const retryUpdateResult = await graphql({
+                    query: updateWorkout,
+                    variables: { input }
+                  }, { userId, authToken: null });
+                  
+                  if (retryUpdateResult.errors) {
+                    throw new Error('Retry update failed');
+                  }
+                  
+                  return { success: true, id: w.id };
+                } catch (retryError) {
+                  console.error(`❌ [Workouts] Both create and update failed for item ${w.id}:`, retryError.message);
+                  throw retryError;
+                }
+              } else {
+                // Create failed for a different reason
+                throw createError;
+              }
+            }
+          } else {
+            // Update failed for a different reason (not conditional failure)
+            throw error;
           }
-          
-          return { success: true, id: w.id };
         }
       })
     );
@@ -176,12 +218,18 @@ export async function syncWorkouts(userId, workouts, exercises, logs, userExerci
           synced: true,
         };
 
+        // Helper function to check if error message indicates a conditional failure
+        const isConditionalFailure = (errorMessage) => {
+          return errorMessage?.includes('conditional request failed') || 
+                 errorMessage?.includes('ConditionalCheckFailedException');
+        };
+
         // Try update first (for edited items that exist in DB)
         try {
-          const updateResult = await client.graphql({
+          const updateResult = await graphql({
             query: updateExercise,
             variables: { input }
-          });
+          }, { userId, authToken: null });
           
           // Check for GraphQL errors
           if (updateResult.errors) {
@@ -190,18 +238,55 @@ export async function syncWorkouts(userId, workouts, exercises, logs, userExerci
           
           return { success: true, id: e.id };
         } catch (error) {
-          // If update fails (item doesn't exist), try create
-          const createResult = await client.graphql({
-            query: createExercise,
-            variables: { input }
-          });
+          const errorMessage = error?.message || '';
           
-          // Check for GraphQL errors
-          if (createResult.errors) {
-            throw new Error('Create failed');
+          // Check if it's a conditional failure (item doesn't exist)
+          if (isConditionalFailure(errorMessage)) {
+            // Item doesn't exist, try create
+            console.log(`ℹ️ [Exercises] Update failed (item doesn't exist), now creating: ${e.id}`);
+            try {
+              const createResult = await graphql({
+                query: createExercise,
+                variables: { input }
+              }, { userId, authToken: null });
+              
+              // Check for GraphQL errors
+              if (createResult.errors) {
+                throw new Error('Create failed');
+              }
+              
+              return { success: true, id: e.id };
+            } catch (createError) {
+              const createErrorMessage = createError?.message || '';
+              
+              // If create also fails with conditional error, item was created between attempts (race condition)
+              if (isConditionalFailure(createErrorMessage)) {
+                // Retry update (item now exists)
+                console.log(`ℹ️ [Exercises] Create failed (race condition), retrying update: ${e.id}`);
+                try {
+                  const retryUpdateResult = await graphql({
+                    query: updateExercise,
+                    variables: { input }
+                  }, { userId, authToken: null });
+                  
+                  if (retryUpdateResult.errors) {
+                    throw new Error('Retry update failed');
+                  }
+                  
+                  return { success: true, id: e.id };
+                } catch (retryError) {
+                  console.error(`❌ [Exercises] Both create and update failed for item ${e.id}:`, retryError.message);
+                  throw retryError;
+                }
+              } else {
+                // Create failed for a different reason
+                throw createError;
+              }
+            }
+          } else {
+            // Update failed for a different reason (not conditional failure)
+            throw error;
           }
-          
-          return { success: true, id: e.id };
         }
       })
     );
@@ -248,12 +333,18 @@ export async function syncWorkouts(userId, workouts, exercises, logs, userExerci
           synced: true,
         };
 
+        // Helper function to check if error message indicates a conditional failure
+        const isConditionalFailure = (errorMessage) => {
+          return errorMessage?.includes('conditional request failed') || 
+                 errorMessage?.includes('ConditionalCheckFailedException');
+        };
+
         // Try update first (for edited items that exist in DB)
         try {
-          const updateResult = await client.graphql({
+          const updateResult = await graphql({
             query: updateExerciseLog,
             variables: { input }
-          });
+          }, { userId, authToken: null });
           
           // Check for GraphQL errors
           if (updateResult.errors) {
@@ -262,18 +353,55 @@ export async function syncWorkouts(userId, workouts, exercises, logs, userExerci
           
           return { success: true, id: l.id };
         } catch (error) {
-          // If update fails (item doesn't exist), try create
-          const createResult = await client.graphql({
-            query: createExerciseLog,
-            variables: { input }
-          });
+          const errorMessage = error?.message || '';
           
-          // Check for GraphQL errors
-          if (createResult.errors) {
-            throw new Error('Create failed');
+          // Check if it's a conditional failure (item doesn't exist)
+          if (isConditionalFailure(errorMessage)) {
+            // Item doesn't exist, try create
+            console.log(`ℹ️ [ExerciseLogs] Update failed (item doesn't exist), now creating: ${l.id}`);
+            try {
+              const createResult = await graphql({
+                query: createExerciseLog,
+                variables: { input }
+              }, { userId, authToken: null });
+              
+              // Check for GraphQL errors
+              if (createResult.errors) {
+                throw new Error('Create failed');
+              }
+              
+              return { success: true, id: l.id };
+            } catch (createError) {
+              const createErrorMessage = createError?.message || '';
+              
+              // If create also fails with conditional error, item was created between attempts (race condition)
+              if (isConditionalFailure(createErrorMessage)) {
+                // Retry update (item now exists)
+                console.log(`ℹ️ [ExerciseLogs] Create failed (race condition), retrying update: ${l.id}`);
+                try {
+                  const retryUpdateResult = await graphql({
+                    query: updateExerciseLog,
+                    variables: { input }
+                  }, { userId, authToken: null });
+                  
+                  if (retryUpdateResult.errors) {
+                    throw new Error('Retry update failed');
+                  }
+                  
+                  return { success: true, id: l.id };
+                } catch (retryError) {
+                  console.error(`❌ [ExerciseLogs] Both create and update failed for item ${l.id}:`, retryError.message);
+                  throw retryError;
+                }
+              } else {
+                // Create failed for a different reason
+                throw createError;
+              }
+            }
+          } else {
+            // Update failed for a different reason (not conditional failure)
+            throw error;
           }
-          
-          return { success: true, id: l.id };
         }
       })
     );
@@ -319,12 +447,18 @@ export async function syncWorkouts(userId, workouts, exercises, logs, userExerci
           synced: true,
         };
 
+        // Helper function to check if error message indicates a conditional failure
+        const isConditionalFailure = (errorMessage) => {
+          return errorMessage?.includes('conditional request failed') || 
+                 errorMessage?.includes('ConditionalCheckFailedException');
+        };
+
         // Try update first (for edited items that exist in DB)
         try {
-          const updateResult = await client.graphql({
+          const updateResult = await graphql({
             query: updateUserExercise,
             variables: { input }
-          });
+          }, { userId, authToken: null });
           
           // Check for GraphQL errors
           if (updateResult.errors) {
@@ -333,18 +467,55 @@ export async function syncWorkouts(userId, workouts, exercises, logs, userExerci
           
           return { success: true, id: ue.id };
         } catch (error) {
-          // If update fails (item doesn't exist), try create
-          const createResult = await client.graphql({
-            query: createUserExercise,
-            variables: { input }
-          });
+          const errorMessage = error?.message || '';
           
-          // Check for GraphQL errors
-          if (createResult.errors) {
-            throw new Error('Create failed');
+          // Check if it's a conditional failure (item doesn't exist)
+          if (isConditionalFailure(errorMessage)) {
+            // Item doesn't exist, try create
+            console.log(`ℹ️ [UserExercises] Update failed (item doesn't exist), now creating: ${ue.id}`);
+            try {
+              const createResult = await graphql({
+                query: createUserExercise,
+                variables: { input }
+              }, { userId, authToken: null });
+              
+              // Check for GraphQL errors
+              if (createResult.errors) {
+                throw new Error('Create failed');
+              }
+              
+              return { success: true, id: ue.id };
+            } catch (createError) {
+              const createErrorMessage = createError?.message || '';
+              
+              // If create also fails with conditional error, item was created between attempts (race condition)
+              if (isConditionalFailure(createErrorMessage)) {
+                // Retry update (item now exists)
+                console.log(`ℹ️ [UserExercises] Create failed (race condition), retrying update: ${ue.id}`);
+                try {
+                  const retryUpdateResult = await graphql({
+                    query: updateUserExercise,
+                    variables: { input }
+                  }, { userId, authToken: null });
+                  
+                  if (retryUpdateResult.errors) {
+                    throw new Error('Retry update failed');
+                  }
+                  
+                  return { success: true, id: ue.id };
+                } catch (retryError) {
+                  console.error(`❌ [UserExercises] Both create and update failed for item ${ue.id}:`, retryError.message);
+                  throw retryError;
+                }
+              } else {
+                // Create failed for a different reason
+                throw createError;
+              }
+            }
+          } else {
+            // Update failed for a different reason (not conditional failure)
+            throw error;
           }
-          
-          return { success: true, id: ue.id };
         }
       })
     );
