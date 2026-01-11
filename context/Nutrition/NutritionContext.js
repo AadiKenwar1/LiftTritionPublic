@@ -56,10 +56,7 @@ export function NutritionProvider({ children }) {
 
   // Console log nutrition data source
   useEffect(() => {
-    console.log('🍎 Nutrition Data Source Check:');
-    console.log('📊 Total nutrition logs:', nutritionData.length);
-    console.log('🗄️ Data source: AsyncStorage (local)');
-    console.log('📋 Nutrition logs:', nutritionData.map(item => `${item.name} - ${item.date}`));
+    // Nutrition data loaded from AsyncStorage
   }, [nutritionData]);
 
   // Wrappers for photo/label/barcode analysis (unchanged, but use addNutrition)

@@ -117,6 +117,8 @@ export async function getNewToken(userId, authToken) {
         });
 
         if (!response.ok) {
+            const errorText = await response.text().catch(() => 'Unable to read error');
+            console.error(`Token generation failed: ${response.status} - ${errorText.substring(0, 200)}`);
             throw new Error(`Token generation failed: ${response.status}`);
         }
 
@@ -141,7 +143,6 @@ export async function getValidToken(userId, authToken) {
         const tokenToUse = authToken || await getStoredAppleIdentityToken();
         
         if (tokenToUse && userId) {
-            console.log('Token expired or missing, getting new token...');
             try {
                 token = await getNewToken(userId, tokenToUse);
                 await storeToken(token);
@@ -155,6 +156,7 @@ export async function getValidToken(userId, authToken) {
             }
         } else {
             // No authToken or stored identityToken available
+            console.error(`No token available for refresh - userId: ${userId ? 'exists' : 'missing'}, tokenToUse: ${tokenToUse ? 'exists' : 'missing'}`);
             throw new Error('Token expired. Please sign in again.');
         }
     }

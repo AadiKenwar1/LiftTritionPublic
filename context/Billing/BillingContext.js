@@ -6,229 +6,174 @@ import { useAuthContext } from "../Auth/AuthContext";
 const BillingContext = createContext(undefined);
 
 export function BillingProvider({ children }) {
-  //Auth context to get user and auth loading state
   const { user, loading: authLoading } = useAuthContext();
-  //State variables for offerings, customer info, loading, loaded, and error
+  
   const [offerings, setOfferings] = useState(null);
   const [customerInfo, setCustomerInfo] = useState(null);
   const [billingLoading, setBillingLoading] = useState(true);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(null);
 
-  // Combined loading state - true if either auth or billing is loading
   const loading = authLoading || billingLoading;
+  const isMountedRef = useRef(true);
+  const reconnectTimeoutRef = useRef(null);
 
-  // Refs to track state without causing re-renders (prevents infinite loops, memory leaks, race conditions, and other issues)
-  const isInitializingRef = useRef(false); //Prevents duplicate initialization calls
-  const isMountedRef = useRef(true); //Prevents memory leaks (Doesnt try to update state if BillingContext is not mounted)
-  const currentUserIdRef = useRef(null); //Prevents stale updates by stopping async operations if user changes
-  const reconnectTimeoutRef = useRef(null); //Prevents rapid reconnects (debounced to prevent flooding)
-  const initializationTimeoutRef = useRef(null); //Prevents stuck initialization
-
-  // Track mounted state
   useEffect(() => {
     isMountedRef.current = true;
-    // Cleanup function (I didnt even know this was a thing)to set mounted state to false and clear timeouts
     return () => {
       isMountedRef.current = false;
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
-      if (initializationTimeoutRef.current) {
-        clearTimeout(initializationTimeoutRef.current);
-      }
     };
   }, []);
 
-  // Load billing data when user changes or when component mounts
   useEffect(() => {
     let listener;
     let netInfoListener;
 
-    // Load billing data from RevenueCat
-    async function loadBillingData(userId) {
-      if (authLoading) return;
-      if (currentUserIdRef.current !== userId) {
-        return;
-      }
+    async function initializeBilling() {
+      if (authLoading || !isMountedRef.current) return;
 
-      try {
-        if (!isMountedRef.current) return;
-        setBillingLoading(true);
-        setError(null);
+      const userId = user?.appleUserId;
 
-        const [fetchedOfferings, fetchedCustomerInfo] = await Promise.all([
-          Purchases.getOfferings(),
-          Purchases.getCustomerInfo(), // RevenueCat handles offline caching internally
-        ]);
-
-        // Double-check we're still mounted and user hasn't changed (prevents stale updates)
-        if (!isMountedRef.current || currentUserIdRef.current !== userId) {
-          return;
-        }
-        setOfferings(fetchedOfferings);
-        setCustomerInfo(fetchedCustomerInfo);
-        setLoaded(true);
-      } catch (err) {
-        console.warn("[Billing] Failed to load billing data", err);
-        if (isMountedRef.current && currentUserIdRef.current === userId) {
-          setError(err);
-          setLoaded(true); // Still mark as loaded even on error
-        }
-      } finally {
-        if (isMountedRef.current && currentUserIdRef.current === userId) {
-          setBillingLoading(false);
-        }
-      }
-    }
-
-    // Initialize billing by logging in/out RevenueCat user and loading billing data
-    async function initializeBilling(userId) {
-      // Step 1: Login/Logout RevenueCat user FIRST
-      if (userId) {
-        if (!isMountedRef.current || currentUserIdRef.current !== userId) {
-          return;
-        }
-        setLoaded(false);
-
-        await Purchases.logIn(userId).catch((error) => {
-          console.warn("[RevenueCat] Failed to log in user", error);
-        });
-
-        // Check again after async operation
-        if (!isMountedRef.current || currentUserIdRef.current !== userId) {
-          return;
-        }
-
-        // Step 2: Then load billing data
-        await loadBillingData(userId);
-      } else {
-        await Purchases.logOut().catch((error) => {
-          console.warn("[RevenueCat] Failed to log out user", error);
-        });
-
-        if (isMountedRef.current && currentUserIdRef.current === userId) {
+      // 1. Check if user is logged in
+      if (!userId) {
+        await Purchases.logOut().catch(() => {});
+        if (isMountedRef.current) {
           setOfferings(null);
           setCustomerInfo(null);
           setBillingLoading(false);
-          setLoaded(false);
+          setLoaded(true);
         }
-      }
-    }
-
-    // SINGLE ENTRY POINT: All initialization requests go through here (prevents duplicate or infinite initialization calls)
-    async function requestInitialization() {
-      const userId = user?.appleUserId;
-      
-      // If user changed, cancel previous initialization
-      if (isInitializingRef.current && currentUserIdRef.current !== userId) {
-        console.log("[Billing] User changed, canceling previous initialization");
-        isInitializingRef.current = false;
-        if (initializationTimeoutRef.current) {
-          clearTimeout(initializationTimeoutRef.current);
-        }
-      }
-
-      // Guard against concurrent calls for the same user
-      if (isInitializingRef.current) {
-        console.log("[Billing] Initialization already in progress, skipping duplicate call");
         return;
       }
 
-      // Track current user to prevent stale updates
-      currentUserIdRef.current = userId;
-
-      // Set timeout to prevent stuck initialization (30 seconds)
-      initializationTimeoutRef.current = setTimeout(() => {
-        if (isInitializingRef.current) {
-          console.warn("[Billing] Initialization timeout, resetting");
-          isInitializingRef.current = false;
-        }
-      }, 30000);
-
+      // 2. Check RevenueCat cache first (works offline)
       try {
-        isInitializingRef.current = true;
-        await initializeBilling(userId);
-      } catch (err) {
-        console.error("[Billing] Initialization error", err);
-        if (isMountedRef.current && currentUserIdRef.current === userId) {
-          setError(err);
+        const cachedInfo = await Purchases.getCustomerInfo();
+        if (cachedInfo && isMountedRef.current) {
+          setCustomerInfo(cachedInfo);
+          setLoaded(true);
         }
-      } finally {
-        isInitializingRef.current = false;
-        if (initializationTimeoutRef.current) {
-          clearTimeout(initializationTimeoutRef.current);
-          initializationTimeoutRef.current = null;
+      } catch (cacheErr) {
+        console.warn("[Billing] Failed to get cached data", cacheErr);
+      }
+
+      // 3. If online, refresh from API (with simple inline retry)
+      const netInfo = await NetInfo.fetch();
+      if (netInfo.isConnected) {
+        let freshOfferings, freshInfo;
+        let success = false;
+
+        for (let i = 0; i < 3; i++) {
+          try {
+            [freshOfferings, freshInfo] = await Promise.all([
+              Purchases.getOfferings(),
+              Purchases.getCustomerInfo(),
+            ]);
+            success = true;
+            break;
+          } catch (err) {
+            if (i === 2) {
+              // Last attempt failed
+              console.warn("[Billing] Failed to refresh from API after 3 attempts", err);
+              if (isMountedRef.current) {
+                setError(err);
+              }
+            } else {
+              // Wait before retry
+              await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+            }
+          }
         }
+
+        if (success && isMountedRef.current && userId === user?.appleUserId) {
+          setOfferings(freshOfferings);
+          setCustomerInfo(freshInfo);
+          setLoaded(true);
+        }
+      }
+
+      if (isMountedRef.current) {
+        setBillingLoading(false);
       }
     }
 
-    // Only initialize if auth is not loading
     if (!authLoading) {
-      requestInitialization();
+      initializeBilling();
     } else {
-      // Keep loading state while auth is loading (prevents race conditions)
       setBillingLoading(true);
     }
 
-    // Network reconnect - debounced to prevent flooding (prevents rapid reconnects)
+    // Network reconnect - simple refresh with retry
     netInfoListener = NetInfo.addEventListener(state => {
       if (state.isConnected && user?.appleUserId && !authLoading) {
         if (reconnectTimeoutRef.current) {
           clearTimeout(reconnectTimeoutRef.current);
         }
 
-        // Debounce rapid reconnects - wait 1.5 seconds for network to stabilize
-        reconnectTimeoutRef.current = setTimeout(() => {
-          // Double-check network is still connected and user is still the same
-          NetInfo.fetch().then(netState => {
-            if (netState.isConnected && currentUserIdRef.current === user?.appleUserId && !authLoading) {
-              requestInitialization();
+        reconnectTimeoutRef.current = setTimeout(async () => {
+          const netState = await NetInfo.fetch();
+          if (netState.isConnected && user?.appleUserId && !authLoading && isMountedRef.current) {
+            let freshInfo;
+            let success = false;
+
+            for (let i = 0; i < 3; i++) {
+              try {
+                freshInfo = await Purchases.getCustomerInfo();
+                success = true;
+                break;
+              } catch (err) {
+                if (i === 2) {
+                  console.warn("[Billing] Failed to refresh after reconnect", err);
+                } else {
+                  await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+                }
+              }
             }
-          });
+
+            if (success && isMountedRef.current && user?.appleUserId) {
+              setCustomerInfo(freshInfo);
+            }
+          }
         }, 1500);
       }
     });
 
-    // RevenueCat's subscription update listener - safe state update
+    // RevenueCat subscription update listener
     listener = Purchases.addCustomerInfoUpdateListener((info) => {
-      if (isMountedRef.current && currentUserIdRef.current === user?.appleUserId) {
+      if (isMountedRef.current && user?.appleUserId) {
         setCustomerInfo(info);
       }
     });
 
-    // Cleanup function to remove listeners and clear timeouts
     return () => {
       listener?.remove?.();
       netInfoListener?.();
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
-    }
+    };
   }, [authLoading, user?.appleUserId]);
 
-  // Purchase a package
   const purchasePackage = useCallback(async (pkg) => {
     try {
       if (!isMountedRef.current) return;
       setError(null);
       const result = await Purchases.purchasePackage(pkg);
       
-      // Immediately update customer info to reflect purchase
-      if (isMountedRef.current && currentUserIdRef.current === user?.appleUserId) {
+      if (isMountedRef.current && user?.appleUserId) {
         setCustomerInfo(result.customerInfo);
       }
       
-      // Force a refresh to ensure we have the latest data
-      // This helps with the "sometimes works, sometimes doesn't" issue
       try {
         const freshInfo = await Purchases.getCustomerInfo();
-        if (isMountedRef.current && currentUserIdRef.current === user?.appleUserId) {
+        if (isMountedRef.current && user?.appleUserId) {
           setCustomerInfo(freshInfo);
         }
       } catch (refreshErr) {
         console.warn("[Billing] Failed to refresh after purchase", refreshErr);
-        // Don't throw - we already have the purchase result
       }
       
       return result.customerInfo;
@@ -240,14 +185,13 @@ export function BillingProvider({ children }) {
     }
   }, [user?.appleUserId]);
 
-  // Restore purchases
   const restorePurchases = useCallback(async () => {
     try {
       if (!isMountedRef.current) return;
       setError(null);
       const info = await Purchases.restorePurchases();
       
-      if (isMountedRef.current && currentUserIdRef.current === user?.appleUserId) {
+      if (isMountedRef.current && user?.appleUserId) {
         setCustomerInfo(info);
       }
       
@@ -260,13 +204,11 @@ export function BillingProvider({ children }) {
     }
   }, [user?.appleUserId]);
 
-  // Refresh subscription
   const refreshSubscription = useCallback(async () => {
     if (!user?.appleUserId) {
       throw new Error("No user logged in");
     }
     
-    // Check network connectivity
     const netInfo = await NetInfo.fetch();
     if (!netInfo.isConnected) {
       throw new Error("No internet connection. Please connect to the internet to refresh your subscription.");
@@ -277,13 +219,23 @@ export function BillingProvider({ children }) {
       setError(null);
       setBillingLoading(true);
       
-      // Step 1: Ensure user is logged in to RevenueCat
-      await Purchases.logIn(user.appleUserId);
+      let info;
+      let success = false;
+
+      for (let i = 0; i < 3; i++) {
+        try {
+          info = await Purchases.getCustomerInfo();
+          success = true;
+          break;
+        } catch (err) {
+          if (i === 2) {
+            throw err;
+          }
+          await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+        }
+      }
       
-      // Step 2: Get fresh customer info
-      const info = await Purchases.getCustomerInfo();
-      
-      if (isMountedRef.current && currentUserIdRef.current === user.appleUserId) {
+      if (success && isMountedRef.current && user?.appleUserId) {
         setCustomerInfo(info);
         setLoaded(true);
       }
@@ -302,21 +254,14 @@ export function BillingProvider({ children }) {
     }
   }, [user?.appleUserId]);
 
-  // Check if user has premium
   const hasPremium = useMemo(() => {
     const entitlementId = "LiftTrition Pro";
     const activeEntitlements = customerInfo?.entitlements?.active ?? {};
     
-    // Only log in development to reduce noise
-    if (__DEV__) {
-      console.log("[Billing] Active entitlements:", activeEntitlements);
-      console.log("[Billing] Has premium:", Boolean(activeEntitlements[entitlementId]));
-    }
     
     return Boolean(activeEntitlements[entitlementId]);
   }, [customerInfo]);
 
-  //Exports
   const value = useMemo(
     () => ({
       offerings,
@@ -344,4 +289,3 @@ export function useBilling() {
   }
   return context;
 }
-

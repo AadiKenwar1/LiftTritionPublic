@@ -4,13 +4,8 @@ import { createNutrition, updateNutrition, deleteNutrition } from '../../../grap
 export async function syncNutrition(userId, nutritionData, setNutritionData) {
   try {
   // Sync deletions first
-  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  console.log('🗑️ [syncNutrition] Starting deletion sync phase');
-  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   const deletedItems = nutritionData.filter(item => item.deleted);
   if (deletedItems.length > 0) {
-    console.log(`🗑️ [Nutrition] Starting deletion sync for ${deletedItems.length} items`);
-    console.log(`🗑️ [Nutrition] Items to delete:`, deletedItems.map(item => ({ id: item.id, name: item.name })));
     
     const startTime = Date.now();
     const deleteResults = await Promise.allSettled(
@@ -22,7 +17,6 @@ export async function syncNutrition(userId, nutritionData, setNutritionData) {
       )
     );
     const duration = Date.now() - startTime;
-    console.log(`🗑️ [Nutrition] Deletion requests completed in ${duration}ms`);
     
     // Remove successfully deleted items from array
     const deletedIds = deleteResults
@@ -30,14 +24,12 @@ export async function syncNutrition(userId, nutritionData, setNutritionData) {
         const item = deletedItems[index];
         // Success: item deleted from database
         if (result.status === 'fulfilled' && !result.value.errors) {
-          console.log(`✅ [Nutrition] Successfully deleted from DB:`, item.id, item.name);
           return item.id;
         }
         // "Not found": item never existed in DB, safe to remove
         if (result.status === 'rejected' && 
             (result.reason?.message?.includes('not found') || 
              result.reason?.errors?.[0]?.errorType === 'NotFound')) {
-          console.log(`✅ [Nutrition] Item never existed in DB (safe to remove):`, item.id, item.name);
           return item.id;
         }
         // Log failures
@@ -50,34 +42,21 @@ export async function syncNutrition(userId, nutritionData, setNutritionData) {
       })
       .filter(Boolean);
     
-    console.log(`🗑️ [Nutrition] Removing ${deletedIds.length} successfully deleted items from AsyncStorage`);
     // Remove successfully deleted items from array
     if (deletedIds.length > 0) {
-      const beforeCount = nutritionData.length;
       setNutritionData(prev => {
         const filtered = prev.filter(item => !deletedIds.includes(item.id));
-        console.log(`🗑️ [Nutrition] State updated: ${beforeCount} → ${filtered.length} items`);
         return filtered;
       });
-    } else {
-      console.log(`⚠️ [Nutrition] No items were successfully deleted, none removed from AsyncStorage`);
     }
-  } else {
-    console.log(`🗑️ [Nutrition] No deleted items to sync`);
   }
-  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  console.log('✅ [syncNutrition] Deletion sync phase complete');
-  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   
   // Then sync creates/updates
-  console.log('🔄 [syncNutrition] Starting create/update sync phase');
   const unsynced = nutritionData.filter(item => !item.synced && !item.deleted);
   if (unsynced.length === 0) {
-    console.log(`✅ [Nutrition] All items already synced`);
     return { success: true, synced: 0 };
   }
   
-  console.log(`📤 [Nutrition] Syncing ${unsynced.length} unsynced items`);
   const startTime = Date.now();
   const results = await Promise.allSettled(
     unsynced.map(async (item) => {
@@ -119,7 +98,6 @@ export async function syncNutrition(userId, nutritionData, setNutritionData) {
         // Check if it's a conditional failure (item doesn't exist)
         if (isConditionalFailure(updateErrorMessage)) {
           // Item doesn't exist, try create
-          console.log(`ℹ️ [Nutrition] Update failed (item doesn't exist), now creating: ${item.id}`);
           try {
             const createResult = await graphql({
               query: createNutrition,
@@ -174,7 +152,6 @@ export async function syncNutrition(userId, nutritionData, setNutritionData) {
     })
     .filter(Boolean);
 
-  console.log(`✅ [Nutrition] Synced ${syncedIds.length}/${unsynced.length} items in ${duration}ms`);
   // Only update state if items were actually synced
   if (syncedIds.length > 0) {
     const syncedSet = new Set(syncedIds);
@@ -183,9 +160,6 @@ export async function syncNutrition(userId, nutritionData, setNutritionData) {
     );
   }
 
-  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  console.log('✅ [syncNutrition] Complete');
-  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   return { success: true, synced: syncedIds.length, failed: unsynced.length - syncedIds.length };
   } catch (error) {
     console.error('❌ [syncNutrition] Fatal error:', error);

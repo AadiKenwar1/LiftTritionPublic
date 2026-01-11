@@ -192,17 +192,11 @@ export const SettingsProvider = ({ children }) => {
     ) {
         // Convert to imperial units for calculations (formula expects lbs and inches)
         if (!currentUnit) { // If metric, convert to imperial
-            console.log('Converting to imperial units');    
             currentBodyWeight = currentBodyWeight * 2.20462; // kg to lbs
-            console.log('Current body weight:', currentBodyWeight);
             currentHeight = currentHeight / 2.54; // cm to inches
-            console.log('Current height:', currentHeight);
             currentGoalWeight = currentGoalWeight * 2.20462; // kg to lbs
-            console.log('Current goal weight:', currentGoalWeight);
             currentGoalPace = currentGoalPace * 2.20462; // kg/week to lbs/week
-            console.log('Current goal pace:', currentGoalPace);
         }
-        console.log('Current goal pace:', currentGoalPace);
         
         // Base calculation using converted values (Mifflin-St Jeor Equation)
         let calResult = 0;
@@ -386,7 +380,6 @@ export const SettingsProvider = ({ children }) => {
                 };
                 
                 await cacheUserData(updatedUser);
-                console.log('[SettingsContext] Updated cached user data with new settings');
             } catch (e) {
                 console.error('[SettingsContext] Error updating cached user data:', e);
             }

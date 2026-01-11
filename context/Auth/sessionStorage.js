@@ -15,7 +15,6 @@ export const storeAppleUserSession = async (userData) => {
     };
     
     await AsyncStorage.setItem(APPLE_USER_SESSION_KEY, JSON.stringify(sessionData));
-    console.log('✅ Apple user session stored successfully');
     return true;
   } catch (error) {
     console.error('❌ Error storing Apple user session:', error);
@@ -43,7 +42,6 @@ export const getAppleUserSession = async () => {
 export const clearAppleUserSession = async () => {
   try {
     await AsyncStorage.removeItem(APPLE_USER_SESSION_KEY);
-    console.log('✅ Apple user session cleared successfully');
     return true;
   } catch (error) {
     console.error('❌ Error clearing Apple user session:', error);
@@ -55,7 +53,6 @@ export const clearAppleUserSession = async () => {
 export const cacheUserData = async (userData) => {
   try {
     await AsyncStorage.setItem('@LiftTrition:cachedUserData', JSON.stringify(userData));
-    console.log('✅ User data cached successfully');
     return true;
   } catch (error) {
     console.error('❌ Error caching user data:', error);
@@ -81,7 +78,6 @@ export const getCachedUserData = async () => {
 export const clearCachedUserData = async () => {
   try {
     await AsyncStorage.removeItem('@LiftTrition:cachedUserData');
-    console.log('✅ Cached user data cleared');
     return true;
   } catch (error) {
     console.error('❌ Error clearing cached user data:', error);

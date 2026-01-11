@@ -17,9 +17,6 @@ import {
   Inter_700Bold,
 } from '@expo-google-fonts/inter';
 
-// Import Amplify configuration first (now in AuthContext)
-import "../context/Auth/amplifyConfig";
-
 // Context Providers
 import { AuthProvider, useAuthContext } from "../context/Auth/AuthContext";
 import { SettingsProvider, useSettings } from "../context/Settings/SettingsContext";

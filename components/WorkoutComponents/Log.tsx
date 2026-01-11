@@ -4,11 +4,30 @@ import { Ionicons } from "@expo/vector-icons";
 import { Dumbbell } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-function Log(props) {
+interface LogProps {
+  // Required props
+  currItem: string | { name: string };
+  function: () => void;
+  onMenuPress: () => void;
+  drag: () => void;
+  
+  // Optional props
+  isActive?: boolean;
+  bold?: boolean;
+}
+
+function Log({
+  isActive,
+  function: onPress,
+  bold,
+  currItem,
+  onMenuPress,
+  drag,
+}: LogProps) {
   return (
     <View style={[
       styles.logButton, 
-      { opacity: props.isActive ? 0.8 : 1 }
+      { opacity: isActive ? 0.8 : 1 }
     ]}>
       <Pressable style={styles.iconContainer}>
         <LinearGradient
@@ -20,31 +39,31 @@ function Log(props) {
           <Dumbbell size={20} color="white" />
         </LinearGradient>
       </Pressable>
-      <TouchableOpacity style={styles.textArea} onPress={props.function}>
-        <View style={[styles.textContainer, {height: props.bold ? 50 : 40}]}>
+      <TouchableOpacity style={styles.textArea} onPress={onPress}>
+        <View style={[styles.textContainer, {height: bold ? 50 : 40}]}>
         <Text
-          numberOfLines={3}  // ✅ Required for adjustsFontSizeToFit
+          numberOfLines={3}
           adjustsFontSizeToFit={true}
           minimumFontScale={0.7}
           style={[
             styles.logText, 
-            {fontFamily: props.bold ? "Inter_600SemiBold" : "Inter_400Regular"}
+            {fontFamily: bold ? "Inter_600SemiBold" : "Inter_400Regular"}
           ]}
         >
-          {typeof props.currItem === "string"
-            ? props.currItem || "Unnamed Workout"
-            : props.currItem?.name || "Unnamed Workout"}
+          {typeof currItem === "string"
+            ? currItem || "Unnamed Workout"
+            : currItem?.name || "Unnamed Workout"}
         </Text>
         </View>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={props.onMenuPress} style={styles.menuButton}>
+      <TouchableOpacity onPress={onMenuPress} style={styles.menuButton}>
         <Ionicons name="pencil" size={20} color="white" />
       </TouchableOpacity>
 
       {/* Always show drag handle */}
       <TouchableOpacity
-        onLongPress={props.drag}
+        onLongPress={drag}
         style={styles.dragHandle}
         hitSlop={10}
       >
@@ -86,10 +105,8 @@ const styles = StyleSheet.create({
   },
   textArea: {
     flex: 1,
-    //borderWidth: 0.3,
   },
   textContainer: {
-    //height: 50,
     justifyContent: "center",
   },
   logText: {
@@ -107,7 +124,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  
 });
-
 

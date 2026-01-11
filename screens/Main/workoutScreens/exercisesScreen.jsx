@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import {View, StyleSheet, Alert, TouchableOpacity} from "react-native";
+import {View, StyleSheet, Alert, TouchableOpacity, Text} from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { useWorkoutContext } from "../../../context/WorkoutsV2/WorkoutContext";
 import DraggableLogList from "../../../components/WorkoutComponents/DraggableLogList";
@@ -155,17 +155,23 @@ export default function WorkoutDetails() {
           marginBottom={80}
           onAdd={handleAddExercise}
           onClose={() => setAddExerciseVisible(false)}
-          showSettingsLink={true}
-          onNavigateToSettings={() => {
-            setAddExerciseVisible(false);
-            navigation.navigate("UserExercisesScreen");
-          }}
         >
           <ExerciseSelector
             selectedExercise={selectedExercise}
             setSelectedExercise={setSelectedExercise}
-            setModalVisible={setAddExerciseVisible}
           />
+          <Text style={styles.settingsText}>
+            *If an exercise isn't listed, you can add it in{" "}
+            <Text 
+              style={styles.settingsLink} 
+              onPress={() => {
+                setAddExerciseVisible(false);
+                navigation.navigate("UserExercisesScreen");
+              }}
+            >
+              settings
+            </Text>
+          </Text>
         </PopupModal>
 
         {/* Archived exercises popup */}
@@ -244,5 +250,15 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     borderWidth: 0.3,
     borderColor: 'grey',
+  },
+  settingsText: {
+    marginTop: 10,
+    color: "white",
+    fontSize: 14,
+    textAlign: "center",
+  },
+  settingsLink: {
+    color: "#4FC3F7",
+    textDecorationLine: "underline",
   },
 })

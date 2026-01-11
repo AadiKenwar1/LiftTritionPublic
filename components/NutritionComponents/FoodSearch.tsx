@@ -12,17 +12,34 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { getFoodSearchResults, getFoodDetails } from '../../utils/foodCache';
 import { useAuthContext } from '../../context/Auth/AuthContext';
+import { MacroValues, MacroSetters } from '../../context/Nutrition/types';
 
-let debounceTimer;
+let debounceTimer: NodeJS.Timeout;
+
+interface FoodItem extends MacroValues {
+  name: string;
+}
+
+interface FoodSearchProps extends MacroSetters {
+  setAddedFood: React.Dispatch<React.SetStateAction<FoodItem[]>>;
+  header: React.ReactNode;
+}
 
 // FoodSearch component provides a search bar and results list for searching foods using Open Food Facts API
-export default function FoodSearch(props) {
+export default function FoodSearch({
+  setAddedFood,
+  setCals,
+  setProtein,
+  setCarbs,
+  setFats,
+  header,
+}: FoodSearchProps) {
   const { user } = useAuthContext();
   // State for search query, results, loading indicators, and added foods
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [fetchingDetails, setFetchingDetails] = useState(false);
+  const [query, setQuery] = useState<string>('');
+  const [results, setResults] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [fetchingDetails, setFetchingDetails] = useState<boolean>(false);
 
   // Debounced search effect: triggers search after user stops typing for 400ms
   useEffect(() => {
@@ -41,7 +58,7 @@ export default function FoodSearch(props) {
   }, [query]);
 
   // Handle selection of a food item: fetch nutrition details and update parent state
-  async function handleSelect(item) {
+  async function handleSelect(item: any) {
     setFetchingDetails(true);
     const userId = user?.userId || null;
     const details = await getFoodDetails(item, userId, null);
@@ -51,19 +68,19 @@ export default function FoodSearch(props) {
       Alert.alert(
         details.name,
         `Serving: ${details.servingSize || "N/A"}\nCalories: ${details.calories}\nProtein: ${details.protein}g\nCarbs: ${details.carbs}g\nFats: ${details.fats}g`
-      )
-      const added = {
+      );
+      const added: FoodItem = {
         name: details.name,
         calories: details.calories,
         protein: details.protein,
         carbs: details.carbs,
         fats: details.fats,
-      }
-      props.setAddedFood((prev) => [added, ...prev])
-      props.setCals((prev) => (parseInt(prev, 10) + parseInt(details.calories, 10)).toString())
-      props.setProtein((prev) => (parseInt(prev, 10) + parseInt(details.protein, 10)).toString())
-      props.setCarbs((prev) => (parseInt(prev, 10) + parseInt(details.carbs, 10)).toString())
-      props.setFats((prev) => (parseInt(prev, 10) + parseInt(details.fats, 10)).toString())
+      };
+      setAddedFood((prev) => [added, ...prev]);
+      setCals((prev) => (parseInt(prev, 10) + parseInt(details.calories, 10)).toString());
+      setProtein((prev) => (parseInt(prev, 10) + parseInt(details.protein, 10)).toString());
+      setCarbs((prev) => (parseInt(prev, 10) + parseInt(details.carbs, 10)).toString());
+      setFats((prev) => (parseInt(prev, 10) + parseInt(details.fats, 10)).toString());
     } else {
       Alert.alert('Error', 'Could not fetch nutrition info.');
     }
@@ -83,7 +100,7 @@ export default function FoodSearch(props) {
           data={query ? results : []}
           ListHeaderComponent={
               <>
-                  {props.header}
+                  {header}
                   <View style={styles.inputContainer}>
                       <TextInput
                           style={styles.input}
@@ -212,3 +229,4 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_500Medium',
   },
 });
+

@@ -21,8 +21,6 @@ export async function addNutrition(nutritionData, setNutritionData, userId, name
     synced: false,
     isPlaceholder,
   };
-  console.log('[DEBUG] addNutrition - userId:', userId);
-  console.log('[DEBUG] addNutrition - newEntry:', newEntry);
   
   // Update state
   setNutritionData(prevData => {
@@ -85,8 +83,6 @@ export function getMacroForLast30Days(nutritionData, macroType = "calories") {
 
 // Update - Edit nutrition entry
 export async function editNutrition(nutritionData, setNutritionData, id, name, protein, carbs, fats, calories, userId, saved) {
-  console.log('[DEBUG] editNutrition - userId:', userId, 'id:', id);
-  
   // Check if item exists
   const itemExists = nutritionData.find(item => item.id === id);
   if (!itemExists) {
@@ -105,7 +101,6 @@ export async function editNutrition(nutritionData, setNutritionData, id, name, p
 
 // Update - Update ingredients and macros
 export async function updateIngredientsAndMacros(nutritionData, setNutritionData, id, ingredients, totalMacros, userId) {
-  console.log('[DEBUG] updateIngredientsAndMacros - userId:', userId, 'id:', id);
   
   // Check if item exists
   const itemExists = nutritionData.find(item => item.id === id);

@@ -54,12 +54,6 @@ export default {
 
     extra: {
       API_GATEWAY_URL: 'https://um1z6mkple.execute-api.us-east-1.amazonaws.com/prod-v2',
-      FATSECRET_CLIENT_ID: process.env.FATSECRET_CLIENT_ID,
-      FATSECRET_CLIENT_SECRET: process.env.FATSECRET_CLIENT_SECRET,
-      APPSYNC_ENDPOINT: process.env.APPSYNC_ENDPOINT,
-      APPSYNC_API_KEY: process.env.APPSYNC_API_KEY,
-      GRAPHQL_ENDPOINT: process.env.GRAPHQL_ENDPOINT,
-      GRAPHQL_API_KEY: process.env.GRAPHQL_API_KEY,
       REVENUECAT_API_KEY_IOS: process.env.REVENUECAT_API_KEY_IOS,
       REVENUECAT_API_KEY_ANDROID: process.env.REVENUECAT_API_KEY_ANDROID,
       

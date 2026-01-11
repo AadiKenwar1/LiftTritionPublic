@@ -16,7 +16,9 @@ async function getJWTSecret() {
 }
 
 exports.handler = async (event) => {
-    console.log('Authorizer event:', JSON.stringify(event, null, 2));
+    console.log('🔐 [Authorizer] ===== AUTHORIZER INVOKED =====');
+    console.log('🔐 [Authorizer] Method ARN:', event.methodArn);
+    console.log('🔐 [Authorizer] Event:', JSON.stringify(event, null, 2));
     
     try {
         // Extract token from Authorization header
@@ -83,18 +85,36 @@ exports.handler = async (event) => {
             userId: userId
         });
         
-        console.log('Authorization successful for userId:', userId);
+        console.log('✅ [Authorizer] Authorization successful for userId:', userId);
+        console.log('✅ [Authorizer] Returning policy:', JSON.stringify(policy, null, 2));
         return policy;
         
     } catch (error) {
-        console.error('Authorization error:', error.message);
+        console.error('❌ [Authorizer] Authorization error:', error.message);
+        console.error('❌ [Authorizer] Error stack:', error.stack);
         // Return Deny policy
-        return generatePolicy('user', 'Deny', event.methodArn);
+        const denyPolicy = generatePolicy('user', 'Deny', event.methodArn);
+        console.log('❌ [Authorizer] Returning deny policy:', JSON.stringify(denyPolicy, null, 2));
+        return denyPolicy;
     }
 };
 
 // Helper function to generate IAM policy
 function generatePolicy(principalId, effect, resource, context = {}) {
+    // Extract API ARN from methodArn (remove the method part)
+    // methodArn format: arn:aws:execute-api:region:account:api-id/stage/method/resource-path
+    // We want: arn:aws:execute-api:region:account:api-id/stage/*/*
+    // This allows access to all methods in the API stage
+    const apiArn = resource.split('/').slice(0, 2).join('/');
+    const wildcardResource = `${apiArn}/*/*`;
+    
+    console.log('🔐 [Authorizer] Generating policy:', {
+        principalId,
+        effect,
+        originalResource: resource,
+        wildcardResource: wildcardResource
+    });
+    
     const authResponse = {
         principalId: principalId,
         policyDocument: {
@@ -103,7 +123,7 @@ function generatePolicy(principalId, effect, resource, context = {}) {
                 {
                     Action: 'execute-api:Invoke',
                     Effect: effect,
-                    Resource: resource
+                    Resource: wildcardResource  // Use wildcard to allow all methods
                 }
             ]
         }
@@ -113,6 +133,8 @@ function generatePolicy(principalId, effect, resource, context = {}) {
     if (Object.keys(context).length > 0) {
         authResponse.context = context;
     }
+    
+    console.log('🔐 [Authorizer] Policy generated:', JSON.stringify(authResponse, null, 2));
     
     return authResponse;
 }

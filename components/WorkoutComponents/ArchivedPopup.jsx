@@ -103,11 +103,9 @@ export default function ArchivedPopup(props) {
                       bold={props.bold}
                       currItem={item.name ? item.name : item}
                       isActive={isActive}
-                      archived={item.archived}
                       function={() => props.function2(item)}
-                      drag={drag} // ✅ Only drag in moveMode
-                      moveMode={props.moveMode}
-                      onMenuPress={() => {props.isWorkout? openArchiveMenu(item) : openArchiveMenu(props.workout, item)}} // ✅ Menu button
+                      drag={drag}
+                      onMenuPress={() => {props.isWorkout? openArchiveMenu(item) : openArchiveMenu(props.workout, item)}}
                     />
 
                   </View>

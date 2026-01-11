@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   StyleSheet,
@@ -8,11 +8,15 @@ import {
   FlatList,
   TouchableOpacity,
 } from "react-native";
-import { useState } from "react";
 import { useWorkoutContext } from "../../context/WorkoutsV2/WorkoutContext";
 import { Ionicons } from "@expo/vector-icons";
-export default function ExerciseSelector(props) {
 
+interface ExerciseSelectorProps {
+  selectedExercise?: string;
+  setSelectedExercise: (exercise: string) => void;
+}
+
+export default function ExerciseSelector({ selectedExercise, setSelectedExercise }: ExerciseSelectorProps) {
   const [showPicker, setShowPicker] = useState(false);
   const [searchText, setSearchText] = useState("");
 
@@ -21,11 +25,10 @@ export default function ExerciseSelector(props) {
   
   const filteredList = exerciseList.filter((item) =>
     item.toLowerCase().includes(searchText.toLowerCase()),
-  )
+  );
 
-  const handleSelect = (item) => {
-    props.setSelectedExercise(item);
-    //setSearchText(item);
+  const handleSelect = (item: string) => {
+    setSelectedExercise(item);
     setShowPicker(false);
   };
 
@@ -37,7 +40,7 @@ export default function ExerciseSelector(props) {
       >
         <View style={styles.dropdownTextItems}>
           <Text style={styles.dropdownText}>
-            {props.selectedExercise || "Select an Exercise"}
+            {selectedExercise || "Select an Exercise"}
           </Text>
           <Ionicons
             name={showPicker ? "chevron-up" : "chevron-down"}
@@ -58,26 +61,25 @@ export default function ExerciseSelector(props) {
             onChangeText={setSearchText}
           />
           <View style={styles.listContainer}>
-          <FlatList
-            data={filteredList}
-            keyExtractor={(item) => item}
-            keyboardShouldPersistTaps="handled"
-            style={styles.list}
-            showsVerticalScrollIndicator={false}
-            renderItem={({ item }) => (
-              <TouchableOpacity 
-                onPress={() => handleSelect(item)}
-                style={styles.listItem}
-                activeOpacity={0.6}
-              >
-                <Text style={styles.item}>{item}</Text>
-              </TouchableOpacity>
-            )}
-          />
+            <FlatList
+              data={filteredList}
+              keyExtractor={(item) => item}
+              keyboardShouldPersistTaps="handled"
+              style={styles.list}
+              showsVerticalScrollIndicator={false}
+              renderItem={({ item }) => (
+                <TouchableOpacity 
+                  onPress={() => handleSelect(item)}
+                  style={styles.listItem}
+                  activeOpacity={0.6}
+                >
+                  <Text style={styles.item}>{item}</Text>
+                </TouchableOpacity>
+              )}
+            />
           </View>
         </View>
       )}
-
     </View>
   );
 }
@@ -102,14 +104,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 0.3,
     borderColor: 'grey',
-    
   },
   dropdownTextItems: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     flex: 1,
-
   },
   dropdownText: {
     fontSize: 16,
@@ -171,4 +171,5 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
     fontFamily: 'Inter_500Medium',
   },
-})
+});
+

@@ -38,11 +38,7 @@
       },
       "env": {
         "EXPO_NO_WEB": "1",
-        "GRAPHQL_API_KEY": "GRAPHQL_API_KEY",
-        "GRAPHQL_ENDPOINT": "GRAPHQL_ENDPOINT",
-        "OPENAI_API_KEY": "OPENAI_API_KEY",
-        "FATSECRET_CLIENT_ID": "FATSECRET_CLIENT_ID",
-        "FATSECRET_CLIENT_SECRET": "FATSECRET_CLIENT_SECRET"
+        "OPENAI_API_KEY": "OPENAI_API_KEY"
       },
       "node": "20.11.0"
     }

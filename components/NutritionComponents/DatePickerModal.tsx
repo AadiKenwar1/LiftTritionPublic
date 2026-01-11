@@ -3,7 +3,14 @@ import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 
-export default function DatePickerModal({ visible, onClose, onDateSelect, initialDate = new Date() }) {
+interface DatePickerModalProps {
+  visible: boolean;
+  onClose: () => void;
+  onDateSelect: (date: Date) => void;
+  initialDate: Date;
+}
+
+export default function DatePickerModal({ visible, onClose, onDateSelect, initialDate }: DatePickerModalProps) {
   const [selectedMonth, setSelectedMonth] = useState(initialDate.getMonth());
   const [selectedDay, setSelectedDay] = useState(initialDate.getDate());
   const [selectedYear, setSelectedYear] = useState(initialDate.getFullYear());
@@ -18,14 +25,21 @@ export default function DatePickerModal({ visible, onClose, onDateSelect, initia
   const years = Array.from({ length: currentYear - 2020 + 1 }, (_, i) => currentYear - i);
   
   // Function to get days in month
-  const getDaysInMonth = (month, year) => {
+  const getDaysInMonth = (month: number, year: number): number => {
     return new Date(year, month + 1, 0).getDate();
   };
   
   const days = Array.from({ length: getDaysInMonth(selectedMonth, selectedYear) }, (_, i) => i + 1);
 
+  // Update state when initialDate changes (e.g., when modal reopens with different date)
+  useEffect(() => {
+    setSelectedMonth(initialDate.getMonth());
+    setSelectedDay(initialDate.getDate());
+    setSelectedYear(initialDate.getFullYear());
+  }, [initialDate]);
+
   // Handle picker changes
-  const handleMonthChange = (month) => {
+  const handleMonthChange = (month: number) => {
     setSelectedMonth(month);
     // Adjust day if it's invalid for the new month
     const maxDays = getDaysInMonth(month, selectedYear);
@@ -34,11 +48,11 @@ export default function DatePickerModal({ visible, onClose, onDateSelect, initia
     }
   };
 
-  const handleDayChange = (day) => {
+  const handleDayChange = (day: number) => {
     setSelectedDay(day);
   };
 
-  const handleYearChange = (year) => {
+  const handleYearChange = (year: number) => {
     setSelectedYear(year);
     // Adjust day if it's invalid for the new year (leap year consideration)
     const maxDays = getDaysInMonth(selectedMonth, year);
@@ -53,7 +67,7 @@ export default function DatePickerModal({ visible, onClose, onDateSelect, initia
     onClose();
   };
 
-  const formatSelectedDate = () => {
+  const formatSelectedDate = (): string => {
     return `${months[selectedMonth]} ${selectedDay}, ${selectedYear}`;
   };
 
@@ -334,3 +348,4 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_600SemiBold',
   },
 });
+

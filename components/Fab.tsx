@@ -1,27 +1,34 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
-  TouchableOpacity,
   StyleSheet,
   Animated,
   Pressable,
+  LayoutChangeEvent,
 } from 'react-native';
 import { Entypo } from '@expo/vector-icons';
 import { useSettings } from '../context/Settings/SettingsContext';
 import { LinearGradient } from 'expo-linear-gradient';
 
-function FloatingActionMenu (props){
-  const {mode} = useSettings()
-  const [isOpen, setIsOpen] = useState(false);
-  const [buttonWidths, setButtonWidths] = useState({});
-  const [isInitialized, setIsInitialized] = useState(false);
+interface FabProps {
+  // Required props
+  children: React.ReactNode;
+  // Optional props
+  tabBarShown?: boolean;
+}
+
+function FloatingActionMenu({ children, tabBarShown }: FabProps) {
+  const { mode } = useSettings();
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [buttonWidths, setButtonWidths] = useState<Record<number, number>>({});
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
   // Store an Animated.Value for each child
-  const opacityValues = useRef([]);
+  const opacityValues = useRef<Animated.Value[]>([]);
 
   // Initialize the animated values based on number of children
   useEffect(() => {
-    const childrenCount = React.Children.count(props.children);
+    const childrenCount = React.Children.count(children);
     
     // Only create new animated values if we don't have enough
     while (opacityValues.current.length < childrenCount) {
@@ -37,7 +44,7 @@ function FloatingActionMenu (props){
     if (!isInitialized) {
       setTimeout(() => setIsInitialized(true), 50);
     }
-  }, [props.children, isInitialized]);
+  }, [children, isInitialized]);
 
   const toggleMenu = () => setIsOpen(prev => !prev);
 
@@ -55,39 +62,38 @@ function FloatingActionMenu (props){
     }
   }, [isOpen, isInitialized]);
 
-  const handleLayout = (e, index) => {
+  const handleLayout = (e: LayoutChangeEvent, index: number) => {
     const width = e.nativeEvent.layout.width;
     setButtonWidths(prev => ({ ...prev, [index]: width }));
   };
 
   return (
-    <View style={[styles.container, { bottom: props.tabBarShown ? 115 : 40 }]}>
-      {React.Children.map(props.children, (child, index) => {
+    <View style={[styles.container, { bottom: tabBarShown ? 115 : 40 }]}>
+      {React.Children.map(children, (child, index) => {
         const width = buttonWidths[index] || 60;
         const xOffset = (80 - width) / 2;
-        const verticalSpacing = 67 // consistent spacing between buttons
-        const bottomOffset = props.tabBarShown? 20 + (index + 1) * verticalSpacing: 20 + (index + 1) * verticalSpacing
+        const verticalSpacing = 67; // consistent spacing between buttons
+        const bottomOffset = tabBarShown ? 20 + (index + 1) * verticalSpacing : 20 + (index + 1) * verticalSpacing;
 
         // Ensure we have an animated value for this index
         const opacityValue = opacityValues.current[index] || new Animated.Value(0);
 
         return (
-            <Animated.View
+          <Animated.View
             key={index}
             style={{
-                position: 'absolute',
-                bottom: bottomOffset,
-                right: xOffset,
-                opacity: opacityValue,
+              position: 'absolute',
+              bottom: bottomOffset,
+              right: xOffset,
+              opacity: opacityValue,
             }}
-            onLayout={e => handleLayout(e, index)}
+            onLayout={(e) => handleLayout(e, index)}
             pointerEvents={isOpen ? "auto" : "none"}
-            >
+          >
             {child}
-            </Animated.View>
+          </Animated.View>
         );
-        })}
-
+      })}
 
       <Pressable style={styles.fab} onPress={toggleMenu}>
         <LinearGradient
@@ -105,7 +111,7 @@ function FloatingActionMenu (props){
       </Pressable>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -113,17 +119,14 @@ const styles = StyleSheet.create({
     right: 15,
     alignItems: 'flex-end',
     zIndex: 10,
-    
   },
   fab: {
     width: 80,
     height: 80,
     borderRadius: 40,
     borderWidth: 0.3,
-    borderColor: 'black',
-    overflow: 'hidden',
     borderColor: 'grey',
-
+    overflow: 'hidden',
   },
   gradientFab: {
     width: '100%',
@@ -131,8 +134,8 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    
   },
 });
 
 export default FloatingActionMenu;
+

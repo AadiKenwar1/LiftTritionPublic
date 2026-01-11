@@ -4,8 +4,13 @@
   "description": "Lambda authorizer for API Gateway authentication",
   "main": "index.js",
   "dependencies": {
-    "jsonwebtoken": "^9.0.2",
-    "@aws-sdk/client-secrets-manager": "^3.0.0"
+    "@aws-sdk/client-secrets-manager": "^3.0.0",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.3",
+    "@types/react": "^19.2.7",
+    "@types/react-native": "^0.72.8",
+    "typescript": "^5.9.3"
   }
 }
-

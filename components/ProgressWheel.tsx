@@ -5,15 +5,27 @@ import { useSettings } from "../context/Settings/SettingsContext";
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
+// Internal constants - not exposed as props since they're never customized
+const ANIMATION_DURATION = 1000;
+const BACKGROUND_COLOR = "#F0F0F0";
+const TEXT_COLOR = "white";
+
+interface ProgressWheelProps {
+  // Required prop (always provided in usage)
+  percent: number;
+
+  // Optional props with defaults (only what's actually customized)
+  size?: number;
+  strokeWidth?: number;
+  fontSize?: number;
+}
+
 export default function ProgressWheel({
   percent = 0,
   size = 120,
   strokeWidth = 12,
-  duration = 1000,
-  backgroundColor = "#F0F0F0",
-  textColor = "white",
   fontSize = 32,
-}) {
+}: ProgressWheelProps) {
   // Validate and sanitize the percent value
   const sanitizedPercent = isNaN(percent) || !isFinite(percent) ? 0 : Math.max(0, Math.min(100, percent));
   const { mode } = useSettings();
@@ -25,8 +37,6 @@ export default function ProgressWheel({
     { offset: "50%", color: "#1B5E9B" },
     { offset: "25%", color: "#2178C7" },
     { offset: "0%", color: "#2D9CFF" },
-
-
   ];
 
   const nutritionStops = [
@@ -43,21 +53,21 @@ export default function ProgressWheel({
   const animatedValue = useRef(new Animated.Value(0)).current;
   const numberValue = useRef(new Animated.Value(0)).current;
 
-  const [displayPercent, setDisplayPercent] = useState(Math.round(sanitizedPercent));
+  const [displayPercent, setDisplayPercent] = useState<number>(Math.round(sanitizedPercent));
 
   useEffect(() => {
     const clampedPercent = Math.min(sanitizedPercent, 100);
 
     Animated.timing(animatedValue, {
       toValue: clampedPercent,
-      duration,
+      duration: ANIMATION_DURATION,
       useNativeDriver: false,
     }).start();
 
     numberValue.setValue(displayPercent);
     Animated.timing(numberValue, {
       toValue: sanitizedPercent,
-      duration,
+      duration: ANIMATION_DURATION,
       useNativeDriver: false,
     }).start();
 
@@ -68,7 +78,7 @@ export default function ProgressWheel({
     return () => {
       numberValue.removeListener(listener);
     };
-  }, [sanitizedPercent, duration]);
+  }, [sanitizedPercent]);
 
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -95,7 +105,7 @@ export default function ProgressWheel({
         </Defs>
 
         <Circle
-          stroke={backgroundColor}
+          stroke={BACKGROUND_COLOR}
           fill="none"
           cx={size / 2}
           cy={size / 2}
@@ -117,7 +127,7 @@ export default function ProgressWheel({
       </Svg>
 
       <View style={styles.percentContainer}>
-        <Text style={[styles.percentText, { color: textColor, fontSize }]}>
+        <Text style={[styles.percentText, { color: TEXT_COLOR, fontSize }]}>
           {displayPercent}%
         </Text>
       </View>
@@ -140,3 +150,4 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_700Bold",
   },
 });
+

@@ -32,15 +32,13 @@ export default function DraggableLogList(props) {
               bold={props.bold}
               currItem={item}
               isActive={isActive}
-              archived={item.archived}
               function={() => props.function2(item)}
-              drag={drag} // ✅ Only drag in moveMode
-              moveMode={props.moveMode}
+              drag={drag}
               onMenuPress={() => {
                 props.reorderWorkouts
                   ? props.onMenuPress(item)
                   : props.onMenuPress(props.workout, item);
-              }} // ✅ Menu button
+              }}
             />
           </View>
         );

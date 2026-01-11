@@ -1,14 +1,14 @@
 import React from 'react';
-import PopupModal from "../../components/PopupModal.jsx";
+import PopupModal from "../../components/PopupModal";
 import { useSettings } from "../../context/Settings/SettingsContext.js";
 import Ionicons from '@expo/vector-icons/Ionicons'; // ✅ Correct import
 import { useState, useEffect } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View, Alert } from "react-native";
 import NetInfo from '@react-native-community/netinfo';
-import Fab from '../../components/Fab.jsx';
+import Fab from '../../components/Fab';
 import { useWorkoutContext } from '../../context/WorkoutsV2/WorkoutContext.js';
 import { useBilling } from '../../context/Billing/BillingContext.js';
-import CustomHeader from '../../components/CustomHeader.jsx';
+import CustomHeader from '../../components/CustomHeader';
 import LogScreen2 from "./workoutScreens/workoutsScreen.jsx"
 import NutritionScreen from './nutritionScreens/nutritionScreen.jsx'
 import { useNavigation } from "@react-navigation/native";

@@ -172,12 +172,6 @@ Daily Budget = 600 fatigue units
    Create a `.env` file in the root directory with:
    ```env
    OPENAI_API_KEY=your_openai_api_key
-   FATSECRET_CLIENT_ID=your_fatsecret_client_id
-   FATSECRET_CLIENT_SECRET=your_fatsecret_client_secret
-   APPSYNC_ENDPOINT=your_appsync_endpoint
-   APPSYNC_API_KEY=your_appsync_api_key
-   GRAPHQL_ENDPOINT=your_graphql_endpoint
-   GRAPHQL_API_KEY=your_graphql_api_key
    REVENUECAT_API_KEY_IOS=your_revenuecat_ios_key
    REVENUECAT_API_KEY_ANDROID=your_revenuecat_android_key
    ```
@@ -185,7 +179,7 @@ Daily Budget = 600 fatigue units
 4. **Set up AWS Amplify backend**
    - Ensure your Amplify backend is configured with the correct GraphQL schema
    - Run `amplify pull` to sync backend configuration to your local project
-   - Verify your AppSync endpoint and API key are correct
+   - Verify your GraphQL endpoint and API key are configured correctly (used by the GraphQL proxy)
 
 5. **Configure Apple Sign In**
    - Set up Sign in with Apple in your Apple Developer account

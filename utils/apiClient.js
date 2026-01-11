@@ -29,9 +29,13 @@ export async function makeAuthenticatedRequest(endpoint, options = {}) {
         },
     });
     
+    if (response.status !== 200 && response.status !== 201) {
+        const errorText = await response.text().catch(() => 'Unable to read error');
+        console.error(`${endpoint} error response:`, errorText.substring(0, 200));
+    }
+    
     // Handle 401 (token expired/invalid)
     if (response.status === 401) {
-        console.log('Token invalid, clearing and requesting new one...');
         await clearToken();
         
         // Try once more with new token

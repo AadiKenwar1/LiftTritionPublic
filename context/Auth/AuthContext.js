@@ -70,8 +70,6 @@ export function AuthProvider({ children }) {
         };
       }
 
-      console.log('📤 Starting sign-out backup process...');
-
       // Step 2: Get nutrition data from AsyncStorage
       const nutritionDataString = await AsyncStorage.getItem(STORAGE_KEYS.nutrition);
       const nutritionData = nutritionDataString ? JSON.parse(nutritionDataString) : [];
@@ -126,16 +124,12 @@ export function AuthProvider({ children }) {
       }
       */
 
-      console.log('✅ Backup completed successfully');
-      console.log(`📊 Backed up: ${nutritionData.length} nutrition entries, ${workouts.length} workouts, ${exercises.length} exercises, ${logs.length} logs, ${userExercises.length} user exercises, ${weightProgress.length} weight progress entries, settings`);
-
       // Step 6: Clear cached user data
       await clearCachedUserData();
 
       // Step 7: Clear all AsyncStorage (session will be cleared by clearSessionAndState)
       try {
         await AsyncStorage.clear();
-        console.log('✅ AsyncStorage cleared');
       } catch (error) {
         console.error('Error clearing AsyncStorage:', error);
         // Continue with sign-out even if clearing fails
@@ -143,7 +137,6 @@ export function AuthProvider({ children }) {
 
       // Step 8.5: Clear JWT token
       await clearToken();
-      console.log('✅ JWT token cleared');
 
       // Step 8: Clear session and state
       await clearSessionAndState();
@@ -170,8 +163,6 @@ export function AuthProvider({ children }) {
   //Restore nutrition and workout data from database to AsyncStorage
   const restoreDataFromDatabase = async (userId) => {
     try {
-      console.log('📥 Starting data restore from database...');
-      
       // Load data from database
       const [nutritionResult, workoutResult, weightProgressResult] = await Promise.all([
         loadNutritionFromDatabase(userId),
@@ -182,7 +173,6 @@ export function AuthProvider({ children }) {
       // Restore nutrition data - ALWAYS write, even if empty
       if (nutritionResult.success) {
         await AsyncStorage.setItem(STORAGE_KEYS.nutrition, JSON.stringify(nutritionResult.data || []));
-        console.log(`✅ Restored ${nutritionResult.data?.length || 0} nutrition entries to AsyncStorage`);
       }
 
       // Restore workout data - ALWAYS write, even if empty
@@ -195,13 +185,11 @@ export function AuthProvider({ children }) {
         ];
 
         await AsyncStorage.multiSet(dataToStore);
-        console.log(`✅ Restored workout data: ${workoutResult.data.workouts?.length || 0} workouts, ${workoutResult.data.exercises?.length || 0} exercises, ${workoutResult.data.logs?.length || 0} logs, ${workoutResult.data.userExercises?.length || 0} user exercises`);
       }
 
       // Restore weightProgress - ALWAYS write, even if empty
       if (weightProgressResult.success) {
         await AsyncStorage.setItem(STORAGE_KEYS.weightProgress, JSON.stringify(weightProgressResult.data || []));
-        console.log(`✅ Restored ${weightProgressResult.data?.length || 0} weight progress entries to AsyncStorage`);
       }
 
       return {
@@ -226,7 +214,6 @@ export function AuthProvider({ children }) {
       
       if (!sessionData) {
         // No session = user is NOT signed in
-        console.log('No existing Apple user session found');
         await clearToken(); // Clear token if no session
         resetAuthState();
         return;
@@ -239,23 +226,17 @@ export function AuthProvider({ children }) {
       if (cachedUser) {
         // Normal case: use cache (works offline)
         setAuthenticatedUser(cachedUser);
-        console.log('✅ Loaded user from cache (data already in AsyncStorage)');
         
         // Check if token exists and is valid (optional - will refresh on next API call if needed)
         const token = await getStoredToken();
-        if (!token || isTokenExpired(token)) {
-          console.log('⚠️ Token expired or missing, will refresh on next API call');
-        }
       } else {
         // Edge case: session exists but no cache (shouldn't happen)
         // Clear session and require re-sign-in
-        console.log('Session exists but no cache - clearing session');
         await clearAppleUserSession();
         await clearToken();
         resetAuthState();
       }
     } catch (error) {
-      console.log('Error checking auth state:', error);
       await clearToken();
       resetAuthState();
     } finally {
@@ -288,8 +269,6 @@ export function AuthProvider({ children }) {
       
       // Store Apple identityToken for future JWT refresh
       await storeAppleIdentityToken(signInResult.credential.identityToken);
-      
-      console.log('✅ JWT token and Apple identity token stored');
     } catch (error) {
       console.error('❌ Failed to get JWT token:', error);
       // Continue anyway - token generation failure shouldn't block sign-in
@@ -323,7 +302,6 @@ export function AuthProvider({ children }) {
           STORAGE_KEYS.userExercises,
           STORAGE_KEYS.weightProgress,
         ]);
-        console.log('✅ Cleared AsyncStorage before restore');
       } catch (error) {
         console.error('Error clearing AsyncStorage before restore:', error);
       }
@@ -381,7 +359,6 @@ export function AuthProvider({ children }) {
     // Clear all AsyncStorage (same as signOut)
     try {
       await AsyncStorage.clear();
-      console.log('✅ AsyncStorage cleared');
     } catch (error) {
       console.error('Error clearing AsyncStorage:', error);
       // Continue with deletion even if clearing fails
@@ -389,7 +366,6 @@ export function AuthProvider({ children }) {
 
     // Clear JWT token
     await clearToken();
-    console.log('✅ JWT token cleared');
 
     await clearSessionAndState();
     return { success: true, message: 'Account deleted successfully.' };

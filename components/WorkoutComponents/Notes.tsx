@@ -10,28 +10,30 @@ import {
   Keyboard,
 } from "react-native";
 
-export default function NotesModal(props) {
+interface NotesModalProps {
+  visible: boolean;
+  onClose: () => void;
+  note: string;
+  setNote: (note: string) => void;
+  title: string;
+}
+
+export default function NotesModal({visible, onClose, note, setNote, title}: NotesModalProps) {
   return (
-    <Modal
-      visible={props.visible}
-      animationType="fade"
-      duration={200}
-      transparent={true}
-      onRequestClose={props.onClose}
-    >
+    <Modal visible={visible} animationType="fade" transparent={true} onRequestClose={onClose}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.overlay}>
           <View style={styles.modalContainer}>
-            <Text style={styles.title}>{props.title}</Text>
+            <Text style={styles.title}>{title}</Text>
             <TextInput
               style={styles.input}
               placeholder="Write your note here..."
               placeholderTextColor="grey"
               multiline
-              value={props.note}
-              onChangeText={props.setNote}
+              value={note}
+              onChangeText={setNote}
             />
-            <Pressable style={styles.button} onPress={props.onClose}>
+            <Pressable style={styles.button} onPress={onClose}>
               <Text style={styles.buttonText}>Close</Text>
             </Pressable>
           </View>
@@ -92,3 +94,4 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 });
+

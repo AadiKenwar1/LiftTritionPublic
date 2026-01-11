@@ -52,7 +52,6 @@ export async function syncSettings(userId) {
     
     // If update fails (settings don't exist) - check for conditional failure or not found
     if (isConditionalFailure(errorMessage) || error.message?.includes('not found') || error.errors?.[0]?.errorType === 'NotFound') {
-      console.log(`ℹ️ [Settings] Update failed (item doesn't exist), now creating: ${userId}`);
       try {
         const result = await graphql({ query: createSettings, variables: { input } }, { userId, authToken: null });
         // Check for GraphQL errors in response
@@ -64,7 +63,6 @@ export async function syncSettings(userId) {
         
         // If create also fails with conditional error, item was created between attempts (race condition)
         if (isConditionalFailure(createErrorMessage)) {
-          console.log(`ℹ️ [Settings] Create failed (race condition), retrying update: ${userId}`);
           try {
             const retryResult = await graphql({ query: updateSettings, variables: { input } }, { userId, authToken: null });
             if (retryResult.errors) {

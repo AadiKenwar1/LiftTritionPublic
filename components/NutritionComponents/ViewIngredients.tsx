@@ -9,7 +9,27 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import {Entypo, Ionicons } from '@expo/vector-icons';
+import { Entypo, Ionicons } from '@expo/vector-icons';
+import { MacroValues } from '../../context/Nutrition/types';
+
+interface IngredientObject {
+  id: string;
+  name: string;
+  quantity: number;
+  protein: string;
+  carbs: string;
+  fats: string;
+  calories: string;
+}
+
+interface ViewIngredientsProps {
+  visible: boolean;
+  onClose: () => void;
+  ingredients?: string[];
+  onSave: (itemId: string, ingredients: string[], totalMacros: MacroValues) => void;
+  itemId: string;
+  currentMacros: MacroValues;
+}
 
 export default function ViewIngredients({
   visible,
@@ -17,16 +37,16 @@ export default function ViewIngredients({
   ingredients = [],
   onSave,
   itemId,
-  currentMacros = { protein: 0, carbs: 0, fats: 0, calories: 0 },
-}) {
-  const [ingredientList, setIngredientList] = useState([]);
-  const [totalMacros, setTotalMacros] = useState(currentMacros);
+  currentMacros,
+}: ViewIngredientsProps) {
+  const [ingredientList, setIngredientList] = useState<IngredientObject[]>([]);
+  const [totalMacros, setTotalMacros] = useState<MacroValues>(currentMacros);
 
   // Initialize ingredient list when modal opens
   useEffect(() => {
     if (visible && ingredients.length > 0) {
       // Count occurrences and create ingredient objects
-      const ingredientCounts = {};
+      const ingredientCounts: Record<string, number> = {};
       ingredients.forEach(ingredient => {
         ingredientCounts[ingredient] = (ingredientCounts[ingredient] || 0) + 1;
       });
@@ -35,7 +55,7 @@ export default function ViewIngredients({
       const uniqueIngredients = Object.keys(ingredientCounts);
       const totalQuantity = Object.values(ingredientCounts).reduce((sum, qty) => sum + qty, 0);
       
-      const ingredientObjects = uniqueIngredients.map((name, index) => {
+      const ingredientObjects: IngredientObject[] = uniqueIngredients.map((name) => {
         const quantity = ingredientCounts[name];
         // Calculate macros per unit (divide by quantity to get per-unit values)
         const proteinPerUnit = Math.round(currentMacros.protein / totalQuantity);
@@ -78,7 +98,7 @@ export default function ViewIngredients({
     setTotalMacros(totals);
   }, [ingredientList]);
 
-  const updateIngredient = (id, field, value) => {
+  const updateIngredient = (id: string, field: keyof IngredientObject, value: string | number) => {
     setIngredientList(prev => 
       prev.map(ingredient => 
         ingredient.id === id 
@@ -88,12 +108,12 @@ export default function ViewIngredients({
     );
   };
 
-  const removeIngredient = (id) => {
+  const removeIngredient = (id: string) => {
     setIngredientList(prev => prev.filter(ingredient => ingredient.id !== id));
   };
 
   const addIngredient = () => {
-    const newIngredient = {
+    const newIngredient: IngredientObject = {
       id: Math.random().toString(),
       name: '',
       quantity: 1,
@@ -105,7 +125,7 @@ export default function ViewIngredients({
     setIngredientList(prev => [...prev, newIngredient]);
   };
 
-  const adjustQuantity = (id, change) => {
+  const adjustQuantity = (id: string, change: number) => {
     setIngredientList(prev => 
       prev.map(ingredient => 
         ingredient.id === id 
@@ -124,7 +144,7 @@ export default function ViewIngredients({
     }
 
     // Create the updated ingredients array with quantities
-    const updatedIngredients = [];
+    const updatedIngredients: string[] = [];
     ingredientList.forEach(ingredient => {
       const quantity = ingredient.quantity || 0;
       for (let i = 0; i < quantity; i++) {
@@ -155,7 +175,7 @@ export default function ViewIngredients({
             <View style={styles.totalMacrosContainer}>
               <Text style={styles.totalMacrosTitle}>Total Macros</Text>
               <View style={styles.totalMacrosGrid}>
-              <View style={styles.macroItem}>
+                <View style={styles.macroItem}>
                   <Text style={styles.macroValue}>{totalMacros.calories} </Text>
                   <Text style={styles.macroLabel}>Calories</Text>
                 </View>
@@ -171,17 +191,16 @@ export default function ViewIngredients({
                   <Text style={styles.macroValue}>{totalMacros.fats}g</Text>
                   <Text style={styles.macroLabel}>Fats</Text>
                 </View>
-                
               </View>
             </View>
 
-                         {/* Ingredients List */}
-             <View style={styles.ingredientsSection}>
-               <View style={styles.sectionHeader}>
-                 <Text style={styles.sectionTitle}>Ingredients</Text>
-               </View>
-               
-               {ingredientList.map((ingredient, index) => {
+            {/* Ingredients List */}
+            <View style={styles.ingredientsSection}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>Ingredients</Text>
+              </View>
+              
+              {ingredientList.map((ingredient) => {
                 const quantity = ingredient.quantity || 0;
                 const proteinPerUnit = parseInt(ingredient.protein) || 0;
                 const carbsPerUnit = parseInt(ingredient.carbs) || 0;
@@ -194,22 +213,22 @@ export default function ViewIngredients({
                 const totalCalories = caloriesPerUnit * quantity;
                 
                 return (
-                    <View key={ingredient.id} style={styles.ingredientCard}>
-                     <View style={styles.ingredientHeader}>
-                       <TextInput
-                         style={styles.nameInput}
-                         value={ingredient.name}
-                         onChangeText={(value) => updateIngredient(ingredient.id, 'name', value)}
-                         placeholder="Ingredient name"
-                         placeholderTextColor="#9CA3AF"
-                       />
-                       <TouchableOpacity 
-                         style={styles.removeButton}
-                         onPress={() => removeIngredient(ingredient.id)}
-                       >
-                         <Entypo name="trash" size={20} color="#FF3B30" />
-                       </TouchableOpacity>
-                     </View>
+                  <View key={ingredient.id} style={styles.ingredientCard}>
+                    <View style={styles.ingredientHeader}>
+                      <TextInput
+                        style={styles.nameInput}
+                        value={ingredient.name}
+                        onChangeText={(value) => updateIngredient(ingredient.id, 'name', value)}
+                        placeholder="Ingredient name"
+                        placeholderTextColor="#9CA3AF"
+                      />
+                      <TouchableOpacity 
+                        style={styles.removeButton}
+                        onPress={() => removeIngredient(ingredient.id)}
+                      >
+                        <Entypo name="trash" size={20} color="#FF3B30" />
+                      </TouchableOpacity>
+                    </View>
                     
                     <View style={styles.quantityRow}>
                       <Text style={styles.inputLabel}>Quantity</Text>
@@ -230,79 +249,79 @@ export default function ViewIngredients({
                       </View>
                     </View>
                     
-                                         <View style={styles.macrosRow}>
-                       <View style={styles.macroInput}>
-                         <Text style={styles.macroInputLabel}>Protein</Text>
-                         <TextInput
-                           style={styles.macroTextInput}
-                           value={totalProtein.toString()}
-                           onChangeText={(value) => {
-                             const newValue = parseInt(value) || 0;
-                             const newPerUnit = quantity > 0 ? Math.round(newValue / quantity) : 0;
-                             updateIngredient(ingredient.id, 'protein', newPerUnit.toString());
-                           }}
-                           placeholder="0"
-                           placeholderTextColor="#9CA3AF"
-                           keyboardType="numeric"
-                         />
-                       </View>
-                       <View style={styles.macroInput}>
-                         <Text style={styles.macroInputLabel}>Carbs</Text>
-                         <TextInput
-                           style={styles.macroTextInput}
-                           value={totalCarbs.toString()}
-                           onChangeText={(value) => {
-                             const newValue = parseInt(value) || 0;
-                             const newPerUnit = quantity > 0 ? Math.round(newValue / quantity) : 0;
-                             updateIngredient(ingredient.id, 'carbs', newPerUnit.toString());
-                           }}
-                           placeholder="0"
-                           placeholderTextColor="#9CA3AF"
-                           keyboardType="numeric"
-                         />
-                       </View>
-                       <View style={styles.macroInput}>
-                         <Text style={styles.macroInputLabel}>Fats</Text>
-                         <TextInput
-                           style={styles.macroTextInput}
-                           value={totalFats.toString()}
-                           onChangeText={(value) => {
-                             const newValue = parseInt(value) || 0;
-                             const newPerUnit = quantity > 0 ? Math.round(newValue / quantity) : 0;
-                             updateIngredient(ingredient.id, 'fats', newPerUnit.toString());
-                           }}
-                           placeholder="0"
-                           placeholderTextColor="#9CA3AF"
-                           keyboardType="numeric"
-                         />
-                       </View>
-                       <View style={styles.macroInput}>
-                         <Text style={styles.macroInputLabel}>Calories</Text>
-                         <TextInput
-                           style={styles.macroTextInput}
-                           value={totalCalories.toString()}
-                           onChangeText={(value) => {
-                             const newValue = parseInt(value) || 0;
-                             const newPerUnit = quantity > 0 ? Math.round(newValue / quantity) : 0;
-                             updateIngredient(ingredient.id, 'calories', newPerUnit.toString());
-                           }}
-                           placeholder="0"
-                           placeholderTextColor="#9CA3AF"
-                           keyboardType="numeric"
-                         />
-                       </View>
-                     </View>
+                    <View style={styles.macrosRow}>
+                      <View style={styles.macroInput}>
+                        <Text style={styles.macroInputLabel}>Protein</Text>
+                        <TextInput
+                          style={styles.macroTextInput}
+                          value={totalProtein.toString()}
+                          onChangeText={(value) => {
+                            const newValue = parseInt(value) || 0;
+                            const newPerUnit = quantity > 0 ? Math.round(newValue / quantity) : 0;
+                            updateIngredient(ingredient.id, 'protein', newPerUnit.toString());
+                          }}
+                          placeholder="0"
+                          placeholderTextColor="#9CA3AF"
+                          keyboardType="numeric"
+                        />
+                      </View>
+                      <View style={styles.macroInput}>
+                        <Text style={styles.macroInputLabel}>Carbs</Text>
+                        <TextInput
+                          style={styles.macroTextInput}
+                          value={totalCarbs.toString()}
+                          onChangeText={(value) => {
+                            const newValue = parseInt(value) || 0;
+                            const newPerUnit = quantity > 0 ? Math.round(newValue / quantity) : 0;
+                            updateIngredient(ingredient.id, 'carbs', newPerUnit.toString());
+                          }}
+                          placeholder="0"
+                          placeholderTextColor="#9CA3AF"
+                          keyboardType="numeric"
+                        />
+                      </View>
+                      <View style={styles.macroInput}>
+                        <Text style={styles.macroInputLabel}>Fats</Text>
+                        <TextInput
+                          style={styles.macroTextInput}
+                          value={totalFats.toString()}
+                          onChangeText={(value) => {
+                            const newValue = parseInt(value) || 0;
+                            const newPerUnit = quantity > 0 ? Math.round(newValue / quantity) : 0;
+                            updateIngredient(ingredient.id, 'fats', newPerUnit.toString());
+                          }}
+                          placeholder="0"
+                          placeholderTextColor="#9CA3AF"
+                          keyboardType="numeric"
+                        />
+                      </View>
+                      <View style={styles.macroInput}>
+                        <Text style={styles.macroInputLabel}>Calories</Text>
+                        <TextInput
+                          style={styles.macroTextInput}
+                          value={totalCalories.toString()}
+                          onChangeText={(value) => {
+                            const newValue = parseInt(value) || 0;
+                            const newPerUnit = quantity > 0 ? Math.round(newValue / quantity) : 0;
+                            updateIngredient(ingredient.id, 'calories', newPerUnit.toString());
+                          }}
+                          placeholder="0"
+                          placeholderTextColor="#9CA3AF"
+                          keyboardType="numeric"
+                        />
+                      </View>
+                    </View>
                   </View>
-                                 );
-               })}
-               
-               {/* Add Button */}
-               <View style={styles.addButtonContainer}>
-                 <TouchableOpacity style={styles.addButton} onPress={addIngredient}>
-                   <Ionicons name="add" size={20} color="white" />
-                 </TouchableOpacity>
-               </View>
-             </View>
+                );
+              })}
+              
+              {/* Add Button */}
+              <View style={styles.addButtonContainer}>
+                <TouchableOpacity style={styles.addButton} onPress={addIngredient}>
+                  <Ionicons name="add" size={20} color="white" />
+                </TouchableOpacity>
+              </View>
+            </View>
           </ScrollView>
 
           <View style={styles.modalFooter}>
@@ -590,4 +609,5 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontFamily: 'Inter_600SemiBold',
   },
-}); 
+});
+

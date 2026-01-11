@@ -21,14 +21,12 @@ export async function addNutritionFromPhoto(uri, addNutrition, userId, authToken
     const base64Image = await uriToBase64(uri);
 
     let openAIResponse = await askOpenAIVisionPicture(base64Image, userId, authToken);
-    console.log('OpenAI Vision Picture raw response:', openAIResponse);
 
     // Attempt to extract JSON from code block if present
     if (openAIResponse.includes('```')) {
       const match = openAIResponse.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
       if (match) {
         openAIResponse = match[1].trim();
-        console.log('Extracted JSON from code block:', openAIResponse);
       }
     }
 
@@ -49,7 +47,6 @@ export async function addNutritionFromPhoto(uri, addNutrition, userId, authToken
     // Handle both single item and multiple items (array)
     if (Array.isArray(nutrition)) {
       // Multiple foods detected - combine them into one log entry
-      console.log('Multiple foods detected:', nutrition.length, 'items');
       
       // Validate all items first
       const validItems = nutrition.filter(item => 
@@ -87,7 +84,6 @@ export async function addNutritionFromPhoto(uri, addNutrition, userId, authToken
       }, []);
       
       // Add the combined food items as one log entry
-      console.log('Adding combined nutrition from photo (multiple items) with isPhoto: true');
       addNutrition(
         combinedName,
         combinedProtein,
@@ -120,7 +116,6 @@ export async function addNutritionFromPhoto(uri, addNutrition, userId, authToken
        }
 
              // Add the single food item with ingredients
-       console.log('Adding nutrition from photo (single item) with isPhoto: true');
        addNutrition(
          nutrition.name,
          nutrition.protein,
@@ -146,14 +141,12 @@ export async function addNutritionFromLabel(uri, addNutrition, userId, authToken
     const base64Image = await uriToBase64(uri);
 
     let openAIResponse = await askOpenAIVisionNutritionLabel(base64Image, userId, authToken);
-    console.log('OpenAI Vision Nutrition Label raw response:', openAIResponse);
 
     // Attempt to extract JSON from code block if present
     if (openAIResponse.includes('```')) {
       const match = openAIResponse.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
       if (match) {
         openAIResponse = match[1].trim();
-        console.log('Extracted JSON from code block:', openAIResponse);
       }
     }
 
@@ -190,7 +183,6 @@ export async function addNutritionFromLabel(uri, addNutrition, userId, authToken
      }
 
          // Add the nutrition label entry (no ingredients)
-     console.log('Adding nutrition from label with isPhoto: false');
      addNutrition(
        nutrition.name,
        nutrition.protein,
@@ -215,14 +207,12 @@ export async function addNutritionFromBarcode(uri, addNutrition, userId, authTok
     const base64Image = await uriToBase64(uri);
 
     let openAIResponse = await askOpenAIVisionBarcode(base64Image, userId, authToken);
-    console.log('OpenAI Vision Barcode raw response:', openAIResponse);
 
     // Attempt to extract JSON from code block if present
     if (openAIResponse.includes('```')) {
       const match = openAIResponse.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
       if (match) {
         openAIResponse = match[1].trim();
-        console.log('Extracted JSON from code block:', openAIResponse);
       }
     }
 
@@ -259,7 +249,6 @@ export async function addNutritionFromBarcode(uri, addNutrition, userId, authTok
     }
 
          // Add the barcode product entry (no ingredients)
-     console.log('Adding nutrition from barcode with isPhoto: false');
      addNutrition(
        nutrition.name,
        nutrition.protein,

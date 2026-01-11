@@ -1,4 +1,4 @@
- import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,12 @@ import {
 } from 'react-native';
 import { useSettings } from '../../context/Settings/SettingsContext';
 
-export default function WeightUpdateModal({ visible, onClose }) {
+interface WeightUpdateModalProps {
+  visible: boolean;
+  onClose: () => void;
+}
+
+export default function WeightUpdateModal({ visible, onClose }: WeightUpdateModalProps) {
   // Access context
   const {
     unit, 
@@ -29,9 +34,9 @@ export default function WeightUpdateModal({ visible, onClose }) {
   } = useSettings();
 
   // Local state for input field
-  const [tempWeight, setTempWeight] = useState(bodyWeight?.toString() ?? '');
+  const [tempWeight, setTempWeight] = useState<string>(bodyWeight?.toString() ?? '');
 
-  const [weightUnit, setWeightUnit] = useState(unit ? 'lbs' : 'kg');
+  const [weightUnit, setWeightUnit] = useState<string>(unit ? 'lbs' : 'kg');
 
   // Reset local input when modal opens
   useEffect(() => {
@@ -74,13 +79,10 @@ export default function WeightUpdateModal({ visible, onClose }) {
     }
   };
 
-    //console.log(JSON.stringify(weightProgress, null, 2));
-
-
   return (
     <Modal
       visible={visible}
-      transparent
+      transparent={true}
       animationType="fade"
       onRequestClose={onClose}
     >
@@ -107,7 +109,7 @@ export default function WeightUpdateModal({ visible, onClose }) {
                   />
                 <TouchableOpacity style={styles.unitButton} onPress={() => setWeightUnit('lbs')}>
                     <Text style={styles.unitButtonText}>
-                    {unit === true? "lb" : "kg"}
+                    {unit === true ? "lb" : "kg"}
                     </Text>
                 </TouchableOpacity>
                 </View>
@@ -137,8 +139,6 @@ export default function WeightUpdateModal({ visible, onClose }) {
     </Modal>
   );
 }
-
-
 
 const styles = StyleSheet.create({
   modalOverlay: {
@@ -236,7 +236,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontFamily: 'Inter_600SemiBold',
   },
-
   modalActions: {
     flexDirection: 'row',
     paddingHorizontal: 24,
@@ -274,3 +273,4 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_600SemiBold',
   },
 });
+

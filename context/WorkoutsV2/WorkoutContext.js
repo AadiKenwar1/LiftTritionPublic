@@ -112,7 +112,6 @@ export function WorkoutProvider({ children }) {
   // Merge userExercises into exerciseLibrary when userExercises changes
   useEffect(() => {
     if (userExercises.length > 0) {
-      console.log('🔄 Merging user exercises into exercise library');
       setExerciseLibrary(prev => {
         const updatedLibrary = { ...prev };
         userExercises.forEach(userExercise => {

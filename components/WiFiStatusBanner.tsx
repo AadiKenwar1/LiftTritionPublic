@@ -3,21 +3,25 @@ import { View, StyleSheet, Animated } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
-const WiFiStatusBanner = () => {
-  const [isConnected, setIsConnected] = useState(true);
-  const [connectionType, setConnectionType] = useState('unknown');
+interface WiFiStatusBannerProps {
+  // No props needed - component manages all state internally
+}
+
+export default function WiFiStatusBanner({}: WiFiStatusBannerProps) {
+  const [isConnected, setIsConnected] = useState<boolean>(true);
+  const [connectionType, setConnectionType] = useState<string>('unknown');
   const pulseAnim = useRef(new Animated.Value(1)).current;
   
   useEffect(() => {
     // Get initial state
     NetInfo.fetch().then(state => {
-      setIsConnected(state.isConnected);
+      setIsConnected(state.isConnected ?? true);
       setConnectionType(state.type);
     });
 
     // Set up listener for network state changes
     const unsubscribe = NetInfo.addEventListener(state => {
-      setIsConnected(state.isConnected);
+      setIsConnected(state.isConnected ?? true);
       setConnectionType(state.type);
     });
     
@@ -78,4 +82,3 @@ const styles = StyleSheet.create({
   },
 });
 
-export default WiFiStatusBanner;

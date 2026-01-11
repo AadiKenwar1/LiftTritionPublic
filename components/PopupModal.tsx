@@ -10,23 +10,27 @@ import {
 
 const { width: screenWidth } = Dimensions.get("window");
 
-export default function PopupModal({
-  modalVisible,
-  setModalVisible,
-  children,
-  showButtons,
-  onAdd,
-  onClose,
-  addButtonText,
-  closeButtonText,
-  showSettingsLink,
-  onNavigateToSettings,
-  marginBottom = 0,
-}) {
+interface PopupModalProps {
+  // Required props
+  modalVisible: boolean;
+  setModalVisible: (visible: boolean) => void;
+  children: React.ReactNode;
+
+  // Optional button controls
+  showButtons?: boolean;
+  onAdd?: () => void;
+  onClose?: () => void;
+  addButtonText?: string;
+  closeButtonText?: string;
+
+  // Optional styling
+  marginBottom?: number;
+}
+
+export default function PopupModal({modalVisible, setModalVisible, children, showButtons, onAdd, onClose, addButtonText, closeButtonText, marginBottom = 0}: PopupModalProps) {
   return (
     <Modal
       animationType="fade"
-      duration={200}
       transparent={true}
       visible={modalVisible}
       onRequestClose={() => setModalVisible(false)}
@@ -37,34 +41,24 @@ export default function PopupModal({
             {children}
             
             {showButtons && (
-              <>
-                {showSettingsLink && (
-                  <Text style={styles.settingsText}>
-                    *If an exercise isn't listed, you can add it in{" "}
-                    <Text style={styles.settingsLink} onPress={onNavigateToSettings}>
-                      settings
-                    </Text>
-                  </Text>
-                )}
-                <View style={styles.buttonContainer}>
-                  <TouchableOpacity
-                    style={styles.buttonClose}
-                    onPress={onClose || (() => setModalVisible(false))}
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={styles.buttonClose}
+                  onPress={onClose || (() => setModalVisible(false))}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.buttonText}>{closeButtonText || "Close"}</Text>
+                </TouchableOpacity>
+                {onAdd && (
+                  <TouchableOpacity 
+                    style={styles.buttonAdd} 
+                    onPress={onAdd}
                     activeOpacity={0.7}
                   >
-                    <Text style={styles.buttonText}>{closeButtonText || "Close"}</Text>
+                    <Text style={styles.buttonText}>{addButtonText || "Add"}</Text>
                   </TouchableOpacity>
-                  {onAdd && (
-                    <TouchableOpacity 
-                      style={styles.buttonAdd} 
-                      onPress={onAdd}
-                      activeOpacity={0.7}
-                    >
-                      <Text style={styles.buttonText}>{addButtonText || "Add"}</Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-              </>
+                )}
+              </View>
             )}
           </View>
         </View>
@@ -79,7 +73,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.8)",
     justifyContent: "center",
     alignItems: "center",
-
   },
   modalContainer: {
     width: screenWidth - 40,
@@ -96,16 +89,6 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     alignItems: "center",
-  },
-  settingsText: {
-    marginTop: 10,
-    color: "white",
-    fontSize: 14,
-    textAlign: "center",
-  },
-  settingsLink: {
-    color: "#4FC3F7",
-    textDecorationLine: "underline",
   },
   buttonContainer: {
     flexDirection: "row",
@@ -145,3 +128,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
+

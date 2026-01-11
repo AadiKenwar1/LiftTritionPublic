@@ -38,7 +38,6 @@ export const checkAppleUserExists = async (appleUserId) => {
       exists: !!result.data.getSettings,
     };
   } catch (error) {
-    console.log('Apple user not found:', error);
     return {
       success: true,
       settings: null,
@@ -154,7 +153,6 @@ export const saveNutritionToDatabase = async (userId, nutritionData) => {
         }, { userId, authToken: null })
       );
       await Promise.all(deletePromises);
-      console.log(`🗑️ Deleted ${existingItems.length} existing nutrition entries`);
     }
     
     // Step 2: Create all nutrition items from AsyncStorage (exclude deleted items)
@@ -185,7 +183,6 @@ export const saveNutritionToDatabase = async (userId, nutritionData) => {
         });
         
         await Promise.all(createPromises);
-        console.log(`✅ Saved ${activeItems.length} nutrition entries to database`);
       }
     }
     
@@ -228,7 +225,6 @@ export const saveWorkoutDataToDatabase = async (userId, workouts, exercises, log
           variables: { input: { id: log.id } }
         }, { userId, authToken: null })
       ));
-      console.log(`🗑️ Deleted ${existingLogs.length} existing exercise logs`);
     }
     
     // Delete exercises
@@ -244,7 +240,6 @@ export const saveWorkoutDataToDatabase = async (userId, workouts, exercises, log
           variables: { input: { id: ex.id } }
         }, { userId, authToken: null })
       ));
-      console.log(`🗑️ Deleted ${existingExercises.length} existing exercises`);
     }
     
     // Delete workouts
@@ -260,7 +255,6 @@ export const saveWorkoutDataToDatabase = async (userId, workouts, exercises, log
           variables: { input: { id: workout.id } }
         }, { userId, authToken: null })
       ));
-      console.log(`🗑️ Deleted ${existingWorkouts.length} existing workouts`);
     }
     
     // Delete user exercises
@@ -276,7 +270,6 @@ export const saveWorkoutDataToDatabase = async (userId, workouts, exercises, log
           variables: { input: { id: ue.id } }
         }, { userId, authToken: null })
       ));
-      console.log(`🗑️ Deleted ${existingUserExercises.length} existing user exercises`);
     }
     
     // Step 2: Create all items from AsyncStorage (in dependency order, exclude deleted items)
@@ -299,7 +292,6 @@ export const saveWorkoutDataToDatabase = async (userId, workouts, exercises, log
             variables: { input }
           }, { userId, authToken: null });
         }));
-        console.log(`✅ Saved ${activeWorkouts.length} workouts to database`);
       }
     }
     
@@ -324,7 +316,6 @@ export const saveWorkoutDataToDatabase = async (userId, workouts, exercises, log
             variables: { input }
           }, { userId, authToken: null });
         }));
-        console.log(`✅ Saved ${activeExercises.length} exercises to database`);
       }
     }
     
@@ -349,7 +340,6 @@ export const saveWorkoutDataToDatabase = async (userId, workouts, exercises, log
             variables: { input }
           }, { userId, authToken: null });
         }));
-        console.log(`✅ Saved ${activeLogs.length} exercise logs to database`);
       }
     }
     
@@ -373,7 +363,6 @@ export const saveWorkoutDataToDatabase = async (userId, workouts, exercises, log
             variables: { input }
           }, { userId, authToken: null });
         }));
-        console.log(`✅ Saved ${activeUserExercises.length} user exercises to database`);
       }
     }
     
@@ -505,10 +494,7 @@ export const loadWorkoutDataFromDatabase = async (userId) => {
  */
 export const deleteAppleUserData = async (appleUserId) => {
   try {
-    console.log('🗑️ Starting account deletion for user:', appleUserId);
-    
     // Step 1: Delete ExerciseLogs first (they depend on exercises)
-    console.log('📝 Step 1: Deleting ExerciseLogs...');
     const exerciseLogsResult = await graphql({
       query: listExerciseLogs,
       variables: { 
@@ -517,7 +503,6 @@ export const deleteAppleUserData = async (appleUserId) => {
     }, { userId: appleUserId, authToken: null });
     
     const exerciseLogsToDelete = exerciseLogsResult.data.listExerciseLogs.items || [];
-    console.log(`Found ${exerciseLogsToDelete.length} ExerciseLogs to delete`);
     
     if (exerciseLogsToDelete.length > 0) {
       const deleteLogPromises = exerciseLogsToDelete.map(log =>
@@ -527,11 +512,9 @@ export const deleteAppleUserData = async (appleUserId) => {
         }, { userId: appleUserId, authToken: null })
       );
       await Promise.all(deleteLogPromises);
-      console.log('✅ ExerciseLogs deleted successfully');
     }
     
     // Step 2: Delete Exercises (they depend on workouts)
-    console.log('💪 Step 2: Deleting Exercises...');
     const exercisesResult = await graphql({
       query: listExercises,
       variables: { 
@@ -540,7 +523,6 @@ export const deleteAppleUserData = async (appleUserId) => {
     }, { userId: appleUserId, authToken: null });
     
     const exercisesToDelete = exercisesResult.data.listExercises.items || [];
-    console.log(`Found ${exercisesToDelete.length} Exercises to delete`);
     
     if (exercisesToDelete.length > 0) {
       const deleteExercisePromises = exercisesToDelete.map(exercise =>
@@ -550,11 +532,9 @@ export const deleteAppleUserData = async (appleUserId) => {
         }, { userId: appleUserId, authToken: null })
       );
       await Promise.all(deleteExercisePromises);
-      console.log('✅ Exercises deleted successfully');
     }
     
     // Step 3: Delete Workouts (independent)
-    console.log('🏋️ Step 3: Deleting Workouts...');
     const workoutsResult = await graphql({
       query: listWorkouts,
       variables: { 
@@ -563,7 +543,6 @@ export const deleteAppleUserData = async (appleUserId) => {
     }, { userId: appleUserId, authToken: null });
     
     const workoutsToDelete = workoutsResult.data.listWorkouts.items || [];
-    console.log(`Found ${workoutsToDelete.length} Workouts to delete`);
     
     if (workoutsToDelete.length > 0) {
       const deleteWorkoutPromises = workoutsToDelete.map(workout =>
@@ -573,11 +552,9 @@ export const deleteAppleUserData = async (appleUserId) => {
         }, { userId: appleUserId, authToken: null })
       );
       await Promise.all(deleteWorkoutPromises);
-      console.log('✅ Workouts deleted successfully');
     }
     
     // Step 4: Delete remaining data in parallel (Nutrition, UserExercises, Settings)
-    console.log('📦 Step 4: Deleting remaining data (Nutrition, UserExercises, Settings)...');
     const [nutritionResult, userExercisesResult, settingsResult] = await Promise.all([
       // Delete nutrition entries
       graphql({
@@ -587,7 +564,6 @@ export const deleteAppleUserData = async (appleUserId) => {
         }
       }, { userId: appleUserId, authToken: null }).then(async (result) => {
         const items = result.data.listNutritions.items || [];
-        console.log(`Found ${items.length} Nutrition entries to delete`);
         if (items.length > 0) {
           const deletePromises = items.map(nutrition =>
             graphql({
@@ -596,7 +572,6 @@ export const deleteAppleUserData = async (appleUserId) => {
             }, { userId: appleUserId, authToken: null })
           );
           await Promise.all(deletePromises);
-          console.log('✅ Nutrition entries deleted successfully');
         }
         return items.length;
       }),
@@ -609,7 +584,6 @@ export const deleteAppleUserData = async (appleUserId) => {
         }
       }, { userId: appleUserId, authToken: null }).then(async (result) => {
         const items = result.data.listUserExercises.items || [];
-        console.log(`Found ${items.length} UserExercises to delete`);
         if (items.length > 0) {
           const deletePromises = items.map(exercise =>
             graphql({
@@ -618,7 +592,6 @@ export const deleteAppleUserData = async (appleUserId) => {
             }, { userId: appleUserId, authToken: null })
           );
           await Promise.all(deletePromises);
-          console.log('✅ UserExercises deleted successfully');
         }
         return items.length;
       }),
@@ -628,7 +601,6 @@ export const deleteAppleUserData = async (appleUserId) => {
         query: deleteSettings,
         variables: { input: { id: appleUserId } }
       }, { userId: appleUserId, authToken: null }).then(() => {
-        console.log('✅ Settings deleted successfully');
         return 1;
       })
     ]);
@@ -641,8 +613,6 @@ export const deleteAppleUserData = async (appleUserId) => {
       userExercises: userExercisesResult,
       settings: settingsResult
     };
-    
-    console.log('🎉 Account deletion completed successfully:', totalDeleted);
     
     return {
       success: true,
@@ -677,7 +647,6 @@ export const saveWeightProgressToDatabase = async (userId, weightProgress) => {
       }
     }, { userId, authToken: null });
     
-    console.log(`✅ Saved ${weightProgress?.length || 0} weight progress entries to database`);
     return { success: true };
   } catch (error) {
     console.error('Error saving weightProgress to database:', error);
@@ -748,7 +717,6 @@ export const saveSettingsToDatabase = async (userId, settings) => {
       variables: { input }
     }, { userId, authToken: null });
     
-    console.log('✅ Saved settings to database');
     return { success: true };
   } catch (error) {
     console.error('Error saving settings to database:', error);
