@@ -15,7 +15,6 @@ async function getGraphQLCredentials() {
             endpoint: secret.GRAPHQL_ENDPOINT
         };
     } catch (error) {
-        console.error('Error retrieving GraphQL credentials:', error);
         throw error;
     }
 }
@@ -132,7 +131,6 @@ exports.handler = async (event) => {
                        event.requestContext?.authorizer?.principalId;
         
         if (!userId) {
-            console.error('Unauthorized: userId not found in request context');
             return {
                 statusCode: 401,
                 headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
@@ -168,7 +166,11 @@ exports.handler = async (event) => {
                 body: JSON.stringify(result)
             };
         } catch (accessError) {
-            console.error('Access control error:', accessError);
+            console.error('GraphQL access error:', {
+                message: accessError.message,
+                stack: accessError.stack,
+                userId: userId
+            });
             return {
                 statusCode: 403,
                 headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
@@ -176,7 +178,11 @@ exports.handler = async (event) => {
             };
         }
     } catch (error) {
-        console.error('Lambda error:', error);
+        console.error('GraphQL proxy error:', {
+            message: error.message,
+            stack: error.stack,
+            hasUserId: !!userId
+        });
         return {
             statusCode: 500,
             headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
